@@ -220,6 +220,12 @@ def _delete_room(room_channel: ChannelName) -> None:
 @executable
 def _delete_room_execute(room_channel: ChannelName) -> None:
     room = _get_room(room_channel)
+    members = room.members
+
+    if not std.contains_using(members, cvm.tx.key_alias, _str_eq):
+        not_a_member : str = cvm.tx.key_alias
+        cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
+
     room.is_deleted = True
     cvm.storage.put(Identifier('room'), room)
     delete_room_event = DeleteRoomEvent(room=room)
@@ -243,8 +249,8 @@ def _restore_room_execute(room_channel: ChannelName) -> None:
     members = room.members
 
     if not std.contains_using(members, cvm.tx.key_alias, _str_eq):
-                not_a_member : str = cvm.tx.key_alias
-                cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
+        not_a_member : str = cvm.tx.key_alias
+        cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
 
     if not room.is_deleted:
         room_channel_str : str = room_channel
@@ -273,6 +279,10 @@ def _invite_to_room(room_channel: ChannelName, new_member: KeyAlias) -> None:
 def _invite_to_room_execute(room_channel: ChannelName, new_member: KeyAlias) -> None:
     room = _get_room(room_channel)
     members = room.members
+
+    if not std.contains_using(members, cvm.tx.key_alias, _str_eq):
+        not_a_member : str = cvm.tx.key_alias
+        cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
 
     if not std.contains_using(members, cvm.tx.key_alias, _str_eq):
             not_a_member : str = cvm.tx.key_alias
@@ -345,6 +355,12 @@ def _send_message(room_channel: ChannelName, message: str) -> None:
 @executable
 def _send_message_execute(room_channel: ChannelName, message: str) -> None:
     room = _get_room(room_channel)
+    members = room.members
+
+    if not std.contains_using(members, cvm.tx.key_alias, _str_eq):
+        not_a_member : str = cvm.tx.key_alias
+        cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
+
     if room.is_deleted:
         room_channel_str : str = room_channel
         cvm.error(f'Room {room_channel_str} has been deleted. Cannot send message.')
