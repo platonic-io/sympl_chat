@@ -154,7 +154,6 @@ def get_rooms() -> List[Room]:
 @clientside
 def send_message(room_channel: ChannelName, message: str) -> None:
     """Sends a message to a room.
-    # TODO(matthew-piziak): Decide whether to reify this requirement in the code.
     Messages can be between 1 and 4000 characters long. Messages cannot contain null bytes.
     """
     return _send_message(room_channel, message)
@@ -241,6 +240,12 @@ def _restore_room(room_channel: ChannelName) -> None:
 @executable
 def _restore_room_execute(room_channel: ChannelName) -> None:
     room = _get_room(room_channel)
+    members = room.members
+
+    if not std.contains_using(members, cvm.tx.key_alias, _str_eq):
+                not_a_member : str = cvm.tx.key_alias
+                cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
+
     if not room.is_deleted:
         room_channel_str : str = room_channel
         cvm.error(f'Room {room_channel_str} already active.')
@@ -267,6 +272,12 @@ def _invite_to_room(room_channel: ChannelName, new_member: KeyAlias) -> None:
 @executable
 def _invite_to_room_execute(room_channel: ChannelName, new_member: KeyAlias) -> None:
     room = _get_room(room_channel)
+    members = room.members
+
+    if not std.contains_using(members, cvm.tx.key_alias, _str_eq):
+            not_a_member : str = cvm.tx.key_alias
+            cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
+
     room.members = room.members + [new_member]
     cvm.storage.put(Identifier('room'), room)
     invite_to_room_event = InviteToRoomEvent(room=room, inviter=cvm.tx.key_alias, invitee=new_member)
@@ -300,11 +311,16 @@ def _remove_from_room(room_channel: ChannelName, member_to_remove: KeyAlias) -> 
 def _remove_from_room_execute(room_channel: ChannelName, member_to_remove: KeyAlias) -> None:
     room = _get_room(room_channel)
     members = room.members
+
+    if not std.contains_using(members, cvm.tx.key_alias, _str_eq):
+        not_a_member : str = cvm.tx.key_alias
+        cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
+
     if not std.contains_using(members, member_to_remove, _str_eq):
         member_to_remove_str : str = member_to_remove
         cvm.error(f'Member {member_to_remove_str} already removed. This may have happened due to a concurrent operation.')
 
-    # room.members-remove(member_to_remove) # TODO how to do it not like bellow
+    # room.members-remove(member_to_remove)
     mtr: str = member_to_remove
     rmx : List[KeyAlias] = [m for m in room.members if mtr != m]
     room.members = rmx
@@ -337,8 +353,8 @@ def _send_message_execute(room_channel: ChannelName, message: str) -> None:
     new_message = Message(message_id=message_id, sender=cvm.tx.key_alias, body=message, timestamp=cvm.tx.timestamp)
     cvm.storage.put(new_message.message_id, new_message)
     send_message_event = SendMessageEvent(room=room, message=new_message)
-    cvm.create_event('SendMessageEvent', std.json(send_message_event))
-    cvm.job_complete(std.json(send_message_event))
+    cvm.create_event('SendMessageEvent', std.json(message_id))
+    cvm.job_complete(std.json(message_id))
 
 @public_clientside
 def _get_messages(room_channel: ChannelName) -> List[Message]:

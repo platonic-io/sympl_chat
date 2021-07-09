@@ -7,6 +7,44 @@ This smart contract repository is a sample "Chat" `symPL` contract. Hereby inclu
 - the contract definition `contract.yaml`
 - A thorough suite of tests to validate the smart contract in various ways
 
+## Model
+
+### Roles
+- Member
+
+### Channel topology
+Members includes a role when key is shared via send key operation
+
+- Room channel
+    - Owners: Member
+    - Members: N/A
+    - Dependecies: N/A
+
+### Actions
+All `Actions` are write operations on `Channel` that can be done only by `Role`
+
+| Action           | Channel | Role   |
+|------------------|---------|--------|
+| Create Room      | Room    | Any    |
+| Delete Room      | Room    | Member |
+| Restore Room     | Room    | Member |
+| Invite to Room   | Room    | Member |
+| Remove from Room | Room    | Member |
+| Send Message     | Room    | Member |
+
+### Events
+All API clients with access to a node containing a `Channel` member have access to `Event Schema` data
+
+| Channel    | Event Schema        | Schema Details         |
+|------------|---------------------|------------------------|
+| Room       | CreateRoomEvent     | Room                   |
+|	Room			 | DeleteRoomEvent     | Room                   |  
+|	Room			 | RestoreRoomEvent    | Room                   | 
+|	Room			 | InviteToRoomEvent   | Room, inviter, invitee | 
+|	Room			 | RemoveFromRoomEvent | Room, remover, removee | 
+|	Room			 | SendMessageEvent    | Room, message          |
+|	Room			 | DeleteRoomEvent     | Room                   |
+
 ## Tests structure
 
 The Chat contract is equipped with a thorough set of tests:

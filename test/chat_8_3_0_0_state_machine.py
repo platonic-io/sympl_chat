@@ -93,13 +93,10 @@ class ChatValidator(RuleBasedStateMachine):
     def send_message(self, sender, room_channel, message):
         assume(room_channel != FATAL_ERROR)
         try:
-            send_message_event = self.network[sender].chat[CHAT_VERSION].send_message(room_channel=room_channel,
+            send_message_id = self.network[sender].chat[CHAT_VERSION].send_message(room_channel=room_channel,
                                                                                       message=message)
-            message = send_message_event['message']
-            message_id = message['message_id']
-            message_timestamp = message['timestamp']
-            body = message['body']
-            self.model.send_message(sender, room_channel, body, message_id, message_timestamp)
+            message_id = send_message_id
+            self.model.send_message(sender, room_channel, message, message_id, "")
         except ContractError as network_error:
             print(f"network_result: {network_error.message}")
             try:
