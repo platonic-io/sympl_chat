@@ -3,7 +3,7 @@
 ## Introduction
 
 This smart contract repository is a sample "Chat" `symPL` contract. Hereby included are:
-- the smart contract `hello.sympl`
+- the smart contract `chat.sympl`
 - the contract definition `contract.yaml`
 - A thorough suite of tests to validate the smart contract in various ways
 
@@ -23,27 +23,29 @@ Members includes a role when key is shared via send key operation
 ### Actions
 All `Actions` are write operations on `Channel` that can be done only by `Role`
 
-| Action           | Channel | Role   |
-|------------------|---------|--------|
-| Create Room      | Room    | Any    |
-| Delete Room      | Room    | Member |
-| Restore Room     | Room    | Member |
-| Invite to Room   | Room    | Member |
-| Remove from Room | Room    | Member |
-| Send Message     | Room    | Member |
+| Action           | Channel | Role    |
+|------------------|---------|---------|
+| Create Room      | Room    | Any     |
+| Delete Room      | Room    | Member  |
+| Restore Room     | Room    | Member  |
+| Invite to Room   | Room    | Member  |
+| Send Message     | Room    | Member  |
+| Remove from Room | Room    | Member' |
 
+' The member cannot remove itself from the room
+ 
 ### Events
 All API clients with access to a node containing a `Channel` member have access to `Event Schema` data
 
-| Channel    | Event Schema        | Schema Details         |
-|------------|---------------------|------------------------|
-| Room       | CreateRoomEvent     | Room                   |
-|	Room			 | DeleteRoomEvent     | Room                   |  
-|	Room			 | RestoreRoomEvent    | Room                   | 
-|	Room			 | InviteToRoomEvent   | Room, inviter, invitee | 
-|	Room			 | RemoveFromRoomEvent | Room, remover, removee | 
-|	Room			 | SendMessageEvent    | Room, message          |
-|	Room			 | DeleteRoomEvent     | Room                   |
+| Channel | Event Schema        | Schema Details         |
+|---------|---------------------|------------------------|
+| Room    | CreateRoomEvent     | Room                   |
+| Room	  | DeleteRoomEvent     | Room                   |  
+| Room	  | RestoreRoomEvent    | Room                   | 
+| Room	  | InviteToRoomEvent   | Room, inviter, invitee | 
+| Room 	  | RemoveFromRoomEvent | Room, remover, removee | 
+| Room	  | SendMessageEvent    | Room, message          |
+| Room	  | DeleteRoomEvent     | Room                   |
 
 ## Tests structure
 
