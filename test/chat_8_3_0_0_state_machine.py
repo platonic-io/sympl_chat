@@ -77,6 +77,8 @@ class ChatValidator(RuleBasedStateMachine):
             network_create_room_event = self.network[creator].chat[CHAT_VERSION].create_room(room_name=room_name)
             room_channel = network_create_room_event['room']['channel']
             model_create_room_event = self.model.create_room(creator, room_channel, room_name)
+            print(network_create_room_event)
+            print(model_create_room_event)
             assert network_create_room_event == model_create_room_event
             return room_channel
         except ContractError as network_error:

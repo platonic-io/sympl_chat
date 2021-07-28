@@ -21,6 +21,7 @@ class Room:
         self.creator = creator
         self.messages = []
         self.members = [creator]
+        self.owners = [creator]
         self.is_deleted = False
         self.channel = channel
 
@@ -37,7 +38,7 @@ class Room:
         self.is_deleted = False
 
     def as_data(self):
-        return {'name': self.name, 'is_deleted': self.is_deleted, 'members': self.members, 'channel': self.channel}
+        return {'name': self.name, 'is_deleted': self.is_deleted, 'members': self.members, 'owners': self.owners, 'channel': self.channel}
 
 
 class CreateRoomEvent:
