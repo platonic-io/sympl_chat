@@ -284,10 +284,6 @@ def _invite_to_room_execute(room_channel: ChannelName, new_member: KeyAlias) -> 
         not_a_member : str = cvm.tx.key_alias
         cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
 
-    if not std.contains_using(members, cvm.tx.key_alias, _str_eq):
-            not_a_member : str = cvm.tx.key_alias
-            cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
-
     room.members = room.members + [new_member]
     cvm.storage.put(Identifier('room'), room)
     invite_to_room_event = InviteToRoomEvent(room=room, inviter=cvm.tx.key_alias, invitee=new_member)
