@@ -182,7 +182,7 @@ def demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
     """Demotes the owner of a room.
     Only works if there is at least one other owner
     """
-    return None
+    return _demote_owner(room_channel, owner)
 
 # # ###################
 # # # implementations #
@@ -441,7 +441,7 @@ def _promote_to_owner(room_channel: ChannelName, member: KeyAlias) -> None:
         _promote_to_owner_execute(room_channel, member)
 
 @executable
-def _promote_to_owner_execute(room_channel: ChannelName, member: KeyAlias) -> str:
+def _promote_to_owner_execute(room_channel: ChannelName, member: KeyAlias) -> PromoteToOwnerEvent:
     room = _get_room(room_channel)
     
     #run the checks, and error out if there is an issue
@@ -456,10 +456,10 @@ def _promote_to_owner_execute(room_channel: ChannelName, member: KeyAlias) -> st
     room.owners = room.owners + [member]
     cvm.storage.put(Identifier('room'), room)
 
-    #create an event for owner promotion, and return the json string
+    #create an event for owner promotion, and return the event data
     promote_to_owner_event = PromoteToOwnerEvent(room=room, promoter=cvm.tx.key_alias, promotee=member)
     cvm.create_event('PromoteToOwnerEvent', std.json(promote_to_owner_event))
-    return std.json_to_str(std.json(promote_to_owner_event))
+    return promote_to_owner_event
 
 def promote_to_owner_checks(member: KeyAlias, caller: KeyAlias, room: Room) -> str:
     #This function performs the permission checks for the promote to owner logic
@@ -495,9 +495,12 @@ def promote_to_owner_checks(member: KeyAlias, caller: KeyAlias, room: Room) -> s
 
 @public_clientside
 def _demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
-    #Clientside check to make sure that the member to demote is actually
-    #an owner
+    
     room = _get_room(room_channel)
+
+    check_result : str = demote_owner_checks(owner, cvm.tx.key_alias, room)
+    if check_result != '':
+        cvm.error(check_result)
 
     #This will remove the 'owner' from the secure channel
     cvm.remove_owner(room_channel, owner)
@@ -509,19 +512,23 @@ def _demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
         _demote_owner_execute(room_channel, owner)
 
 @executable
-def _demote_owner_execute(room_channel: ChannelName, owner: KeyAlias) -> str:
+def _demote_owner_execute(room_channel: ChannelName, owner: KeyAlias) -> DemoteOwnerEvent:
     room = _get_room(room_channel)
     
+    check_result : str = demote_owner_checks(owner, cvm.tx.key_alias, room)
+    if check_result != '':
+        cvm.error(check_result)
+
     #update the owners list in storage
     otr : str = owner
     new_owners_list : List[KeyAlias] = [o for o in room.owners if otr != o]
     room.owners = new_owners_list
     cvm.storage.put(Identifier('room'), room)
 
-    #create an event for owner promotion, and return the json string
+    #create an event for owner promotion, and return the event data
     demote_owner_event = DemoteOwnerEvent(room=room, demoter=cvm.tx.key_alias, demotee=owner)
     cvm.create_event('DemoteOwnerEvent', std.json(demote_owner_event))
-    return std.json_to_str(std.json(demote_owner_event))
+    return demote_owner_event
 
 def demote_owner_checks(owner: KeyAlias, caller: KeyAlias, room: Room) -> str:
     #This function performs the permission checks for the demote owner logic
@@ -535,11 +542,11 @@ def demote_owner_checks(owner: KeyAlias, caller: KeyAlias, room: Room) -> str:
         room_channel_str : str = room_channel
         return f'{owner_str} is not a member of room {room_channel_str}. Please invite them first.'
 
-    #check to ensure the new owner is not already an owner
-    if std.contains_using(room.owners, owner, _str_eq):
+    #check to ensure the owner to demote is actually an owner
+    if not std.contains_using(room.owners, owner, _str_eq):
         owner_str : str = owner
         room_channel_str : str = room_channel
-        return f'{owner_str} is already an owner of room {room_channel_str}.'
+        return f'{owner_str} is not an owner of room {room_channel_str}.'
     
     #check to ensure that a room is not deleted
     if room.is_deleted:
