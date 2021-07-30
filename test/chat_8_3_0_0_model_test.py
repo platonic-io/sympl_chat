@@ -117,6 +117,14 @@ class TestRegTests:
         state.invite_to_room(invitee=u2, inviter=u1, room_channel=room)
         state.remove_from_room(removee=u1, remover=u2, room_channel=room)
 
+    def test_invite_as_non_owner(self, state):
+        u1 = state.key_alias()
+        u2 = state.key_alias()
+        u3 = state.key_alias()
+        room = state.create_room(creator = u1, room_name='rm1')
+        state.invite_to_room(inviter=u1, invitee=u2, room_channel=room)
+        state.invite_to_room(inviter=u2, invitee=u3, room_channel=room)
+
     def test_create_room_with_empty_name(self, state):
         creator = state.key_alias()
         state.create_room(creator=creator, room_name='')
@@ -157,6 +165,29 @@ class TestRegTests:
         room = state.create_room(creator=u1, room_name='0')
         state.send_message(message='0', room_channel=room, sender=u1)
         state.get_messages(getter=u1, room_channel=room)
+
+    def test_promote_owner(self, state):
+        inviter = state.key_alias()
+        room = state.create_room(creator=inviter, room_name='room_name')
+        invitee = state.key_alias()
+        state.invite_to_room(invitee=invitee, inviter=inviter, room_channel=room)
+        state.promote_to_owner(promoter=inviter, promotee=invitee, room_channel=room)
+
+    def test_promote_owner_twice(self, state):
+        inviter = state.key_alias()
+        room = state.create_room(creator=inviter, room_name='room_name')
+        invitee = state.key_alias()
+        state.invite_to_room(invitee=invitee, inviter=inviter, room_channel=room)
+        state.promote_to_owner(promoter=inviter, promotee=invitee, room_channel=room)
+        state.promote_to_owner(promoter=inviter, promotee=invitee, room_channel=room)
+
+    def test_demote_owner(self, state):
+        inviter = state.key_alias()
+        room = state.create_room(creator=inviter, room_name='room_name')
+        invitee = state.key_alias()
+        state.invite_to_room(invitee=invitee, inviter=inviter, room_channel=room)
+        state.promote_to_owner(promoter=inviter, promotee=invitee, room_channel=room)
+        state.demote_owner(demoter=invitee, demotee=inviter, room_channel=room)
 
 
 @pytest.mark.usefixtures('network')

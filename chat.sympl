@@ -389,9 +389,6 @@ def remove_from_room_checks(room: Room, member_to_remove: KeyAlias, caller: KeyA
     #check if member to remove is actually a member of the room
     if not std.contains_using(room.members, member_to_remove, _str_eq):
         return f"{member_to_remove} is not a member of room {room.channel}. Operation Denied."
-    #check if there will be people left in the room once member_to_remove leaves
-    if len(room.members) == 1:
-        return f"Cannot leave a room empty. Please delete the room if you want to get rid of it!"
     #check if the room is deleted
     if room.is_deleted:
         return f"Room {room.channel} is not deleted! Operation Denied."
@@ -406,7 +403,7 @@ def remove_from_room_checks(room: Room, member_to_remove: KeyAlias, caller: KeyA
     mtr_str : str = member_to_remove
     cal_str : str = caller
     if mtr_str == cal_str:
-        return f"Cannot remove yourself from the room!"
+        return f"Cannot remove self from room!"
 
     return ''
 
