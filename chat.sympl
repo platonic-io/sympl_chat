@@ -240,9 +240,12 @@ def _delete_room(room_channel: ChannelName) -> None:
     with PostTxArgs(room_channel):
         _delete_room_execute(room_channel)
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     cvm.job_start()
 >>>>>>> 942c14e (more tests/now use @public)
+=======
+>>>>>>> fef5799 (removed job start and job complete)
 
 @executable
 def _delete_room_execute(room_channel: ChannelName) -> DeleteRoomEvent:
@@ -281,9 +284,12 @@ def _restore_room(room_channel: ChannelName) -> None:
     with PostTxArgs(room_channel):
         _restore_room_execute(room_channel)
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     cvm.job_start()
 >>>>>>> 942c14e (more tests/now use @public)
+=======
+>>>>>>> fef5799 (removed job start and job complete)
 
 @executable
 def _restore_room_execute(room_channel: ChannelName) -> RestoreRoomEvent:
