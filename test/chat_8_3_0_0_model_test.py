@@ -189,6 +189,12 @@ class TestRegTests:
         state.promote_to_owner(promoter=inviter, promotee=invitee, room_channel=room)
         state.demote_owner(demoter=invitee, demotee=inviter, room_channel=room)
 
+    def test_demote_non_owner(self, state):
+        inviter = state.key_alias()
+        room = state.create_room(creator=inviter, room_name='room_name')
+        invitee = state.key_alias()
+        state.invite_to_room(invitee=invitee, inviter=inviter, room_channel=room)
+        state.demote_owner(demoter=inviter, demotee=invitee, room_channel=room)
 
 @pytest.mark.usefixtures('network')
 @pytest.mark.proptest
