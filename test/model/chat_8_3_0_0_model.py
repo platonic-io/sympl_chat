@@ -87,12 +87,12 @@ class RemoveFromRoomEvent:
 
 
 class SendMessageEvent:
-    def __init__(self, room, message):
+    def __init__(self, room, mid):
         self.room = room
-        self.message = message
+        self.mid = mid
 
     def as_data(self):
-        return {'room': self.room.as_data(), 'message': self.message.as_data()}
+        return {'room': self.room.as_data(), 'mid': self.mid}
 
 class PromoteToOwnerEvent:
     def __init__(self, room, promoter, promotee):
@@ -193,7 +193,7 @@ class ChatModel:
         if chr(0) in message:
             raise ContractError("Message cannot contain null byte.")
         room.add_message(message, sender, message_id, message_timestamp)
-        return SendMessageEvent(room, Message(sender, message, message_id, message_timestamp))
+        return SendMessageEvent(room, message_id)
 
     def get_messages(self, getter, room_channel):
         room = self._get_room(getter, room_channel)

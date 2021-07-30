@@ -88,7 +88,7 @@ schema RemoveFromRoomEvent:
 
 schema SendMessageEvent:
     room: Room
-    message: Message
+    mid: Identifier
 
 schema PromoteToOwnerEvent:
     room: Room
@@ -215,10 +215,9 @@ def _create_room(room_name: str) -> None:
     room_channel = cvm.new_channel('RID')
     with PostTxArgs(room_channel):
         _create_room_execute(room_name, room_channel)
-    cvm.job_start()
 
 @executable
-def _create_room_execute(room_name: str, room_channel: ChannelName) -> None:
+def _create_room_execute(room_name: str, room_channel: ChannelName) -> CreateRoomEvent:
     _guard_input("Room name", room_name)
     room = cvm.storage.get(room_channel, RoomStatic, Identifier('room'))
     if isinstance(room, None):
@@ -226,7 +225,7 @@ def _create_room_execute(room_name: str, room_channel: ChannelName) -> None:
         cvm.storage.put(Identifier('room'), room)
         create_room_event = CreateRoomEvent(room=room)
         cvm.create_event('CreateRoomEvent', std.json(create_room_event))
-        cvm.job_complete(std.json(create_room_event))
+        return create_room_event
     else:
         room_channel_str : str = room_channel
         cvm.error(f'Room {room_channel_str} already exists.')
@@ -240,7 +239,6 @@ def _delete_room(room_channel: ChannelName) -> None:
 
     with PostTxArgs(room_channel):
         _delete_room_execute(room_channel)
-    cvm.job_start()
 
 @executable
 def _delete_room_execute(room_channel: ChannelName) -> DeleteRoomEvent:
@@ -278,7 +276,6 @@ def _restore_room(room_channel: ChannelName) -> None:
 
     with PostTxArgs(room_channel):
         _restore_room_execute(room_channel)
-    cvm.job_start()
 
 @executable
 def _restore_room_execute(room_channel: ChannelName) -> RestoreRoomEvent:
@@ -319,7 +316,6 @@ def _invite_to_room(room_channel: ChannelName, new_member: KeyAlias) -> None:
     cvm.send_key(room_channel, new_member)
     with PostTxArgs(room_channel):
         _invite_to_room_execute(room_channel, new_member)
-    cvm.job_start()
 
 
 @executable
@@ -431,11 +427,10 @@ def _send_message(room_channel: ChannelName, message: str) -> None:
     _guard_input("Message", message)
     with PostTxArgs(room_channel):
         _send_message_execute(room_channel, message)
-    cvm.job_start()
 
 
 @executable
-def _send_message_execute(room_channel: ChannelName, message: str) -> None:
+def _send_message_execute(room_channel: ChannelName, message: str) -> SendMessageEvent:
     room = _get_room(room_channel)
     members = room.members
 
@@ -450,9 +445,10 @@ def _send_message_execute(room_channel: ChannelName, message: str) -> None:
     message_id = cvm.generate_id('MID')
     new_message = Message(message_id=message_id, sender=cvm.tx.key_alias, body=message, timestamp=cvm.tx.timestamp)
     cvm.storage.put(new_message.message_id, new_message)
-    send_message_event = SendMessageEvent(room=room, message=new_message)
-    cvm.create_event('SendMessageEvent', std.json(message_id))
-    cvm.job_complete(std.json(message_id))
+    
+    send_message_event = SendMessageEvent(room=room, mid=message_id)
+    cvm.create_event('SendMessageEvent', std.json(send_message_event))
+    return send_message_event
 
 @public_clientside
 def _get_messages(room_channel: ChannelName) -> List[Message]:
