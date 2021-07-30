@@ -195,6 +195,29 @@ class TestRegTests:
         invitee = state.key_alias()
         state.invite_to_room(invitee=invitee, inviter=inviter, room_channel=room)
         state.demote_owner(demoter=inviter, demotee=invitee, room_channel=room)
+    
+    def test_demote_non_owner_demote_owner(self, state):
+        u1 = state.key_alias()
+        u2 = state.key_alias()
+        room = state.create_room(creator= u1, room_name="rm1")
+        state.invite_to_room(inviter=u1, room_channel=room, invitee=u2)
+        state.demote_owner(demoter=u2, room_channel=room, demotee=u2)
+    
+    def test_demote_deleted_room(self, state):
+        u1 = state.key_alias()
+        u2 = state.key_alias()
+        room = state.create_room(creator=u1, room_name="rm1")
+        state.invite_to_room(inviter=u1, room_channel=room, invitee=u2)
+        state.promote_to_owner(promoter=u1, room_channel=room, promotee=u2)
+        state.delete_room(deleter=u1, room_channel=room)
+        state.demote_owner(demoter=u1, room_channel=room, demotee=u2)
+
+    def test_demote_non_member_demote(self, state):
+        u = [state.key_alias() for _ in range(3)]
+        room = state.create_room(creator=u[0], room_name="rm1")
+        state.invite_to_room(inviter=u[0], room_channel=room, invitee=u[1])
+        state.promote_to_owner(promoter=u[0], room_channel=room, promotee=u[1])
+        state.demote_owner(demoter=u[2], room_channel=room, demotee=u[0])
 
 @pytest.mark.usefixtures('network')
 @pytest.mark.proptest

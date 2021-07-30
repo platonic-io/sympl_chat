@@ -234,66 +234,86 @@ def _create_room_execute(room_name: str, room_channel: ChannelName) -> None:
 @public_clientside
 def _delete_room(room_channel: ChannelName) -> None:
     room = _get_room(room_channel)
-    if room.is_deleted:
-        room_channel_str : str = room_channel
-        cvm.error(f'Room {room_channel_str} already deleted.')
+
+    #delete the checks on the room
+    delete_room_checks(room_channel)
+
     with PostTxArgs(room_channel):
         _delete_room_execute(room_channel)
     cvm.job_start()
 
-
 @executable
-def _delete_room_execute(room_channel: ChannelName) -> None:
+def _delete_room_execute(room_channel: ChannelName) -> DeleteRoomEvent:
     room = _get_room(room_channel)
-    members = room.members
 
-    if not std.contains_using(members, cvm.tx.key_alias, _str_eq):
-        not_a_member : str = cvm.tx.key_alias
-        cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
+    #run the checks on delete room
+    delete_room_checks(room_channel)
 
     room.is_deleted = True
     cvm.storage.put(Identifier('room'), room)
     delete_room_event = DeleteRoomEvent(room=room)
     cvm.create_event('DeleteRoomEvent', std.json(delete_room_event))
-    cvm.job_complete(std.json(delete_room_event))
+    return delete_room_event
+
+@public
+def delete_room_checks(room_channel: ChannelName) -> None:
+    room = _get_room(room_channel)
+
+    if room.is_deleted:
+        room_channel_str : str = room_channel
+        cvm.error(f'Room {room_channel_str} already deleted.')
+    if not std.contains_using(room.members, cvm.tx.key_alias, _str_eq):
+        not_a_member : str = cvm.tx.key_alias
+        cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
+    if not std.contains_using(room.owners, cvm.tx.key_alias, _str_eq):
+        not_an_owner: str = cvm.tx.key_alias
+        cvm.error(f"{not_an_owner} is not an owner and does not have permission to delete the room.")
 
 @public_clientside
 def _restore_room(room_channel: ChannelName) -> None:
     room = _get_room(room_channel)
-    if not room.is_deleted:
-        room_channel_str : str = room_channel
-        cvm.error(f'Room {room_channel_str} already active.')
+    
+    #run the checks for restore room
+    restore_room_checks(room_channel)
+
     with PostTxArgs(room_channel):
         _restore_room_execute(room_channel)
     cvm.job_start()
 
-
 @executable
-def _restore_room_execute(room_channel: ChannelName) -> None:
+def _restore_room_execute(room_channel: ChannelName) -> RestoreRoomEvent:
     room = _get_room(room_channel)
     members = room.members
 
-    if not std.contains_using(members, cvm.tx.key_alias, _str_eq):
-        not_a_member : str = cvm.tx.key_alias
-        cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
+    #run the checks for restore room
+    restore_room_checks(room_channel)
 
-    if not room.is_deleted:
-        room_channel_str : str = room_channel
-        cvm.error(f'Room {room_channel_str} already active.')
     room.is_deleted = False
     cvm.storage.put(Identifier('room'), room)
     restore_room_event = RestoreRoomEvent(room=room)
     cvm.create_event('RestoreRoomEvent', std.json(restore_room_event))
-    cvm.job_complete(std.json(restore_room_event))
+    return restore_room_event
+
+@public
+def restore_room_checks(room_channel: ChannelName) -> None:
+    room = _get_room(room_channel)
+
+    if not room.is_deleted:
+        room_channel_str : str = room_channel
+        cvm.error(f'Room {room_channel_str} already active.')
+    if not std.contains_using(room.members, cvm.tx.key_alias, _str_eq):
+        not_a_member : str = cvm.tx.key_alias
+        cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
+    if not std.contains_using(room.owners, cvm.tx.key_alias, _str_eq):
+        not_an_owner: str = cvm.tx.key_alias
+        cvm.error(f"{not_an_owner} is not an owner and does not have permission to delete the room.")
 
 @public_clientside
 def _invite_to_room(room_channel: ChannelName, new_member: KeyAlias) -> None:
     room = _get_room(room_channel)
 
     #perform invite checks
-    check_result : str = invite_to_room_checks(room, new_member, cvm.tx.key_alias)
-    if check_result != '':
-        cvm.error(check_result)
+    invite_to_room_checks(room, new_member, cvm.tx.key_alias)
 
     #cvm.add_owner(room_channel, new_member)
     cvm.send_key(room_channel, new_member)
@@ -303,47 +323,43 @@ def _invite_to_room(room_channel: ChannelName, new_member: KeyAlias) -> None:
 
 
 @executable
-def _invite_to_room_execute(room_channel: ChannelName, new_member: KeyAlias) -> None:
+def _invite_to_room_execute(room_channel: ChannelName, new_member: KeyAlias) -> InviteToRoomEvent:
     room = _get_room(room_channel)
     members = room.members
 
     #perform invite checks
-    check_result : str = invite_to_room_checks(room, new_member, cvm.tx.key_alias)
-    if check_result != '':
-        cvm.error(check_result)
+    invite_to_room_checks(room, new_member, cvm.tx.key_alias)
     
     room.members = room.members + [new_member]
     cvm.storage.put(Identifier('room'), room)
+
     invite_to_room_event = InviteToRoomEvent(room=room, inviter=cvm.tx.key_alias, invitee=new_member)
     cvm.create_event('InviteToRoomEvent', std.json(invite_to_room_event))
-    cvm.job_complete(std.json(invite_to_room_event))
+    return invite_to_room_event
 
 #runs checks to see if the caller has the correct permissions to invite the 
 #a new member to a room, returns '' if there are no issues
-def invite_to_room_checks(room: Room, new_member: KeyAlias, caller: KeyAlias) -> str:
+@public
+def invite_to_room_checks(room: Room, new_member: KeyAlias, caller: KeyAlias) -> None:
 
     #check if the caller is an owner
     if not std.contains_using(room.owners, caller, _str_eq):
-        return f"{caller} is not an owner of the room {room.channel}"
+        cvm.error(f"{caller} is not an owner of the room {room.channel}")
 
     #check if the invitee is already a member
     if std.contains_using(room.members, new_member, _str_eq):
-        return f"Member {new_member} already in room {room.channel}."
+        cvm.error(f"Member {new_member} already in room {room.channel}.")
 
     #check if the room is deleted
     if room.is_deleted:
-        return f"{room.channel} is deleted."
-
-    return ''
+        cvm.error(f"{room.channel} is deleted.")
 
 
 @public_clientside
 def _remove_from_room(room_channel: ChannelName, member_to_remove: KeyAlias) -> None:
     room = _get_room(room_channel)
     #run checks on removing
-    checks_result = remove_from_room_checks(room, member_to_remove, cvm.tx.key_alias)
-    if checks_result != '':
-        cvm.error(checks_result)
+    remove_from_room_checks(room, member_to_remove, cvm.tx.key_alias)
 
     #if the member to remove is an owner, we want to remove ownership
     #privileges, and then promote a new owner if there are no
@@ -366,9 +382,8 @@ def _remove_from_room_execute(room_channel: ChannelName, member_to_remove: KeyAl
     members = room.members
 
     #run checks on removing
-    checks_result = remove_from_room_checks(room, member_to_remove, cvm.tx.key_alias)
-    if checks_result != '':
-        cvm.error(checks_result)    
+    remove_from_room_checks(room, member_to_remove, cvm.tx.key_alias)
+  
 
     # room.members-remove(member_to_remove)
     mtr: str = member_to_remove
@@ -377,21 +392,23 @@ def _remove_from_room_execute(room_channel: ChannelName, member_to_remove: KeyAl
 
     cvm.storage.put(Identifier('room'), room)
     remove_from_room_event = RemoveFromRoomEvent(room=room, remover=cvm.tx.key_alias, removee=member_to_remove)
+    
     cvm.create_event('RemoveFromRoomEvent', std.json(remove_from_room_event))
     return remove_from_room_event
 
 #runs checks to see if the caller has the correct permissions to invite the 
 #a new member to a room, returns '' if there are no issues
-def remove_from_room_checks(room: Room, member_to_remove: KeyAlias, caller: KeyAlias) -> str:
+@public
+def remove_from_room_checks(room: Room, member_to_remove: KeyAlias, caller: KeyAlias) -> None:
     #check if caller is an owner and has perms to remove 
     if (not std.contains_using(room.owners, caller, _str_eq)): # and (str(member_to_remove) != str(caller)):
-        return f"{caller} is not an owner and does not have permission to remove {member_to_remove} from room {room.channel}" 
+        cvm.error(f"{caller} is not an owner and does not have permission to remove {member_to_remove} from room {room.channel}" )
     #check if member to remove is actually a member of the room
     if not std.contains_using(room.members, member_to_remove, _str_eq):
-        return f"Member {member_to_remove} not in room {room.channel}."
+        cvm.error(f"Member {member_to_remove} not in room {room.channel}.")
     #check if the room is deleted
     if room.is_deleted:
-        return f"Room {room.channel} is not deleted! Operation Denied."
+        cvm.error(f"Room {room.channel} is deleted! Operation Denied.")
 
     #check if caller is the same as the person to remove... cannot remove yourself
     #### - this is the case because when someone leaves the secure channel, the keys
@@ -403,9 +420,7 @@ def remove_from_room_checks(room: Room, member_to_remove: KeyAlias, caller: KeyA
     mtr_str : str = member_to_remove
     cal_str : str = caller
     if mtr_str == cal_str:
-        return f"Cannot remove self from room."
-
-    return ''
+        cvm.error(f"Cannot remove self from room.")
 
 @public_clientside
 def _send_message(room_channel: ChannelName, message: str) -> None:
@@ -473,9 +488,7 @@ def _promote_to_owner(room_channel: ChannelName, member: KeyAlias) -> None:
     room = _get_room(room_channel)
     
     #run the checks and error out if there is an issue
-    check_result: str = promote_to_owner_checks(member, cvm.tx.key_alias, room)
-    if check_result != '':
-        cvm.error(check_result)
+    promote_to_owner_checks(member, cvm.tx.key_alias, room)
 
     #This will promote the member to 'owner' of the secure channel
     cvm.add_owner(room_channel, member)
@@ -494,9 +507,7 @@ def _promote_to_owner_execute(room_channel: ChannelName, member: KeyAlias) -> Pr
     #this is performed on both the executable and clientside sides
     #because a malicious KA and Node Administrator could directly run
     #any executable function 
-    check_result: str = promote_to_owner_checks(member, cvm.tx.key_alias, room)
-    if check_result != '':
-        cvm.error(check_result)
+    promote_to_owner_checks(member, cvm.tx.key_alias, room)
 
     #update the owners list in storage
     room.owners = room.owners + [member]
@@ -507,7 +518,8 @@ def _promote_to_owner_execute(room_channel: ChannelName, member: KeyAlias) -> Pr
     cvm.create_event('PromoteToOwnerEvent', std.json(promote_to_owner_event))
     return promote_to_owner_event
 
-def promote_to_owner_checks(member: KeyAlias, caller: KeyAlias, room: Room) -> str:
+@public
+def promote_to_owner_checks(member: KeyAlias, caller: KeyAlias, room: Room) -> None:
     #This function performs the permission checks for the promote to owner logic
     #it takes a member, caller, and a room channel, and ensures that the caller KA
     #is allowed to promote the member KA to an owner
@@ -518,26 +530,24 @@ def promote_to_owner_checks(member: KeyAlias, caller: KeyAlias, room: Room) -> s
     if not std.contains_using(room.members, member, _str_eq):
         member_str : str = member
         room_channel_str : str = room_channel
-        return f"Member {member_str} is not in room {room_channel_str}."
+        cvm.error( f"Member {member_str} is not in room {room_channel_str}.")
     
     #check to ensure a member is not already an owner
     if std.contains_using(room.owners, member, _str_eq):
         member_str : str = member
         room_channel_str : str = room_channel
-        return f"Member {member_str} is already an owner of room {room_channel_str}."
+        cvm.error( f"Member {member_str} is already an owner of room {room_channel_str}.")
 
     #check to ensure that a room is not deleted
     if room.is_deleted:
         room_channel_str : str = room_channel
-        return f'Room {room_channel_str} has been deleted. Cannot promote anyone'
+        cvm.error( f'Room {room_channel_str} has been deleted. Cannot promote anyone')
 
     #ensure that the calling key alias is an owner of the room, and is allowed
     #to promote others to owner
     if not std.contains_using(room.owners, caller, _str_eq):
         not_an_owner : str = caller
-        return f'{not_an_owner} is not an owner of the room. Operation denied.'
-    
-    return ''
+        cvm.error( f'{not_an_owner} is not an owner of the room. Operation denied.')
 
 @public_clientside
 def _demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
@@ -545,9 +555,8 @@ def _demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
     room = _get_room(room_channel)
 
     #run demote checks
-    check_result : str = demote_owner_checks(owner, cvm.tx.key_alias, room)
-    if check_result != '':
-        cvm.error(check_result)
+    demote_owner_checks(owner, cvm.tx.key_alias, room)
+
     
     #if there's only one owner left when you attempt to demote an owner
     #promote the next member (that is not a current owner) to owner
@@ -577,9 +586,7 @@ def _demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
 def _demote_owner_execute(room_channel: ChannelName, owner: KeyAlias) -> DemoteOwnerEvent:
     room = _get_room(room_channel)
 
-    check_result : str = demote_owner_checks(owner, cvm.tx.key_alias, room)
-    if check_result != '':
-        cvm.error(check_result)
+    demote_owner_checks(owner, cvm.tx.key_alias, room)
 
     #update the owners list in storage
     otr : str = owner
@@ -592,7 +599,8 @@ def _demote_owner_execute(room_channel: ChannelName, owner: KeyAlias) -> DemoteO
     cvm.create_event('DemoteOwnerEvent', std.json(demote_owner_event))
     return demote_owner_event
 
-def demote_owner_checks(owner: KeyAlias, caller: KeyAlias, room: Room) -> str:
+@public
+def demote_owner_checks(owner: KeyAlias, caller: KeyAlias, room: Room) -> None:
     #This function performs the permission checks for the demote owner logic
     #it takes an owner, caller, and a room channel, and ensures that the caller KA
     #is allowed to demote the owner KA
@@ -602,30 +610,28 @@ def demote_owner_checks(owner: KeyAlias, caller: KeyAlias, room: Room) -> str:
     if not std.contains_using(room.members, owner, _str_eq):
         owner_str : str = owner
         room_channel_str : str = room_channel
-        return f'{owner_str} is not a member of room {room_channel_str}. Please invite them first.'
-
-    #check to ensure the owner to demote is actually an owner
-    if not std.contains_using(room.owners, owner, _str_eq):
-        owner_str : str = owner
-        room_channel_str : str = room_channel
-        return f'{owner_str} is not an owner of room {room_channel_str}. Cannot demote a non-owner'
-    
-    #check to ensure that a room is not deleted
-    if room.is_deleted:
-        room_channel_str : str = room_channel
-        return f'Room {room_channel_str} has been deleted. Cannot promote anyone'
+        cvm.error(f'{owner_str} is not a member of room {room_channel_str}.')
 
     #ensure that the calling key alias is an owner of the room, and is allowed
     #to demote others from owner
     if not std.contains_using(room.owners, caller, _str_eq):
         not_an_owner : str = caller
-        return f'{not_an_owner} is not an owner of the room. Operation denied.'
+        cvm.error(f'{not_an_owner} is not an owner of the room. Operation denied.')
+
+    #check to ensure the owner to demote is actually an owner
+    if not std.contains_using(room.owners, owner, _str_eq):
+        owner_str : str = owner
+        room_channel_str : str = room_channel
+        cvm.error(f'{owner_str} is not an owner of room {room_channel_str}. Cannot demote a non-owner')
     
+    #check to ensure that a room is not deleted
+    if room.is_deleted:
+        room_channel_str : str = room_channel
+        cvm.error(f'Room {room_channel_str} has been deleted. Cannot demote anyone')
+
     #cannot leave zero owners in the room
     if len(room.owners) == 1 and len(room.members) == 1:
-        return f"Cannot demote {owner}, as {owner} is the only member!"
-
-    return ""
+        cvm.error(f"Cannot demote {owner}, as {owner} is the only member!")
 
 def _str_eq(str1 : str, str2: str) -> bool:
     return str1 == str2

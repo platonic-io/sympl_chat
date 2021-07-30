@@ -155,7 +155,7 @@ class ChatModel:
         if remover not in room.owners:
             raise ContractError(f"{remover} is not an owner and does not have permission to remove {member_to_remove} from room {room.channel}" )
         if room.is_deleted:
-            raise ContractError(f"Room {room.channel} is not deleted! Operation Denied.")
+            raise ContractError(f"Room {room.channel} is deleted! Operation Denied.")
         if member_to_remove == remover:
             raise ContractError("Cannot remove self from room.")
         room.members.remove(member_to_remove)
@@ -165,6 +165,10 @@ class ChatModel:
         room = self._get_room(deleter, room_channel)
         if room.is_deleted:
             raise ContractError("Room {} already deleted.".format(room_channel))
+        if deleter not in room.members:
+            raise ContractError(f'Member {deleter} does not belong to the room. Operation denied.')
+        if deleter not in room.owners:
+            raise ContractError(f"{deleter} is not an owner and does not have permission to delete the room.")
         room.delete()
         return DeleteRoomEvent(room).as_data()
 

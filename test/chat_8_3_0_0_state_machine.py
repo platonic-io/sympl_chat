@@ -52,9 +52,7 @@ class ChatValidator(RuleBasedStateMachine):
     def assert_results_match(self, method, caller, **kwargs):
         """Calls the method on both the network and the model, and ensures that their return values are the same."""
         network_result = self.try_and_catch(lambda: getattr(self.network[caller].chat[CHAT_VERSION], method)(**kwargs))
-        print(f"network_result: {network_result}")
         model_result = self.try_and_catch(lambda: getattr(self.model, method)(caller, **kwargs))
-        print(f"model_result: {model_result}")
         if isinstance(model_result, (list, )) and len(model_result) > 0 and 'message_id' in model_result[0]:
             assert scrub_ids_and_timestamps(model_result) == scrub_ids_and_timestamps(network_result)
         else:
