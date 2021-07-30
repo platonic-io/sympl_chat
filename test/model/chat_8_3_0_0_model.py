@@ -174,8 +174,13 @@ class ChatModel:
 
     def restore_room(self, restorer, room_channel):
         room = self._get_room(restorer, room_channel)
+ 
         if not room.is_deleted:
-            raise ContractError("Room {} already active.".format(room_channel))
+            raise ContractError(f'Room {room_channel} already active.')
+        if restorer not in room.members:
+            raise ContractError(f'Member {restorer} does not belong to the room. Operation denied.')
+        if restorer not in room.owners:
+            raise ContractError(f"{restorer} is not an owner and does not have permission to delete the room.")
         room.restore()
         return RestoreRoomEvent(room).as_data()
 
@@ -217,13 +222,13 @@ class ChatModel:
     def demote_owner(self, demoter, room_channel, owner):
         room = self._get_room(demoter, room_channel)
         if owner not in room.members:
-            raise ContractError(f'{owner} is not a member of room {room_channel}. Please invite them first.')
+            raise ContractError(f'{owner} is not a member of room {room_channel}.')
+        if demoter not in room.owners:
+            raise ContractError(f'{demoter} is not an owner of the room. Operation denied.')
         if owner not in room.owners:
             raise ContractError(f"{owner} is not an owner of room {room_channel}. Cannot demote a non-owner")
         if room.is_deleted:
             raise ContractError(f'Room {room_channel} has been deleted. Cannot demote anyone')
-        if demoter not in room.owners:
-            raise ContractError(f'{demoter} is not an owner of the room. Operation denied.')
             #cannot leave zero owners in the room
         if len(room.owners) == 1 and len(room.members) == 1:
             raise ContractError(f"Cannot demote {owner}, as {owner} is the only member!")
@@ -234,8 +239,8 @@ class ChatModel:
             if new_owner == owner:
                 new_owner = members[1]
 
-            room = self.promote_to_owner(demoter, room_channel, new_owner)["room"]
-        
+            self.promote_to_owner(demoter, room_channel, new_owner)
+
         room.owners.remove(owner)
         
         return DemoteOwnerEvent(room=room, demoter=demoter, demotee=owner).as_data()
