@@ -260,7 +260,7 @@ def _delete_room_execute(room_channel: ChannelName) -> DeleteRoomEvent:
     cvm.create_event('DeleteRoomEvent', std.json(delete_room_event))
     return delete_room_event
 
-@public
+@helper
 def delete_room_checks(room_channel: ChannelName) -> None:
     room = _get_room(room_channel)
 
@@ -305,7 +305,7 @@ def _restore_room_execute(room_channel: ChannelName) -> RestoreRoomEvent:
     cvm.create_event('RestoreRoomEvent', std.json(restore_room_event))
     return restore_room_event
 
-@public
+@helper
 def restore_room_checks(room_channel: ChannelName) -> None:
     room = _get_room(room_channel)
 
@@ -391,7 +391,7 @@ def invite_to_room_checks(room: Room, new_member: KeyAlias, caller: KeyAlias) ->
 @clientside_helper
 #runs checks to see if the caller has the correct permissions to invite the 
 #a new member to a room, returns '' if there are no issues
-@public
+@helper
 def invite_to_room_checks(room: Room, new_member: KeyAlias, caller: KeyAlias) -> None:
 
     #check if the caller is an owner
@@ -411,7 +411,7 @@ def invite_to_room_checks(room: Room, new_member: KeyAlias, caller: KeyAlias) ->
         cvm.error(f"{room.channel} is deleted.")
 
 
-@public_clientside
+@clientside_helper
 def _remove_from_room(room_channel: ChannelName, member_to_remove: KeyAlias) -> None:
     room = _get_room(room_channel)
     #run checks on removing
@@ -477,6 +477,7 @@ def _remove_from_room_execute(room_channel: ChannelName, member_to_remove: KeyAl
 #a new member to a room, returns '' if there are no issues
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 @public
 def remove_from_room_checks(room: Room, member_to_remove: KeyAlias, caller: KeyAlias) -> None:
     #check if caller is an owner and has perms to remove 
@@ -505,6 +506,9 @@ def remove_from_room_checks(room: Room, member_to_remove: KeyAlias, caller: KeyA
 >>>>>>> 7af94d1 (modified invite and remove to handle owners)
 =======
 @public
+=======
+@helper
+>>>>>>> 529113f (use helper instead of public)
 def remove_from_room_checks(room: Room, member_to_remove: KeyAlias, caller: KeyAlias) -> None:
     #check if caller is an owner and has perms to remove 
     if (not std.contains_using(room.owners, caller, _str_eq)): # and (str(member_to_remove) != str(caller)):
@@ -600,7 +604,7 @@ def _get_rooms() -> List[Room]:
 
     return std.sort_by(rooms, compare)
 
-@public_clientside
+@clientside_helper
 def _promote_to_owner(room_channel: ChannelName, member: KeyAlias) -> None:
     room = _get_room(room_channel)
     
@@ -635,7 +639,7 @@ def _promote_to_owner_execute(room_channel: ChannelName, member: KeyAlias) -> Pr
     cvm.create_event('PromoteToOwnerEvent', std.json(promote_to_owner_event))
     return promote_to_owner_event
 
-@public
+@helper
 def promote_to_owner_checks(member: KeyAlias, caller: KeyAlias, room: Room) -> None:
     #This function performs the permission checks for the promote to owner logic
     #it takes a member, caller, and a room channel, and ensures that the caller KA
@@ -666,7 +670,7 @@ def promote_to_owner_checks(member: KeyAlias, caller: KeyAlias, room: Room) -> N
         not_an_owner : str = caller
         cvm.error( f'{not_an_owner} is not an owner of the room. Operation denied.')
 
-@public_clientside
+@clientside_helper
 def _demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
     
     room = _get_room(room_channel)
@@ -737,7 +741,7 @@ def _demote_owner_execute(room_channel: ChannelName, owner: KeyAlias) -> DemoteO
     cvm.create_event('DemoteOwnerEvent', std.json(demote_owner_event))
     return demote_owner_event
 
-@public
+@helper
 def demote_owner_checks(owner: KeyAlias, caller: KeyAlias, room: Room) -> None:
     #This function performs the permission checks for the demote owner logic
     #it takes an owner, caller, and a room channel, and ensures that the caller KA
