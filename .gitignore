@@ -1,2 +1,6 @@
 .idea
 .DS_Store
+.vscode
+*.pyc
+*.cpython
+test/assembly-sdk-pytest-*
