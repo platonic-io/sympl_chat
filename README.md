@@ -20,6 +20,11 @@ Members includes a role when key is shared via send key operation
     - Members: Members
     - Dependecies: Owners is a subset of Members
 
+#### Security Policy of Channel
+
+- `owners` are Channel Owners (added using `cvm.add_owner`)
+- `members` have the Channel Key (received using `cvm.send_key`) 
+- Keys get rotated using `cvm.rotate_key` when an `owner` of a `room` removes someone from the room.
 ### Actions
 All `Actions` are write operations on `Channel` that can be done only by `Role`
 
@@ -31,7 +36,7 @@ All `Actions` are write operations on `Channel` that can be done only by `Role`
 | Invite to Room   | Room    | Owner   |
 | Send Message     | Room    | Member  |
 | Remove from Room | Room    | Owner   |
-| Promote Owner    | Room    | Owner   |
+| Promote to Owner | Room    | Owner   |
 | Demote Owner     | Room    | Owner   |
 
 ' The member cannot remove itself from the room
