@@ -467,10 +467,15 @@ def _send_message_execute(room_channel: ChannelName, message: str) -> SendMessag
     #run checks on sending the message
     send_message_checks(room_channel, message)
 
+    # create a message
     message_id = cvm.generate_id('MID')
     new_message = Message(message_id=message_id, sender=cvm.tx.key_alias, body=message, timestamp=cvm.tx.timestamp)
     cvm.storage.put(new_message.message_id, new_message)
     
+    # create an event saying there's a new message
+    # Note: the send_message_event doesn't store the contents of 
+    # the message. This was done because it would allow anyone on
+    # the blockchain network to read the contents of the message
     send_message_event = SendMessageEvent(room=room, mid=message_id)
     cvm.create_event('SendMessageEvent', std.json(send_message_event))
     return send_message_event
