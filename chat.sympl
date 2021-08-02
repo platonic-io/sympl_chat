@@ -163,7 +163,7 @@ def send_message(room_channel: ChannelName, message: str) -> None:
 # # # implementations #
 # # ###################
 
-@public
+@helper
 def _get_room(room_channel: ChannelName) -> Room:
     room = cvm.storage.get(room_channel, RoomStatic, Identifier('room'))
     if isinstance(room,  None):
@@ -171,7 +171,7 @@ def _get_room(room_channel: ChannelName) -> Room:
         cvm.error(f"Room for channel {room_channel_str} not found.")
     return room
 
-@public
+@helper
 def _guard_input(input_description: str, input_: str) -> None:
     if input_ == '':
         cvm.error(f"{input_description} cannot be empty.")
@@ -183,7 +183,7 @@ def _guard_input(input_description: str, input_: str) -> None:
     if len(input_) > 4000:
         cvm.error(f"{input_description} cannot be longer than 4000 characters.")
 
-@public_clientside
+@clientside_helper
 def _create_room(room_name: str) -> None:
     _guard_input("Room name", room_name)
     room_channel = cvm.new_channel('RID')
@@ -206,7 +206,7 @@ def _create_room_execute(room_name: str, room_channel: ChannelName) -> None:
         room_channel_str : str = room_channel
         cvm.error(f'Room {room_channel_str} already exists.')
 
-@public_clientside
+@clientside_helper
 def _delete_room(room_channel: ChannelName) -> None:
     room = _get_room(room_channel)
     if room.is_deleted:
@@ -232,7 +232,7 @@ def _delete_room_execute(room_channel: ChannelName) -> None:
     cvm.create_event('DeleteRoomEvent', std.json(delete_room_event))
     cvm.job_complete(std.json(delete_room_event))
 
-@public_clientside
+@clientside_helper
 def _restore_room(room_channel: ChannelName) -> None:
     room = _get_room(room_channel)
     if not room.is_deleted:
@@ -261,7 +261,7 @@ def _restore_room_execute(room_channel: ChannelName) -> None:
     cvm.create_event('RestoreRoomEvent', std.json(restore_room_event))
     cvm.job_complete(std.json(restore_room_event))
 
-@public_clientside
+@clientside_helper
 def _invite_to_room(room_channel: ChannelName, new_member: KeyAlias) -> None:
     room = _get_room(room_channel)
     members = room.members
@@ -294,7 +294,7 @@ def _invite_to_room_execute(room_channel: ChannelName, new_member: KeyAlias) -> 
     cvm.create_event('InviteToRoomEvent', std.json(invite_to_room_event))
     cvm.job_complete(std.json(invite_to_room_event))
 
-@public_clientside
+@clientside_helper
 def _remove_from_room(room_channel: ChannelName, member_to_remove: KeyAlias) -> None:
     room = _get_room(room_channel)
     mrs : str = member_to_remove
@@ -340,7 +340,7 @@ def _remove_from_room_execute(room_channel: ChannelName, member_to_remove: KeyAl
     cvm.job_complete(std.json(remove_from_room_event))
 
 
-@public_clientside
+@clientside_helper
 def _send_message(room_channel: ChannelName, message: str) -> None:
     room = _get_room(room_channel)
     if room.is_deleted:
@@ -372,7 +372,7 @@ def _send_message_execute(room_channel: ChannelName, message: str) -> None:
     cvm.create_event('SendMessageEvent', std.json(message_id))
     cvm.job_complete(std.json(message_id))
 
-@public_clientside
+@clientside_helper
 def _get_messages(room_channel: ChannelName) -> List[Message]:
     # check that the room exists and is accessible
     room = _get_room(room_channel)
@@ -386,7 +386,7 @@ def _get_messages(room_channel: ChannelName) -> List[Message]:
         return lt < rhs.timestamp
     return std.sort_by(messages, compare)
 
-@public
+@helper
 def _get_rooms() -> List[Room]:
     rooms : List[Room] = [r for r in cvm.storage.query(RoomStatic).values() if not r.is_deleted]
     def compare(lhs: Room, rhs: Room) -> bool:
