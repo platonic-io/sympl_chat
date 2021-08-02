@@ -189,7 +189,7 @@ def demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
 # # # implementations #
 # # ###################
 
-@public
+@helper
 def _get_room(room_channel: ChannelName) -> Room:
     room = cvm.storage.get(room_channel, RoomStatic, Identifier('room'))
     if isinstance(room,  None):
@@ -197,7 +197,7 @@ def _get_room(room_channel: ChannelName) -> Room:
         cvm.error(f"Room for channel {room_channel_str} not found.")
     return room
 
-@public
+@helper
 def _guard_input(input_description: str, input_: str) -> None:
     if input_ == '':
         cvm.error(f"{input_description} cannot be empty.")
@@ -209,7 +209,7 @@ def _guard_input(input_description: str, input_: str) -> None:
     if len(input_) > 4000:
         cvm.error(f"{input_description} cannot be longer than 4000 characters.")
 
-@public_clientside
+@clientside_helper
 def _create_room(room_name: str) -> None:
     _guard_input("Room name", room_name)
     room_channel = cvm.new_channel('RID')
@@ -230,7 +230,7 @@ def _create_room_execute(room_name: str, room_channel: ChannelName) -> CreateRoo
         room_channel_str : str = room_channel
         cvm.error(f'Room {room_channel_str} already exists.')
 
-@public_clientside
+@clientside_helper
 def _delete_room(room_channel: ChannelName) -> None:
     room = _get_room(room_channel)
 
@@ -267,7 +267,7 @@ def delete_room_checks(room_channel: ChannelName) -> None:
         not_an_owner: str = cvm.tx.key_alias
         cvm.error(f"{not_an_owner} is not an owner and does not have permission to delete the room.")
 
-@public_clientside
+@clientside_helper
 def _restore_room(room_channel: ChannelName) -> None:
     room = _get_room(room_channel)
     
@@ -305,7 +305,7 @@ def restore_room_checks(room_channel: ChannelName) -> None:
         not_an_owner: str = cvm.tx.key_alias
         cvm.error(f"{not_an_owner} is not an owner and does not have permission to delete the room.")
 
-@public_clientside
+@clientside_helper
 def _invite_to_room(room_channel: ChannelName, new_member: KeyAlias) -> None:
     room = _get_room(room_channel)
 
@@ -351,7 +351,7 @@ def invite_to_room_checks(room: Room, new_member: KeyAlias, caller: KeyAlias) ->
         cvm.error(f"{room.channel} is deleted.")
 
 
-@public_clientside
+@clientside_helper
 def _remove_from_room(room_channel: ChannelName, member_to_remove: KeyAlias) -> None:
     room = _get_room(room_channel)
     #run checks on removing
@@ -418,7 +418,7 @@ def remove_from_room_checks(room: Room, member_to_remove: KeyAlias, caller: KeyA
     if mtr_str == cal_str:
         cvm.error(f"Cannot remove self from room.")
 
-@public_clientside
+@clientside_helper
 def _send_message(room_channel: ChannelName, message: str) -> None:
     room = _get_room(room_channel)
     if room.is_deleted:
@@ -450,7 +450,7 @@ def _send_message_execute(room_channel: ChannelName, message: str) -> SendMessag
     cvm.create_event('SendMessageEvent', std.json(send_message_event))
     return send_message_event
 
-@public_clientside
+@clientside_helper
 def _get_messages(room_channel: ChannelName) -> List[Message]:
     # check that the room exists and is accessible
     room = _get_room(room_channel)
@@ -464,7 +464,7 @@ def _get_messages(room_channel: ChannelName) -> List[Message]:
         return lt < rhs.timestamp
     return std.sort_by(messages, compare)
 
-@public
+@helper
 def _get_rooms() -> List[Room]:
     rooms : List[Room] = [r for r in cvm.storage.query(RoomStatic).values() if not r.is_deleted]
     def compare(lhs: Room, rhs: Room) -> bool:
