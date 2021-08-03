@@ -111,6 +111,14 @@ class TestRegTests:
         invitee = state.key_alias()
         state.invite_to_room(invitee=invitee, inviter=inviter, room_channel=room)
 
+    def test_invite_non_owner(self, state):
+        inviter = state.key_alias()
+        room = state.create_room(creator=inviter, room_name='room_name')
+        invitee = state.key_alias()
+        state.invite_to_room(invitee=invitee, inviter=inviter, room_channel=room)
+        third = state.key_alias()
+        state.invite_to_room(invitee=third, inviter=invitee, room_channel=room)
+
     def test_invite_user_who_then_deletes_room(self, state):
         deleter = state.key_alias()
         creator = state.key_alias()
@@ -169,6 +177,13 @@ class TestRegTests:
         u1 = state.key_alias()
         room = state.create_room(creator=u1, room_name='0')
         state.delete_room(deleter=u1, room_channel=room)
+
+    def test_create_and_non_owner_delete_room(self, state):
+        u1 = state.key_alias()
+        u2 = state.key_alias()
+        room = state.create_room(creator=u1, room_name='0')
+        state.invite_to_room(inviter=u1, invitee=u2, room_channel=room)
+        state.delete_room(deleter=u2, room_channel=room)
 
     def test_send_message(self, state):
         u1 = state.key_alias()
