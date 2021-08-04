@@ -92,7 +92,7 @@ class SendMessageEvent:
         self.message_id = message_id
 
     def as_data(self):
-        return {'room': self.room.as_data(), 'message_id': self.mid}
+        return {'room': self.room.as_data(), 'message_id': self.message_id}
 
 class PromoteToOwnerEvent:
     def __init__(self, room, promoter, promotee):
