@@ -101,7 +101,7 @@ schema RemoveFromRoomEvent:
 
 schema SendMessageEvent:
     room: Room
-    mid: Identifier
+    message_id: Identifier
 
 schema PromoteToOwnerEvent:
     room: Room
@@ -371,7 +371,7 @@ def invite_to_room_checks(room: Room, new_member: KeyAlias) -> None:
 
     #check if the caller is an owner
     if not std.contains_using(room.owners, caller, _str_eq):
-        cvm.error(f"{caller} is not an owner of the room {room.channel}")
+        cvm.error(f"{caller} is not an owner of the room {room.channel}.")
 
     #check if the invitee is already a member
     if std.contains_using(room.members, new_member, _str_eq):
@@ -431,7 +431,7 @@ def _remove_from_room_execute(room_channel: ChannelName, member_to_remove: KeyAl
 def remove_from_room_checks(room: Room, member_to_remove: KeyAlias, caller: KeyAlias) -> None:
     #check if caller is an owner and has perms to remove 
     if (not std.contains_using(room.owners, caller, _str_eq)): # and (str(member_to_remove) != str(caller)):
-        cvm.error(f"{caller} is not an owner and does not have permission to remove {member_to_remove} from room {room.channel}" )
+        cvm.error(f"{caller} is not an owner and does not have permission to remove {member_to_remove} from room {room.channel}." )
     #check if member to remove is actually a member of the room
     if not std.contains_using(room.members, member_to_remove, _str_eq):
         cvm.error(f"Member {member_to_remove} not in room {room.channel}.")
@@ -476,7 +476,7 @@ def _send_message_execute(room_channel: ChannelName, message: str) -> SendMessag
     # Note: the send_message_event doesn't store the contents of 
     # the message. This was done because it would allow anyone on
     # the blockchain network to read the contents of the message
-    send_message_event = SendMessageEvent(room=room, mid=message_id)
+    send_message_event = SendMessageEvent(room=room, message_id=message_id)
     cvm.create_event('SendMessageEvent', std.json(send_message_event))
     return send_message_event
 
@@ -582,7 +582,7 @@ def promote_to_owner_checks(member: KeyAlias, caller: KeyAlias, room: Room) -> N
     #check to ensure that a room is not deleted
     if room.is_deleted:
         room_channel_str : str = room_channel
-        cvm.error( f'Room {room_channel_str} has been deleted. Cannot promote anyone')
+        cvm.error( f'Room {room_channel_str} has been deleted. Cannot promote.')
 
     #ensure that the calling key alias is an owner of the room, and is allowed
     #to promote others to owner
@@ -662,12 +662,12 @@ def demote_owner_checks(owner: KeyAlias, caller: KeyAlias, room: Room) -> None:
     if not std.contains_using(room.owners, owner, _str_eq):
         owner_str : str = owner
         room_channel_str : str = room_channel
-        cvm.error(f'{owner_str} is not an owner of room {room_channel_str}. Cannot demote a non-owner')
+        cvm.error(f'{owner_str} is not an owner of room {room_channel_str}. Cannot demote a non-owner.')
     
     #check to ensure that a room is not deleted
     if room.is_deleted:
         room_channel_str : str = room_channel
-        cvm.error(f'Room {room_channel_str} has been deleted. Cannot demote anyone')
+        cvm.error(f'Room {room_channel_str} has been deleted. Cannot demote.')
 
     #cannot leave zero owners in the room
     if len(room.owners) == 1 and len(room.members) == 1:

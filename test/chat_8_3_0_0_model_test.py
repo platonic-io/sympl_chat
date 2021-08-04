@@ -87,6 +87,14 @@ class TestRegTests:
         room = state.create_room(creator=creator, room_name='room_name')
         state.remove_from_room(removee=non_member, remover=creator, room_channel=room)
 
+    def test_remove_owner(self, state):
+        u1 = state.key_alias()
+        u2 = state.key_alias()
+        room = state.create_room(creator=u1, room_name="rm1")
+        state.invite_to_room(inviter=u1, invitee=u2, room_channel=room)
+        state.promote_to_owner(promoter=u1, promotee=u2, room_channel=room)
+        state.remove_from_room(remover=u2, removee=u1, room_channel=room)
+
     def test_send_message_as_non_member(self, state):
         sender = state.key_alias()
         creator = state.key_alias()
