@@ -74,7 +74,7 @@ schema Room:
     name: str  # the human-readable name of the room
     is_deleted: bool  # to support restoration, deleted rooms are flagged, not expunged
     members: List[KeyAlias]  # a list of the key aliases that have access to the room
-    owners: List[KeyAlias]   # a list of key aliases that are 'owners' of the room (this should always be a subset of 'members', these people functiona as admins)
+    owners: List[KeyAlias]   # a list of key aliases that are 'owners' of the room (this should always be a subset of 'members', these people function as admins)
 
 ##########
 # events #
@@ -332,7 +332,7 @@ def restore_room_checks(room_channel: ChannelName) -> None:
         cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
     if not std.contains_using(room.owners, cvm.tx.key_alias, _str_eq):
         not_an_owner: str = cvm.tx.key_alias
-        cvm.error(f"{not_an_owner} is not an owner and does not have permission to delete the room.")
+        cvm.error(f"{not_an_owner} is not an owner and does not have permission to restore the room.")
 
 @clientside_helper
 def _invite_to_room(room_channel: ChannelName, new_member: KeyAlias) -> None:
@@ -341,7 +341,6 @@ def _invite_to_room(room_channel: ChannelName, new_member: KeyAlias) -> None:
     #perform invite checks
     invite_to_room_checks(room, new_member)
 
-    #cvm.add_owner(room_channel, new_member)
     cvm.send_key(room_channel, new_member)
     with PostTxArgs(room_channel):
         _invite_to_room_execute(room_channel, new_member)

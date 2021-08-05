@@ -18,7 +18,7 @@ Members includes a role when key is shared via send key operation
 - Room channel
     - Owners: Owners
     - Members: Members
-    - Dependecies: Owners is a subset of Members
+    - Dependecies: N/A
 
 #### Security Policy of Channel
 

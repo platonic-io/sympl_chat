@@ -182,7 +182,7 @@ class ChatModel:
         if restorer not in room.members:
             raise ContractError(f'Member {restorer} does not belong to the room. Operation denied.')
         if restorer not in room.owners:
-            raise ContractError(f"{restorer} is not an owner and does not have permission to delete the room.")
+            raise ContractError(f"{restorer} is not an owner and does not have permission to restore the room.")
         room.restore()
         return RestoreRoomEvent(room).as_data()
 
