@@ -409,6 +409,11 @@ def _remove_from_room_execute(room_channel: ChannelName, member_to_remove: KeyAl
     room = _get_room(room_channel)
     members = room.members
 
+    #check to ensure owner member is not an owner, demote him if possible
+    if std.contains_using(room.owners, member_to_remove, _str_eq):
+        with PostTxArgs(room_channel):
+            _demote_owner_execute(room_channel,member_to_remove)
+
     #run checks on removing
     remove_from_room_checks(room, member_to_remove, cvm.tx.key_alias)
   
