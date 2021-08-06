@@ -232,17 +232,11 @@ class ChatModel:
         if room.is_deleted:
             raise ContractError(f'Room {room_channel} has been deleted. Cannot demote.')
             #cannot leave zero owners in the room
-        if len(room.owners) == 1 and len(room.members) == 1:
-            raise ContractError(f"Cannot demote {owner}, as {owner} is the only member!")
     
-        if len(room.owners) == 1:
-            members = room.members
-            new_owner = members[0]
-            if new_owner == owner:
-                new_owner = members[1]
-
-            self.promote_to_owner(demoter, room_channel, new_owner)
-
+        #cannot demote yourself
+        if demoter == owner:
+            raise ContractError(f"Cannot demote yourself!")
+    
         room.owners.remove(owner)
         
         return DemoteOwnerEvent(room=room, demoter=demoter, demotee=owner).as_data()

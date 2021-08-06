@@ -430,7 +430,7 @@ def _remove_from_room_execute(room_channel: ChannelName, member_to_remove: KeyAl
     return remove_from_room_event
 
 #runs checks to see if the caller has the correct permissions to invite the 
-#a new member to a room, returns '' if there are no issues
+#a new member to a room, throws cvm error if there are issues
 @helper
 def remove_from_room_checks(room: Room, member_to_remove: KeyAlias, caller: KeyAlias) -> None:
     #check if caller is an owner and has perms to remove 
@@ -547,7 +547,7 @@ def _promote_to_owner(room_channel: ChannelName, member: KeyAlias) -> None:
 @executable
 def _promote_to_owner_execute(room_channel: ChannelName, member: KeyAlias) -> PromoteToOwnerEvent:
     room = _get_room(room_channel)
-    
+
     #run the checks, and error out if there is an issue
     #this is performed on both the executable and clientside sides
     #because a malicious KA and Node Administrator could directly run
@@ -601,21 +601,6 @@ def _demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
 
     #run demote checks
     demote_owner_checks(owner, cvm.tx.key_alias, room)
-    
-    #if there's only one owner left when you attempt to demote an owner
-    #promote the next member (that is not a current owner) to owner
-    #an error will be thrown before this function runs if there is only
-    #one member, so we can be sure there are at least two members at
-    #this point
-    if len(room.owners) == 1:
-        members : List[KeyAlias] = room.members
-        new_owner : str = str(members[0])
-        owner_str : str = owner
-        if owner_str == new_owner:
-            new_owner = str(members[1])
-        
-        oka: KeyAlias = KeyAlias(new_owner)
-        _promote_to_owner(room_channel, oka)
 
     #This will remove the 'owner' from the secure channel
     cvm.remove_owner(room_channel, owner)
@@ -673,9 +658,11 @@ def demote_owner_checks(owner: KeyAlias, caller: KeyAlias, room: Room) -> None:
         room_channel_str : str = room_channel
         cvm.error(f'Room {room_channel_str} has been deleted. Cannot demote.')
 
-    #cannot leave zero owners in the room
-    if len(room.owners) == 1 and len(room.members) == 1:
-        cvm.error(f"Cannot demote {owner}, as {owner} is the only member!")
+    #cannot demote yourself
+    caller_str : str = caller
+    owner_str : str = owner
+    if caller_str == owner_str:
+        cvm.error(f"Cannot demote yourself!")
 
 def _str_eq(str1 : str, str2: str) -> bool:
     return str1 == str2
