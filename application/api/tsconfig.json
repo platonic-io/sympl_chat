@@ -16,6 +16,9 @@
       "types": [
         "node"
       ],
+      "typeRoots": [
+        "./@assembly/contract.d.ts"
+      ],
       "lib": [
         "esnext",
         "dom",
