@@ -1,3 +1,4 @@
 node_modules/
 network_config.json
 @assembly/*
+users.json
