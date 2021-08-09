@@ -1,0 +1,38 @@
+module.exports = {
+    root: true,
+    parser: '@typescript-eslint/parser',
+    extends: [
+      'plugin:@typescript-eslint/recommended',
+      'plugin:prettier/recommended',
+    ],
+    settings: {},
+    "globals": {
+      "Promise": true,
+      "console": true,
+    },
+    plugins: ['prettier'],
+    env: {
+      browser: false,
+      es6: true,
+    },
+    rules: {
+      'no-console': 'off',
+      'no-debugger': 'error',
+      'no-alert': 'error',
+      indent: ['error', 2, { SwitchCase: 1 }],
+      quotes: ['error', 'single'],
+      'comma-dangle': ['error', 'always-multiline'],
+      'no-param-reassign': 'error',
+      'prettier/prettier': 'error',
+      'prefer-rest-params': 0,
+      '@typescript-eslint/no-explicit-any': 0,
+      '@typescript-eslint/ban-ts-comment': 0,
+      '@typescript-eslint/explicit-function-return-type': 0,
+      '@typescript-eslint/no-var-requires': 0,
+      '@typescript-eslint/no-namespace': 0,
+      '@typescript-eslint/no-use-before-define': 0,
+      '@typescript-eslint/no-empty-interface': 0,
+      '@typescript-eslint/no-empty-function': 1,
+      '@typescript-eslint/no-unused-vars': 1,
+    },
+  };
