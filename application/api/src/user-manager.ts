@@ -1,6 +1,7 @@
 import { create } from 'domain';
 import * as fs from 'fs';
 import Koa, { Context, Request } from 'koa';
+import { mainModule } from 'process';
 import {networkClient, chat} from './assembly-wrapper';
 
 const users_db_location = 'users.json'
@@ -66,11 +67,26 @@ export const create_user = async function create_user(user: string, ip: string) 
  * @returns string
  */
 export const get_user_ka = async function get_user_ka(user:string) : Promise<string> {
-    let user_db = JSON.parse(fs.readFileSync(users_db_location, 'utf-8'))
+    let user_db = JSON.parse(fs.readFileSync(users_db_location, 'utf-8'));
     if(!user_db[user]) {
         throw new Error("User does not exist!");
     }
     return user_db[user]["ka"];
+}
+
+/**
+ * this function will return a username associated with a key alias
+ * @param ka key alias
+ * @returns username string
+ */
+export const get_user_from_ka = async function get_user_from_ka(ka:string) : Promise<string> {
+    let user_db = JSON.parse(fs.readFileSync(users_db_location, 'utf-8'));
+    for(let user in user_db) {
+        if(ka === user_db[user]["ka"]) {
+            return user;
+        }
+    }
+    throw new Error("KA not associated with a user!")
 }
 
 /**
@@ -80,3 +96,8 @@ export const get_user_ka = async function get_user_ka(user:string) : Promise<str
 export const list_users = async function list_users() : Promise<string[]> {
     return Object.keys(JSON.parse(fs.readFileSync(users_db_location, 'utf-8')))
 }
+
+async function main() {
+await get_user_from_ka(await get_user_ka("bob"));
+}
+main();
