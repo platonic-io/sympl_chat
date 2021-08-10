@@ -1,6 +1,6 @@
 import { create } from 'domain';
 import * as fs from 'fs';
-import Koa, { Context } from 'koa';
+import Koa, { Context, Request } from 'koa';
 import {networkClient, chat} from './assembly-wrapper';
 
 const users_db_location = 'users.json'
@@ -20,6 +20,9 @@ export const auth_middleware = async (ctx: Context, next: any) => {
     if(false) {
         ctx.redirect('/login');
     }
+    try {
+        ctx.state.user = await get_user_ka(ctx.get('username'))
+    } catch {}
     return next();
 }
 
