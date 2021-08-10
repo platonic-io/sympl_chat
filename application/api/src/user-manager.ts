@@ -1,5 +1,6 @@
 import { create } from 'domain';
 import * as fs from 'fs';
+import Koa, { Context } from 'koa';
 import {networkClient, chat} from './assembly-wrapper';
 
 const users_db_location = 'users.json'
@@ -12,6 +13,14 @@ if (!fs.existsSync(users_db_location)) {
     } catch {
         fs.writeFileSync(users_db_location, "{}")
     }
+}
+
+//auth middleware
+export const auth_middleware = async (ctx: Context, next: any) => {
+    if(false) {
+        ctx.redirect('/login');
+    }
+    return next();
 }
 
 /**
