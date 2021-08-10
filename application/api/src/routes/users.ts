@@ -8,7 +8,12 @@ export const getUsers = async function getUsers(ctx: Context) {
 
 export const createUser = async function createUser(ctx: Context) {
     if(ctx.request.query.username) {   
-        um.create_user(ctx.request.query.username, ctx.request.ip);
+        try {
+            um.create_user(ctx.request.query.username, ctx.request.ip);
+            ctx.body = ctx.request.query.username;
+        } catch (e) {
+            throw e;
+        }
     } else {
         throw new Error('No Username Supplied!');
    }
