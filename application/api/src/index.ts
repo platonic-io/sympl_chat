@@ -5,8 +5,11 @@ import Koa, {Context} from 'koa';
 import Router from 'koa-router';
 import mount from 'koa-mount';
 
+import {auth_middleware} from './user-manager'
+
 //routes
 import * as users from './routes/users';
+import { user_is_authorized } from './user-manager';
 
 try {    
     var CONFIG = JSON.parse(fs.readFileSync('network_config.json', 'utf-8'));
@@ -19,6 +22,7 @@ const networkClient = contracts["ContractsClientFactory"].getInstance(CONFIG ? C
 const nodeClient = networkClient.nodeClients[0];
 const chat : Chat = new contracts["Chat"](networkClient);
 
+//overall koa app
 const app : Koa = new Koa();
 
 const api : Koa = new Koa();
@@ -27,9 +31,12 @@ const api_router : Router = new Router();
 api_router.get("/get_users", users.getUsers);
 api_router.post("/create_user", users.createUser);
 
-api.use(api_router.middleware())
+api.use(api_router.middleware());
 
-app.use(mount('/api', api))
+//Middleware Flow
+
+app.use(auth_middleware);
+app.use(mount('/api', api));
 
 app.listen(8080);   
 
