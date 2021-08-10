@@ -1,11 +1,16 @@
 import Handlebars, { template } from 'handlebars';
 import { chat } from '../assembly-wrapper';
+import Koa from 'koa';
 import * as fs from 'fs';
 
 //register a helper to convert the js function names from
 //camelCase to lowercase and underscore
 Handlebars.registerHelper('underscore', (item : string) => {
     return item.toString().replace( /([A-Z])/g, "_$1").toLowerCase()
+})
+
+Handlebars.registerHelper('person', (item : string) => {
+    return item.toString().includes("member") || item.toString().includes("owner")
 })
 
 //generate the Handlebars template
@@ -46,6 +51,6 @@ for(let i in chat_function_names) {
 const template_chat_routes :string = assembly_routes(function_meta)
 fs.writeFileSync(`${__dirname}/generated_chat.ts`, template_chat_routes);
 
-//import from the newly created file and export the module
+//import from the newly created file and export the modules
 import { assembly_api } from './generated_chat';
-export const chat_routes = assembly_api;
+export const chat_routes : Koa = assembly_api;

@@ -32,7 +32,6 @@ api_router.get("/get_users", users.getUsers);
 api_router.post("/create_user", users.createUser);
 
 api.use(api_router.middleware());
-console.log(chat_routes)
 api.use(mount('/', chat_routes));
 
 //Middleware Flow
