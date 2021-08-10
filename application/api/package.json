@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^16.4.13",
+    "handlebars": "^4.7.7",
     "koa": "^2.13.1",
     "koa-mount": "^4.0.0",
     "koa-router": "^10.0.0",

@@ -5,11 +5,11 @@ import Koa, {Context} from 'koa';
 import Router from 'koa-router';
 import mount from 'koa-mount';
 
-import {auth_middleware} from './user-manager'
+import { auth_middleware } from './user-manager'
 
 //routes
 import * as users from './routes/users';
-import { user_is_authorized } from './user-manager';
+import { chat_routes } from './routes/chat';
 
 try {    
     var CONFIG = JSON.parse(fs.readFileSync('network_config.json', 'utf-8'));
@@ -32,14 +32,14 @@ api_router.get("/get_users", users.getUsers);
 api_router.post("/create_user", users.createUser);
 
 api.use(api_router.middleware());
+console.log(chat_routes)
+api.use(mount('/', chat_routes));
 
 //Middleware Flow
+app.use(auth_middleware);     //check if user is authenticated then redirect
+app.use(mount('/api', api));  
 
-
-app.use(auth_middleware);
-app.use(mount('/api', api));
-
-app.listen(8080);   
+app.listen(8081);   
 
 
 async function main() {
