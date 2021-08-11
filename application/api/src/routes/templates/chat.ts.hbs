@@ -1,0 +1,16 @@
+import { chat } from '../../assembly-wrapper';
+import {Context} from 'koa';
+import Router from 'koa-router';
+import * as um from '../../user-manager';
+
+const assemblyRouter : Router = new Router();
+{{#each contracts}}{{#with this}}
+{{#each functions}}
+assemblyRouter.post('/{{this.name}}', async (ctx: Context) => {
+    ctx.body = await chat.{{#camelcase this.name}}{{/camelcase}}(ctx.state.user{{#each this.parameters}}, 
+        ctx.state.{{this.name}}{{/each}}
+    );
+})
+{{/each}}{{/with}}{{/each}}
+
+export const assembly_router : Router = assemblyRouter;
