@@ -1,9 +1,28 @@
 import { chat } from '../../assembly-wrapper';
 import {Context} from 'koa';
 import Router from 'koa-router';
-import * as um from '../../user-manager';
 
 const assemblyRouter : Router = new Router();
+{{! 
+This file is a handlebarjs template file. You can generate the js file
+by running `sym generate -i /path/to/input/dir -o /path/to/output/dir
+
+The data which gets passed to this template can be seen by running:
+sym generate --raw
+
+The template logic here goes through each of the contracts (there's 
+only one for this application), then loops through each function,
+then substitues the names and parameters of the contract function
+into the templated javascript
+
+#camelcase is a helper function provided by sym generate which converts the
+function_name format from assembly to the camel case functionName format that's
+used in the assembly client js library (generated from just running sym generate
+with no parameters)
+
+the prerequisite to have sym generate work is to have a network running, with
+the desired contract published to it
+}}
 {{#each contracts}}{{#with this}}
 {{#each functions}}
 assemblyRouter.post('/{{this.name}}', async (ctx: Context) => {
