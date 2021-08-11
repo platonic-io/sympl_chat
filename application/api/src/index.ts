@@ -56,5 +56,4 @@ app.use(mount('/', ui));
 
 server_instance.listen(8081);
 
-
 fs.writeFileSync(`${__dirname}/static/primus.js`, primus.library())
