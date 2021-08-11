@@ -96,6 +96,15 @@ export const list_users = async function list_users() : Promise<string[]> {
     return Object.keys(JSON.parse(fs.readFileSync(users_db_location, 'utf-8')))
 }
 
+/**
+ * checks if a string is key alias format
+ * @param ka key alias
+ * @returns boolean
+ */
+export const is_key_alias = async function is_key_alias(ka: string) : Promise<boolean> {
+    return Boolean(ka.match(/KA-[0-9]{16}/g))
+}
+
 async function main() {
 await get_user_from_ka(await get_ka_from_user("bob"));
 }

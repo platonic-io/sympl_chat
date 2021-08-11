@@ -1,7 +1,6 @@
 import { chat } from '../../assembly-wrapper';
 import {Context} from 'koa';
 import Router from 'koa-router';
-import * as um from '../../user-manager';
 
 const assemblyRouter : Router = new Router();
 

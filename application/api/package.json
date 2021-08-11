@@ -6,9 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node src/index.ts",
-    "build": "ts-node src/routes/chat.ts",
-    "install-mock-network": "./script.sh",
-    "remove-generated": "rm $(npm root)/../users.json && rm $(npm root)/../src/routes/generated_chat.ts"
+    "remove-generated": "rm $(npm root)/../users.json && rm $(npm root)/../src/routes/generated/chat.ts"
   },
   "author": "",
   "license": "ISC",
