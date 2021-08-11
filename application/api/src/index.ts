@@ -31,8 +31,8 @@ const api_router : Router = new Router();
 api_router.get("/get_users", users.getUsers);
 api_router.post("/create_user", users.createUser);
 
-api.use(api_router.middleware());
-api.use(mount('/', chat_routes));
+api.use(mount('/local', api_router.middleware()));
+api.use(mount('/assembly', chat_routes));
 
 //Middleware Flow
 app.use(auth_middleware);     //check if user is authenticated then redirect

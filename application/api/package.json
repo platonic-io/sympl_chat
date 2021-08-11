@@ -6,15 +6,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node src/index.ts",
-    "build" : "ts-node src/routes/chat.ts",
+    "build": "ts-node src/routes/chat.ts",
     "install-mock-network": "./script.sh",
-    "remove-generated" : "rm $(npm root)/../users.json && rm $(npm root)/../src/routes/generated_chat.ts"
+    "remove-generated": "rm $(npm root)/../users.json && rm $(npm root)/../src/routes/generated_chat.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/node": "^16.4.13",
-    "handlebars": "^4.7.7",
     "koa": "^2.13.1",
     "koa-mount": "^4.0.0",
     "koa-router": "^10.0.0",

@@ -1,10 +1,9 @@
 import { create } from 'domain';
 import * as fs from 'fs';
 import Koa, { Context, Request } from 'koa';
-import { mainModule } from 'process';
 import {networkClient, chat} from './assembly-wrapper';
 
-const users_db_location = 'users.json'
+const users_db_location = `${__dirname}/../users.json`
 
 if (!fs.existsSync(users_db_location)) {
     fs.writeFileSync(users_db_location, "{}")
@@ -22,7 +21,7 @@ export const auth_middleware = async (ctx: Context, next: any) => {
         ctx.redirect('/login');
     }
     try {
-        ctx.state.user = await get_user_ka(ctx.get('username'))
+        ctx.state.user = await get_ka_from_user(ctx.get('username'))
     } catch {}
     return next();
 }
@@ -66,7 +65,7 @@ export const create_user = async function create_user(user: string, ip: string) 
  * @param user 
  * @returns string
  */
-export const get_user_ka = async function get_user_ka(user:string) : Promise<string> {
+export const get_ka_from_user = async function get_user_ka(user:string) : Promise<string> {
     let user_db = JSON.parse(fs.readFileSync(users_db_location, 'utf-8'));
     if(!user_db[user]) {
         throw new Error("User does not exist!");
@@ -98,6 +97,6 @@ export const list_users = async function list_users() : Promise<string[]> {
 }
 
 async function main() {
-await get_user_from_ka(await get_user_ka("bob"));
+await get_user_from_ka(await get_ka_from_user("bob"));
 }
 main();
