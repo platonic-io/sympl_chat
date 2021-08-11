@@ -5,7 +5,7 @@ import * as um from '../user-manager';
 const assembly : Koa = new Koa();
 
 assembly.use(async (ctx:Context, next: any) => {
-    //this middleware swaps supplied 'usernames' for the associated key alias
+    //swaps supplied 'usernames' for the associated key alias
     //from the users.json file
     for(let key in JSON.parse((JSON.stringify(ctx.request.query)))) {
         ctx.state[key] = key.includes("owner") || key.includes("member") ? await um.get_ka_from_user(ctx.request.query[key]) : ctx.request.query[key];
@@ -14,7 +14,7 @@ assembly.use(async (ctx:Context, next: any) => {
 })
 
 assembly.use(async (ctx:Context, next: any) => {
-    //this middleware replaces all 'key_aliases' from the return event in assembly
+    //replaces all 'key_aliases' from the return event in assembly
     //with the corresponding username stored in the users.json file. It uses
     //a regex to recognize the key aliases and then replaces them
     await next();
