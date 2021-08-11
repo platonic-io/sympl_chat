@@ -6,7 +6,6 @@ export const create_primus = (server) : Primus => {
     })
     
     primus.on('connection', function(spark) {
-        console.log('hi')
         spark.write('hi')
     })
 

@@ -11,12 +11,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/koa-static": "^4.0.2",
     "@types/node": "^16.4.13",
     "@types/primus": "^7.3.5",
     "@types/ws": "^7.4.7",
     "koa": "^2.13.1",
     "koa-mount": "^4.0.0",
     "koa-router": "^10.0.0",
+    "koa-static": "^5.0.0",
     "primus": "^8.0.5",
     "tslib": "^2.3.0",
     "ws": "^8.0.0"
