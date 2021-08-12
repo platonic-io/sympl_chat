@@ -236,10 +236,12 @@ def _create_room(room_name: str) -> None:
     _guard_input("Room name", room_name)
     room_channel = cvm.new_channel('RID')
     with PostTxArgs(room_channel):
-        _create_room_execute(room_name, room_channel)
+        _create_room_execute(room_name)
 
 @executable
-def _create_room_execute(room_name: str, room_channel: ChannelName) -> CreateRoomEvent:
+def _create_room_execute(room_name: str) -> CreateRoomEvent:
+    room_channel : ChannelName = cvm.tx.write_channel
+
     _guard_input("Room name", room_name)
     room = cvm.storage.get(room_channel, RoomStatic, Identifier('room'))
     #check if the room exists already. The storage query will return None if the room doesn't exist
@@ -261,10 +263,13 @@ def _delete_room(room_channel: ChannelName) -> None:
     delete_room_checks(room_channel)
 
     with PostTxArgs(room_channel):
-        _delete_room_execute(room_channel)
+        _delete_room_execute()
 
 @executable
-def _delete_room_execute(room_channel: ChannelName) -> DeleteRoomEvent:
+def _delete_room_execute() -> DeleteRoomEvent:
+    #get the room channel
+    room_channel : ChannelName = cvm.tx.write_channel
+
     room = _get_room(room_channel)
 
     #run the checks on delete room
@@ -301,10 +306,13 @@ def _restore_room(room_channel: ChannelName) -> None:
     restore_room_checks(room_channel)
 
     with PostTxArgs(room_channel):
-        _restore_room_execute(room_channel)
+        _restore_room_execute()
 
 @executable
-def _restore_room_execute(room_channel: ChannelName) -> RestoreRoomEvent:
+def _restore_room_execute() -> RestoreRoomEvent:
+    #get the room channel
+    room_channel : ChannelName = cvm.tx.write_channel
+
     room = _get_room(room_channel)
     members = room.members
 
@@ -343,10 +351,13 @@ def _invite_to_room(room_channel: ChannelName, new_member: KeyAlias) -> None:
 
     cvm.send_key(room_channel, new_member)
     with PostTxArgs(room_channel):
-        _invite_to_room_execute(room_channel, new_member)
+        _invite_to_room_execute(new_member)
 
 @executable
-def _invite_to_room_execute(room_channel: ChannelName, new_member: KeyAlias) -> InviteToRoomEvent:
+def _invite_to_room_execute(new_member: KeyAlias) -> InviteToRoomEvent:
+    #get the room channel
+    room_channel : ChannelName = cvm.tx.write_channel
+    
     room = _get_room(room_channel)
     members = room.members
 
@@ -393,7 +404,7 @@ def _remove_from_room(room_channel: ChannelName, member_to_remove: KeyAlias) -> 
        _demote_owner(room_channel,member_to_remove)
 
     with PostTxArgs(room_channel):
-        _remove_from_room_execute(room_channel, member_to_remove)
+        _remove_from_room_execute(member_to_remove)
 
     #rotate the keys so that all members of the chatroom will be able to 
     #read future messages, and the member we are removing will not be able to 
@@ -405,14 +416,17 @@ def _remove_from_room(room_channel: ChannelName, member_to_remove: KeyAlias) -> 
             cvm.send_key(room_channel, member)
 
 @executable
-def _remove_from_room_execute(room_channel: ChannelName, member_to_remove: KeyAlias) -> RemoveFromRoomEvent:
+def _remove_from_room_execute(member_to_remove: KeyAlias) -> RemoveFromRoomEvent:
+    #get the room channel
+    room_channel : ChannelName = cvm.tx.write_channel
+    
     room = _get_room(room_channel)
     members = room.members
 
     #check to ensure owner member is not an owner, demote him if possible
     if std.contains_using(room.owners, member_to_remove, _str_eq):
         with PostTxArgs(room_channel):
-            _demote_owner_execute(room_channel,member_to_remove)
+            _demote_owner_execute(member_to_remove)
 
     #run checks on removing
     remove_from_room_checks(room, member_to_remove, cvm.tx.key_alias)
@@ -462,10 +476,13 @@ def _send_message(room_channel: ChannelName, message: str) -> None:
     send_message_checks(room_channel, message)
 
     with PostTxArgs(room_channel):
-        _send_message_execute(room_channel, message)
+        _send_message_execute(message)
 
 @executable
-def _send_message_execute(room_channel: ChannelName, message: str) -> SendMessageEvent:
+def _send_message_execute(message: str) -> SendMessageEvent:
+    #get the room channel
+    room_channel : ChannelName = cvm.tx.write_channel
+
     room = _get_room(room_channel)
 
     #run checks on sending the message
@@ -542,10 +559,13 @@ def _promote_to_owner(room_channel: ChannelName, member: KeyAlias) -> None:
     #to have access the the channel with which you
     #are attempting to write
     with PostTxArgs(room_channel):
-        _promote_to_owner_execute(room_channel, member)
+        _promote_to_owner_execute(member)
 
 @executable
-def _promote_to_owner_execute(room_channel: ChannelName, member: KeyAlias) -> PromoteToOwnerEvent:
+def _promote_to_owner_execute(member: KeyAlias) -> PromoteToOwnerEvent:
+    #get the room channel
+    room_channel : ChannelName = cvm.tx.write_channel
+
     room = _get_room(room_channel)
 
     #run the checks, and error out if there is an issue
@@ -609,10 +629,13 @@ def _demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
     #to have access the the channel with which you
     #are attempting to write
     with PostTxArgs(room_channel):
-        _demote_owner_execute(room_channel, owner)
+        _demote_owner_execute(owner)
 
 @executable
-def _demote_owner_execute(room_channel: ChannelName, owner: KeyAlias) -> DemoteOwnerEvent:
+def _demote_owner_execute(owner: KeyAlias) -> DemoteOwnerEvent:
+    #get the room channel
+    room_channel : ChannelName = cvm.tx.write_channel
+    
     room = _get_room(room_channel)
 
     demote_owner_checks(owner, cvm.tx.key_alias, room)
