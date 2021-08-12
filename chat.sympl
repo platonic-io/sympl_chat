@@ -380,6 +380,7 @@ def invite_to_room_checks(room: Room, new_member: KeyAlias) -> None:
     if room.is_deleted:
         cvm.error(f"{room.channel} is deleted.")
 
+@clientside_helper
 def _remove_from_room(room_channel: ChannelName, member_to_remove: KeyAlias) -> None:
     room = _get_room(room_channel)
     #run checks on removing
