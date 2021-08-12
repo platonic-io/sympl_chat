@@ -104,8 +104,8 @@ class TestChatCoverage():
         chat_8('alice').create_room(room_name='room_2')
         rooms = chat_8('alice').get_rooms()
         utils.scrub_channels(rooms)
-        assert rooms == [{'name': 'room_1', 'is_deleted': False, 'members': [store['alice']]},
-                         {'name': 'room_2', 'is_deleted': False, 'members': [store['alice']]}]
+        assert rooms == [{'name': 'room_1', 'is_deleted': False, 'members': [store['alice']], 'owners':[store['alice']]},
+                         {'name': 'room_2', 'is_deleted': False, 'members': [store['alice']], 'owners':[store['alice']]}]
 
     def test_get_rooms_sorted_by_name(self, store, chat_8):
         chat_8('alice').create_room(room_name='room_0')
