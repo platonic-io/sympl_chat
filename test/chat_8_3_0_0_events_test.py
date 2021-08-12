@@ -47,16 +47,3 @@ class TestChatCoverage():
         room = chat_8('alice').create_room(room_name=ROOM_NAME)['room']['channel']
         chat_8('alice').send_message(room_channel=room, message="message")
         assert _is_room_event_present(network.events(), ROOM_NAME, 'SendMessageEvent')
-
-    def test_promote_owner(self, chat_8, network, store):
-        room = chat_8('alice').create_room(room_name=ROOM_NAME)['room']['channel']
-        chat_8('alice').invite_to_room(room_channel=room, new_member=store['bob'])
-        chat_8('alice').promote_to_owner(room_channel=room, member=store['bob'])
-        assert _is_room_event_present(network.events(), ROOM_NAME, 'PromoteToOwnerEvent')
-    
-    def test_demote_owner(self, chat_8, network, store):
-        room = chat_8('alice').create_room(room_name=ROOM_NAME)['room']['channel']
-        chat_8('alice').invite_to_room(room_channel=room, new_member=store['bob'])
-        chat_8('alice').promote_to_owner(room_channel=room, member=store['bob'])
-        chat_8('alice').demote_owner(room_channel=room, member=store['bob'])
-        assert _is_room_event_present(network.events(), ROOM_NAME, 'DemoteOwnerEvent')
