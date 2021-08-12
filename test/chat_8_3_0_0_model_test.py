@@ -39,14 +39,6 @@ class TestRegTests:
         room = state.create_room(creator=u1, room_name='room_name')
         state.restore_room(room, restorer=u1)
 
-    def test_restore_non_owner_deleted_room(self, state):
-        u1 = state.key_alias()
-        u2 = state.key_alias()
-        room = state.create_room(creator=u1, room_name="rm1")
-        state.invite_to_room(inviter=u1, room_channel=room, invitee=u2)
-        state.delete_room(deleter=u1, room_channel=room)
-        state.restore_room(restorer=u2, room_channel=room)
-
     def test_delete_deleted_room(self, state):
         u1 = state.key_alias()
         room = state.create_room(creator=u1, room_name='room_name')
@@ -57,13 +49,6 @@ class TestRegTests:
         creator = state.key_alias()
         room = state.create_room(creator=creator, room_name='room_name')
         state.delete_room(deleter=creator, room_channel=room)
-
-    def test_delete_non_owner_delete_room(self, state):
-        u1 = state.key_alias()
-        u2 = state.key_alias()
-        room = state.create_room(creator=u1, room_name="rm1")
-        state.invite_to_room(inviter=u1, room_channel=room, invitee=u2)
-        state.delete_room(deleter=u2, room_channel=room)
 
     def test_get_messages_from_new_room(self, state):
         creator = state.key_alias()
@@ -86,14 +71,6 @@ class TestRegTests:
         creator = state.key_alias()
         room = state.create_room(creator=creator, room_name='room_name')
         state.remove_from_room(removee=non_member, remover=creator, room_channel=room)
-
-    def test_remove_owner(self, state):
-        u1 = state.key_alias()
-        u2 = state.key_alias()
-        room = state.create_room(creator=u1, room_name="rm1")
-        state.invite_to_room(inviter=u1, invitee=u2, room_channel=room)
-        state.promote_to_owner(promoter=u1, promotee=u2, room_channel=room)
-        state.remove_from_room(remover=u2, removee=u1, room_channel=room)
 
     def test_send_message_as_non_member(self, state):
         sender = state.key_alias()
@@ -119,14 +96,6 @@ class TestRegTests:
         invitee = state.key_alias()
         state.invite_to_room(invitee=invitee, inviter=inviter, room_channel=room)
 
-    def test_invite_non_owner(self, state):
-        inviter = state.key_alias()
-        room = state.create_room(creator=inviter, room_name='room_name')
-        invitee = state.key_alias()
-        state.invite_to_room(invitee=invitee, inviter=inviter, room_channel=room)
-        third = state.key_alias()
-        state.invite_to_room(invitee=third, inviter=invitee, room_channel=room)
-
     def test_invite_user_who_then_deletes_room(self, state):
         deleter = state.key_alias()
         creator = state.key_alias()
@@ -147,14 +116,6 @@ class TestRegTests:
         u2 = state.key_alias()
         state.invite_to_room(invitee=u2, inviter=u1, room_channel=room)
         state.remove_from_room(removee=u1, remover=u2, room_channel=room)
-
-    def test_invite_as_non_owner(self, state):
-        u1 = state.key_alias()
-        u2 = state.key_alias()
-        u3 = state.key_alias()
-        room = state.create_room(creator = u1, room_name='rm1')
-        state.invite_to_room(inviter=u1, invitee=u2, room_channel=room)
-        state.invite_to_room(inviter=u2, invitee=u3, room_channel=room)
 
     def test_create_room_with_empty_name(self, state):
         creator = state.key_alias()
@@ -186,13 +147,6 @@ class TestRegTests:
         room = state.create_room(creator=u1, room_name='0')
         state.delete_room(deleter=u1, room_channel=room)
 
-    def test_create_and_non_owner_delete_room(self, state):
-        u1 = state.key_alias()
-        u2 = state.key_alias()
-        room = state.create_room(creator=u1, room_name='0')
-        state.invite_to_room(inviter=u1, invitee=u2, room_channel=room)
-        state.delete_room(deleter=u2, room_channel=room)
-
     def test_send_message(self, state):
         u1 = state.key_alias()
         room = state.create_room(creator=u1, room_name='0')
@@ -204,86 +158,6 @@ class TestRegTests:
         state.send_message(message='0', room_channel=room, sender=u1)
         state.get_messages(getter=u1, room_channel=room)
 
-    def test_promote_to_owner(self, state):
-        inviter = state.key_alias()
-        room = state.create_room(creator=inviter, room_name='room_name')
-        invitee = state.key_alias()
-        state.invite_to_room(invitee=invitee, inviter=inviter, room_channel=room)
-        state.promote_to_owner(promoter=inviter, promotee=invitee, room_channel=room)
-
-    def test_promote_owner_twice(self, state):
-        inviter = state.key_alias()
-        room = state.create_room(creator=inviter, room_name='room_name')
-        invitee = state.key_alias()
-        state.invite_to_room(invitee=invitee, inviter=inviter, room_channel=room)
-        state.promote_to_owner(promoter=inviter, promotee=invitee, room_channel=room)
-        state.promote_to_owner(promoter=inviter, promotee=invitee, room_channel=room)
-
-    def test_promote_non_member(self, state):
-        u1 = state.key_alias()
-        u2 = state.key_alias()
-        room = state.create_room(creator=u1, room_name="rm1")
-        state.promote_to_owner(promoter=u1, room_channel=room, promotee=u2)
-    
-    def test_promote_deleted_room(self, state):
-        inviter = state.key_alias()
-        room = state.create_room(creator=inviter, room_name='room_name')
-        invitee = state.key_alias()
-        state.invite_to_room(invitee=invitee, inviter=inviter, room_channel=room)
-        state.delete_room(deleter=inviter, room_channel=room)
-        state.promote_to_owner(promoter=inviter, promotee=invitee, room_channel=room)
-
-    def test_promote_non_owner_promote_member(self, state):
-        u = [state.key_alias() for _ in range(3)]
-        room = state.create_room(creator=u[0], room_name="rm1")
-        state.invite_to_room(inviter=u[0], room_channel=room, invitee=u[1])
-        state.invite_to_room(inviter=u[0], room_channel=room, invitee=u[2])
-        state.promote_to_owner(promoter=u[1], room_channel=room, promotee=u[2])
-
-    def test_demote_owner(self, state):
-        inviter = state.key_alias()
-        room = state.create_room(creator=inviter, room_name='room_name')
-        invitee = state.key_alias()
-        state.invite_to_room(invitee=invitee, inviter=inviter, room_channel=room)
-        state.promote_to_owner(promoter=inviter, promotee=invitee, room_channel=room)
-        state.demote_owner(demoter=invitee, demotee=inviter, room_channel=room)
-
-    def test_demote_self_with_members(self, state):
-        u = [state.key_alias() for _ in range(3)]
-        room = state.create_room(creator=u[0], room_name="rm1")
-        state.invite_to_room(inviter=u[0], room_channel=room, invitee=u[1])
-        state.invite_to_room(inviter=u[0], room_channel=room, invitee=u[2])
-        state.demote_owner(demoter=u[0], room_channel=room, demotee=u[0])
-
-    def test_demote_non_owner(self, state):
-        inviter = state.key_alias()
-        room = state.create_room(creator=inviter, room_name='room_name')
-        invitee = state.key_alias()
-        state.invite_to_room(invitee=invitee, inviter=inviter, room_channel=room)
-        state.demote_owner(demoter=inviter, demotee=invitee, room_channel=room)
-    
-    def test_demote_non_owner_demote_owner(self, state):
-        u1 = state.key_alias()
-        u2 = state.key_alias()
-        room = state.create_room(creator= u1, room_name="rm1")
-        state.invite_to_room(inviter=u1, room_channel=room, invitee=u2)
-        state.demote_owner(demoter=u2, room_channel=room, demotee=u2)
-    
-    def test_demote_deleted_room(self, state):
-        u1 = state.key_alias()
-        u2 = state.key_alias()
-        room = state.create_room(creator=u1, room_name="rm1")
-        state.invite_to_room(inviter=u1, room_channel=room, invitee=u2)
-        state.promote_to_owner(promoter=u1, room_channel=room, promotee=u2)
-        state.delete_room(deleter=u1, room_channel=room)
-        state.demote_owner(demoter=u1, room_channel=room, demotee=u2)
-
-    def test_demote_non_member_demote(self, state):
-        u = [state.key_alias() for _ in range(3)]
-        room = state.create_room(creator=u[0], room_name="rm1")
-        state.invite_to_room(inviter=u[0], room_channel=room, invitee=u[1])
-        state.promote_to_owner(promoter=u[0], room_channel=room, promotee=u[1])
-        state.demote_owner(demoter=u[2], room_channel=room, demotee=u[0])
 
 @pytest.mark.usefixtures('network')
 @pytest.mark.proptest

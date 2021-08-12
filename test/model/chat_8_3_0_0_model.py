@@ -1,4 +1,3 @@
-from hashlib import new
 from assembly.lang_8 import ContractError
 
 
@@ -22,7 +21,6 @@ class Room:
         self.creator = creator
         self.messages = []
         self.members = [creator]
-        self.owners = [creator]
         self.is_deleted = False
         self.channel = channel
 
@@ -39,7 +37,7 @@ class Room:
         self.is_deleted = False
 
     def as_data(self):
-        return {'name': self.name, 'is_deleted': self.is_deleted, 'members': self.members, 'owners': self.owners, 'channel': self.channel}
+        return {'name': self.name, 'is_deleted': self.is_deleted, 'members': self.members, 'channel': self.channel}
 
 
 class CreateRoomEvent:
@@ -87,30 +85,13 @@ class RemoveFromRoomEvent:
 
 
 class SendMessageEvent:
-    def __init__(self, room, message_id):
+    def __init__(self, room, message):
         self.room = room
-        self.message_id = message_id
+        self.message = message
 
     def as_data(self):
-        return {'room': self.room.as_data(), 'message_id': self.message_id}
+        return {'room': self.room.as_data(), 'message': self.message.as_data()}
 
-class PromoteToOwnerEvent:
-    def __init__(self, room, promoter, promotee):
-        self.room = room
-        self.promoter = promoter
-        self.promotee = promotee
-
-    def as_data(self):
-        return {'room': self.room.as_data(), 'promoter': self.promoter, 'promotee': self.promotee}
-
-class DemoteOwnerEvent:
-    def __init__(self, room, demoter, demotee):
-        self.room = room
-        self.demoter = demoter
-        self.demotee = demotee
-
-    def as_data(self):
-        return {'room': self.room.as_data(), 'demoter': self.demoter, 'demotee': self.demotee}
 
 class ChatModel:
     def __init__(self):
@@ -140,11 +121,6 @@ class ChatModel:
         room = self._get_room(inviter, room_channel)
         if new_member in room.members:
             raise ContractError("Member {} already in room {}.".format(new_member, room_channel))
-        if inviter not in room.owners:
-            raise ContractError(f"{inviter} is not an owner of the room {room.channel}.")
-        if room.is_deleted:
-            raise ContractError(f"{room.channel} is deleted.")
-
         room.members.append(new_member)
         return InviteToRoomEvent(room, inviter=inviter, invitee=new_member).as_data()
 
@@ -152,37 +128,22 @@ class ChatModel:
         room = self._get_room(remover, room_channel)
         if member_to_remove not in room.members:
             raise ContractError("Member {} not in room {}.".format(member_to_remove, room_channel))
-        if remover not in room.owners:
-            raise ContractError(f"{remover} is not an owner and does not have permission to remove {member_to_remove} from room {room.channel}." )
-        if room.is_deleted:
-            raise ContractError(f"Room {room.channel} is deleted! Operation Denied.")
         if member_to_remove == remover:
             raise ContractError("Cannot remove self from room.")
         room.members.remove(member_to_remove)
-        if member_to_remove in room.owners:
-            room.owners.remove(member_to_remove)
         return RemoveFromRoomEvent(room, remover=remover, removee=member_to_remove).as_data()
 
     def delete_room(self, deleter, room_channel):
         room = self._get_room(deleter, room_channel)
         if room.is_deleted:
             raise ContractError("Room {} already deleted.".format(room_channel))
-        if deleter not in room.members:
-            raise ContractError(f'Member {deleter} does not belong to the room. Operation denied.')
-        if deleter not in room.owners:
-            raise ContractError(f"{deleter} is not an owner and does not have permission to delete the room.")
         room.delete()
         return DeleteRoomEvent(room).as_data()
 
     def restore_room(self, restorer, room_channel):
         room = self._get_room(restorer, room_channel)
- 
         if not room.is_deleted:
-            raise ContractError(f'Room {room_channel} already active.')
-        if restorer not in room.members:
-            raise ContractError(f'Member {restorer} does not belong to the room. Operation denied.')
-        if restorer not in room.owners:
-            raise ContractError(f"{restorer} is not an owner and does not have permission to restore the room.")
+            raise ContractError("Room {} already active.".format(room_channel))
         room.restore()
         return RestoreRoomEvent(room).as_data()
 
@@ -195,7 +156,7 @@ class ChatModel:
         if chr(0) in message:
             raise ContractError("Message cannot contain null byte.")
         room.add_message(message, sender, message_id, message_timestamp)
-        return SendMessageEvent(room, message_id)
+        return SendMessageEvent(room, Message(sender, message, message_id, message_timestamp))
 
     def get_messages(self, getter, room_channel):
         room = self._get_room(getter, room_channel)
@@ -206,37 +167,3 @@ class ChatModel:
     def get_rooms(self, getter):
         rooms = [room.as_data() for room in self.rooms.values() if getter in room.members and not room.is_deleted]
         return sorted(rooms, key=lambda room: (room['name'], room['channel']))
-
-    def promote_to_owner(self, promoter, room_channel, member):
-        room = self._get_room(promoter, room_channel)
-        if member not in room.members:
-            raise ContractError(f"Member {member} is not in room {room_channel}.")
-        if member in room.owners:
-            raise ContractError(f"Member {member} is already an owner of room {room_channel}.")
-        if room.is_deleted:
-            raise ContractError(f'Room {room_channel} has been deleted. Cannot promote.')
-        if promoter not in room.owners:
-            raise ContractError(f'{promoter} is not an owner of the room. Operation denied.')
-
-        room.owners.append(member)
-        return PromoteToOwnerEvent(room=room, promoter=promoter, promotee=member).as_data()
-
-    def demote_owner(self, demoter, room_channel, owner):
-        room = self._get_room(demoter, room_channel)
-        if owner not in room.members:
-            raise ContractError(f'{owner} is not a member of room {room_channel}.')
-        if demoter not in room.owners:
-            raise ContractError(f'{demoter} is not an owner of the room. Operation denied.')
-        if owner not in room.owners:
-            raise ContractError(f"{owner} is not an owner of room {room_channel}. Cannot demote a non-owner.")
-        if room.is_deleted:
-            raise ContractError(f'Room {room_channel} has been deleted. Cannot demote.')
-            #cannot leave zero owners in the room
-    
-        #cannot demote yourself
-        if demoter == owner:
-            raise ContractError(f"Cannot demote yourself!")
-    
-        room.owners.remove(owner)
-        
-        return DemoteOwnerEvent(room=room, demoter=demoter, demotee=owner).as_data()
