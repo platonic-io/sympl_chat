@@ -12,15 +12,6 @@ catch (err) {
     console.log("No network-config.json found, using default connection parameters!")
 }
 
-
 export const networkClient = contracts["ContractsClientFactory"].getInstance(CONFIG ? CONFIG : false)
-
-networkClient.nodeClients[0].on('data', () => console.log("event!"))
-networkClient.nodeClients[0].on('*', () => console.log("event!"))
-networkClient.nodeClients[0].on('error', () => console.log("event!"))
-
-
-
+networkClient.init();
 export const chat : Chat = new contracts["Chat"](networkClient);
-
-

@@ -7,11 +7,12 @@ import { auth_middleware } from './user-manager'
 import http from 'http';
 import * as fs from 'fs';
 import path from 'path';
-
+import {networkClient, chat} from './assembly-wrapper';
+import { initialize_events } from './events-manager';
 //routes
 import * as users from './routes/users';
 import { chat_routes } from './routes/chat';
-import { create_primus } from './primus_wrapper';
+import { create_primus } from './primus-wrapper';
 import serve from 'koa-static';
 
 //overall koa app
@@ -44,7 +45,9 @@ api_router.post("/create_user", users.createUser);
 api.use(api_router.middleware());
 api.use(mount('/', chat_routes)); //routes that go to assembly
 
-var primus : Primus = create_primus(server_instance);
+const primus : Primus = create_primus(server_instance);
+initialize_events(primus);
+
 
 //Middleware Flow
 app.use(auth_middleware);     //check if user is authenticated then redirect
