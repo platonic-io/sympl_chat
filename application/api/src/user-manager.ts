@@ -104,8 +104,3 @@ export const list_users = async function list_users() : Promise<string[]> {
 export const is_key_alias = async function is_key_alias(ka: string) : Promise<boolean> {
     return Boolean(ka.match(/KA-[0-9]{16}/g))
 }
-
-async function main() {
-await get_user_from_ka(await get_ka_from_user("bob"));
-}
-main();

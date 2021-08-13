@@ -1,18 +1,32 @@
 import Koa, {Context} from 'koa';
 import Router from 'koa-router';
 import mount from 'koa-mount';
+import Serve from 'koa-static'
 import Primus from 'primus';
 import { auth_middleware } from './user-manager'
 import http from 'http';
 import * as fs from 'fs';
+import path from 'path';
 
 //routes
 import * as users from './routes/users';
 import { chat_routes } from './routes/chat';
 import { create_primus } from './primus_wrapper';
+import serve from 'koa-static';
 
 //overall koa app
 const app : Koa = new Koa();
+
+//error handling
+app.use(async (ctx: Context, next: any) => {
+    try {
+        await next();
+    } catch(e) {
+        ctx.status = e.status || 500;
+        ctx.body = {"error": {"message":e.message}};
+        console.log(e)
+    }
+})
 
 //create an http server instance to wrap the koa app
 //and for use with Primus
@@ -27,32 +41,17 @@ api_router.get("/get_users", users.getUsers);
 api_router.post("/create_user", users.createUser);
 
 //mount both local assembly routes to api
-api.use(mount('/local', api_router.middleware()));
-api.use(mount('/assembly', chat_routes)); //routes that go to assembly
-
-const ui : Koa = new Koa();
-const ui_router : Router = new Router();
+api.use(api_router.middleware());
+api.use(mount('/', chat_routes)); //routes that go to assembly
 
 var primus : Primus = create_primus(server_instance);
-
-ui_router.get("/", (ctx: Context) => {
-    ctx.body = `
-        <head> </head>
-        <script>
-        ${primus.library()}
-        </script>
-        <script defer>
-        var primus = new Primus('http://localhost:8081/primus', {websockets: true});
-        </script>
-        <body></body>
-    `
-})
-ui.use(ui_router.middleware())
 
 //Middleware Flow
 app.use(auth_middleware);     //check if user is authenticated then redirect
 app.use(mount('/api', api)); 
-app.use(mount('/', ui));
+
+//serve the ui
+app.use(mount('/', serve(path.join(__dirname, "../../ui"))));
 
 server_instance.listen(8081);
 
