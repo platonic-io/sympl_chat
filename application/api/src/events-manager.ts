@@ -3,7 +3,6 @@ import Primus from "primus";
 
 export const initialize_events = (primus : Primus) => {
     networkClient.nodeClients[0].on('*', (e) => {
-        console.log(e);
         if(e.type.includes("Event")) {
             primus.write({
                 "event": e.type,
@@ -13,6 +12,6 @@ export const initialize_events = (primus : Primus) => {
     })
 
     primus.on('connection', (spark) => {
-        console.log(spark)
+    
     })
 }
