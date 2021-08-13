@@ -29,14 +29,16 @@ assembly.use(async (ctx:Context, next: any) => {
     //a regex to recognize the key aliases and then replaces them
     await next();
     let body_temp = JSON.stringify(ctx.body);
-    let key_alias_regex = /KA-[0-9]{16}/g
-    let kas = [...body_temp.matchAll(key_alias_regex)];
+    if(body_temp !== undefined) {
+        let key_alias_regex = /KA-[0-9]{16}/g
+        let kas = [...body_temp.matchAll(key_alias_regex)];
 
-    for(let i = 0; i < kas.length; i++ ) {
-        let username = (await um.get_user_from_ka(kas[i][0])).replaceAll('"', '\\"');
-        body_temp = body_temp.replaceAll(kas[i][0], username);
+        for(let i = 0; i < kas.length; i++ ) {
+            let username = (await um.get_user_from_ka(kas[i][0])).replaceAll('"', '\\"');
+            body_temp = body_temp.replaceAll(kas[i][0], username);
+        }
+        ctx.body = JSON.parse(body_temp);
     }
-    ctx.body = JSON.parse(body_temp);
 })
 
 //the routes middleware for the assembly functions
