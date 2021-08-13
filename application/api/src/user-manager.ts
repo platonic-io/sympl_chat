@@ -4,6 +4,7 @@ import Koa, { Context, Request } from 'koa';
 import {networkClient, chat} from './assembly-wrapper';
 
 const users_db_location = `${__dirname}/../users.json`
+const api_header = '/api'
 
 if (!fs.existsSync(users_db_location)) {
     fs.writeFileSync(users_db_location, "{}")
@@ -17,12 +18,19 @@ if (!fs.existsSync(users_db_location)) {
 
 //auth middleware
 export const auth_middleware = async (ctx: Context, next: any) => {
-    if(false) {
-        ctx.redirect('/login');
-    }
     try {
-        ctx.state.user = await get_ka_from_user(ctx.get('username'))
-    } catch {}
+        ctx.state.user = await get_ka_from_user(ctx.get('username'));
+    } catch {
+
+    }
+
+    //if the user is unauthorized is an api but not create_user/
+    if((!await user_is_authorized(ctx.get("username"), ctx.ip) && (ctx.url.startsWith(api_header))) && !ctx.url.includes("create_user"))  {
+        ctx.body = {
+            "error" : {"message" : "Unauthorized Request!"}
+        }
+        return;
+    }
     return next();
 }
 
@@ -38,7 +46,7 @@ export const user_is_authorized = async function user_is_authorized(user: string
     if(user_db[user]) {
         return user_db[user]["ip"] == ip;
     }
-    return true;
+    return false;
 }
 
 /**
