@@ -5,7 +5,6 @@ function init() {
     room_channel = window.location.hash.substr(1);
     //initialize the list of rooms
     call_api("POST", "get_rooms").then(rooms=> {
-        console.log(rooms)
         for(let room of rooms) {
             add_room(room);
         }
@@ -16,6 +15,11 @@ function init() {
 
     //events 
     document.querySelector("#btn-send-message").addEventListener('click', send_message)
+    document.querySelector("#inp-send-message").addEventListener('keypress', (e) => {
+        if(e.keyCode == 13) {
+            send_message(e);
+        }
+    })
 }
 
 function send_message(e) {
@@ -36,10 +40,15 @@ function add_room(room) {
     document.querySelector("#room-items").appendChild(li);
 } 
 
-function add_message(message) {
-    let msg_dom = document.createElement("p");
-    msg_dom.innerHTML = `${message.sender}: ${message.body}`;
-    document.querySelector("#messages").appendChild(msg_dom)
+function add_message(message, channel) {
+    if(channel === room_channel) {
+        let msg_dom = document.createElement("p");
+        msg_dom.innerHTML = `${message.sender}: ${message.body}`;
+        msg_dom.id = message.message_id
+        document.querySelector("#messages").appendChild(msg_dom)
+        let msg_list_dom = document.querySelector("#message-list-container")
+        msg_list_dom.scrollTo(0, msg_list_dom.clientHeight);
+    }
 }
 
 function load_messages() {
@@ -47,7 +56,7 @@ function load_messages() {
         document.querySelector("#messages").innerHTML = "";
         call_api("POST", "get_messages", { "room_channel" : room_channel} ).then( messages => {
             for(let message of messages) {
-                add_message(message);
+                add_message(message, room_channel);
             }
         })
     }       

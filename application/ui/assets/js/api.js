@@ -28,7 +28,6 @@ async function call_api(method, api_method, parameters={}, headers={}, data="") 
         body: data
     }).then((res) => {
         let result = res.json()
-        console.log(result)
         return result;
     })
 }

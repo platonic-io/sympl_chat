@@ -20,5 +20,32 @@ html, body {
 
 #chat-main {
     display: flex;
-    height: 99vh;
+}
+
+#message-container {
+    flex-grow: 1;   
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 50px);
+    max-height: calc(100vh - 50px);
+}
+
+#message-list-container {
+    flex-grow: 1;
+    overflow-y: scroll;
+}
+
+#rooms {
+    min-width: 200px;
+}
+
+#send-message {
+    display: flex;
+    min-width: 100%;
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+#send-message input {
+    flex-grow: 1;
 }
