@@ -1,12 +1,29 @@
 
+let room_channel = ''
+
 function init() {
+    room_channel = window.location.hash.substr(1);
     //initialize the list of rooms
     call_api("POST", "get_rooms").then(rooms=> {
+        console.log(rooms)
         for(let room of rooms) {
             add_room(room);
         }
     })
     load_messages();
+
+    window.scrollTo(0,0);
+
+    //events 
+    document.querySelector("#btn-send-message").addEventListener('click', send_message)
+}
+
+function send_message(e) {
+    let input_element = document.querySelector("#inp-send-message")
+    call_api("POST", "send_message", {
+        "room_channel":room_channel, 
+        "message":input_element.value})
+    input_element.value = "";
 }
 
 function add_room(room) {
@@ -26,18 +43,18 @@ function add_message(message) {
 }
 
 function load_messages() {
-    if(window.location.hash) {
-        let room_channel = window.location.hash.substr(1);
-            call_api("POST", "get_messages", { "room_channel" : room_channel} ).then( messages => {
-                for(let message of messages) {
-                    add_message(message);
-                }
-            })
+    if(room_channel) {
+        document.querySelector("#messages").innerHTML = "";
+        call_api("POST", "get_messages", { "room_channel" : room_channel} ).then( messages => {
+            for(let message of messages) {
+                add_message(message);
+            }
+        })
     }       
 }
 
 window.addEventListener('hashchange', () => {
-    console.log(window.location.href);
+    room_channel = window.location.hash.substr(1);
     load_messages();
 })
 
