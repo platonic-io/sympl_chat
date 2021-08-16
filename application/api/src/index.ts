@@ -10,7 +10,7 @@ import path from 'path';
 import {networkClient, chat} from './assembly-wrapper';
 import { initialize_events } from './events-manager';
 //routes
-import * as users from './routes/users';
+import * as local_api from './routes/local_api';
 import { chat_routes } from './routes/chat';
 import { create_primus } from './primus-wrapper';
 import serve from 'koa-static';
@@ -38,16 +38,15 @@ const api : Koa = new Koa();
 const api_router : Router = new Router();
 
 //local web-server specific routes
-api_router.get("/get_users", users.getUsers);
-api_router.post("/create_user", users.createUser);
-
+api_router.get("/get_users", local_api.getUsers);
+api_router.post("/create_user", local_api.createUser);
+api_router.post("/get_message", local_api.getMessage)
 //mount both local assembly routes to api
 api.use(api_router.middleware());
 api.use(mount('/', chat_routes)); //routes that go to assembly
 
 const primus : Primus = create_primus(server_instance);
 initialize_events(primus);
-
 
 //Middleware Flow
 app.use(auth_middleware);     //check if user is authenticated then redirect

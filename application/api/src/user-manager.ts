@@ -44,7 +44,7 @@ export const auth_middleware = async (ctx: Context, next: any) => {
 export const user_is_authorized = async function user_is_authorized(user: string, ip: string) : Promise<boolean> {
     let user_db = JSON.parse(fs.readFileSync(users_db_location, 'utf-8'))
     if(user_db[user]) {
-        return user_db[user]["ip"] == ip;
+        return true;//user_db[user]["ip"] == ip;
     }
     return false;
 }
