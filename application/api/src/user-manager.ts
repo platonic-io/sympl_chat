@@ -112,3 +112,21 @@ export const list_users = async function list_users() : Promise<string[]> {
 export const is_key_alias = async function is_key_alias(ka: string) : Promise<boolean> {
     return Boolean(ka.match(/KA-[0-9]{16}/g))
 }
+
+/**
+ * this will take a JSON object that contains key aliases
+ * and return a JSON objec with the KA's swapped for their equivalent usernames
+ * @param object JSON object to filter the ka
+ * @returns JSON object
+ */
+export const filter_out_ka = async function filter_out_ka(object) : Promise<JSON> {
+    let temp = JSON.stringify(object)
+    let key_alias_regex = /KA-[0-9]{16}/g
+    let kas = [...temp.matchAll(key_alias_regex)];
+
+    for(let i = 0; i < kas.length; i++ ) {
+        let username = (await get_user_from_ka(kas[i][0])).replaceAll('"', '\\"');
+        temp = temp.replaceAll(kas[i][0], username);
+    }
+    return JSON.parse(temp);
+}

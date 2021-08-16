@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Room</title>
     <script src="/assets/js/helper.js"></script>
+    <link rel="stylesheet" href="/assets/css/room.css">
+    <link rel="stylesheet" href="/assets/css/mains.css">
 </head>
 <body>
     <div id="menu-bar">
@@ -15,9 +17,13 @@
         <div id="rooms">
             <ol id="room-items"></ol>
         </div>
-        <div id="messages">
-            <a href="/room#one">one</a>
-            <a href="/room#two">two</a>
+        <div id="message-container">
+            <div id="messages">
+            </div>
+            <div id="send-message">
+                <input type="text" name="send-message" id="inp-send-message">
+                <button id="btn-send-message">^</button>
+            </div>
         </div>
     </div>
 </body>
