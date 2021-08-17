@@ -43,6 +43,7 @@ function add_room(room) {
     document.querySelector("#room-items").appendChild(li);
 } 
 
+<<<<<<< HEAD
 function get_message_and_add(message_id, room_channel) {
     call_api("POST", "get_message", {
         "message_id" : message_id, 
@@ -57,6 +58,8 @@ function get_message_and_add(message_id, room_channel) {
     })
 }
 
+=======
+>>>>>>> a863f7a6800c1c6f787bc1bf7545fc1930c8b32e
 function add_message(message, channel) {
     if(channel === room_channel) {
         let msg_dom = document.createElement("p");
@@ -64,7 +67,11 @@ function add_message(message, channel) {
         msg_dom.id = message.message_id
         document.querySelector("#messages").appendChild(msg_dom)
         let msg_list_dom = document.querySelector("#message-list-container")
+<<<<<<< HEAD
         msg_list_dom.scrollTo(0, msg_list_dom.scrollHeight);
+=======
+        msg_list_dom.scrollTo(0, msg_list_dom.clientHeight);
+>>>>>>> a863f7a6800c1c6f787bc1bf7545fc1930c8b32e
     }
 }
 
