@@ -2,13 +2,14 @@ var primus = new Primus('http://localhost:8081/primus', { websockets: true });
 
 primus.on('open', () => {
     console.log("test")
-    primus.write({ "initial_message": 
-                        { "username": localStorage["username"] } 
+    primus.write({ "type" : "initial_message", 
+                   "data" : { "username": localStorage["username"] } 
                 })
 })
 
 primus.on("data", (data) => {
     if(data.event) {
+        console.log(data.event)
         //When you receive a sendmessage event
         //get the message, then display it on the screen
         //if it is the correct message
