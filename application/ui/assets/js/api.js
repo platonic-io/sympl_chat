@@ -22,11 +22,16 @@ async function call_api(method, api_method, parameters={}, headers={}, data="") 
     }
     headers["username"] = localStorage.username;
 
-    return fetch(url, {
+    options = {
         method: method,
-        headers: headers,
-        body: data
-    }).then((res) => {
+        headers: headers
+    }
+
+    if(method == "POST") {
+        options.body = data;
+    }
+
+    return fetch(url, options).then((res) => {
         let result = res.json()
         return result;
     })

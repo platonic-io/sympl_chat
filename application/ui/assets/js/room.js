@@ -22,11 +22,14 @@ function init() {
     })
 }
 
+var start, finsih
 function send_message(e) {
+    start = new Date();
     let input_element = document.querySelector("#inp-send-message")
     call_api("POST", "send_message", {
         "room_channel":room_channel, 
-        "message":input_element.value})
+        "message":input_element.value
+    })
     input_element.value = "";
 }
 
@@ -40,6 +43,20 @@ function add_room(room) {
     document.querySelector("#room-items").appendChild(li);
 } 
 
+function get_message_and_add(message_id, room_channel) {
+    call_api("POST", "get_message", {
+        "message_id" : message_id, 
+        "room_channel": room_channel
+    }).then(message => {
+        add_message(message.message,room_channel);
+        // Do things here
+        finish = new Date();
+        var difference = new Date();
+        difference.setTime(finish.getTime() - start.getTime());
+        console.log( difference.getMilliseconds() );
+    })
+}
+
 function add_message(message, channel) {
     if(channel === room_channel) {
         let msg_dom = document.createElement("p");
@@ -47,7 +64,7 @@ function add_message(message, channel) {
         msg_dom.id = message.message_id
         document.querySelector("#messages").appendChild(msg_dom)
         let msg_list_dom = document.querySelector("#message-list-container")
-        msg_list_dom.scrollTo(0, msg_list_dom.clientHeight);
+        msg_list_dom.scrollTo(0, msg_list_dom.scrollHeight);
     }
 }
 

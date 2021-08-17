@@ -9,9 +9,7 @@ if(js_file === "/.js") {
     js_file = "/index.js"
 }
 let includes = [
-    {"src":"/primus/primus.js"},
     {"src":`${js_dir}/api.js`},
-    {"src":`${js_dir}/primus.js`, "defer": true},
     {"src":`${js_dir}${js_file}`, "defer": true}
 ]
 

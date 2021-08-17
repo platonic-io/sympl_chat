@@ -1,0 +1,10 @@
+.member_item {
+    display: flex;
+    width: 100%;
+}
+.member_item p {
+    flex-grow: 1;
+}
+.member_item button {
+    min-width: 100px;
+}
