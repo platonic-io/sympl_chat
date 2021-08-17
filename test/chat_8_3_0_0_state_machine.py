@@ -52,13 +52,11 @@ class ChatValidator(RuleBasedStateMachine):
     def assert_results_match(self, method, caller, **kwargs):
         """Calls the method on both the network and the model, and ensures that their return values are the same."""
         network_result = self.try_and_catch(lambda: getattr(self.network[caller].chat[CHAT_VERSION], method)(**kwargs))
-        print(f"network_result: {network_result}")
         model_result = self.try_and_catch(lambda: getattr(self.model, method)(caller, **kwargs))
-        print(f"model_result: {model_result}")
         if isinstance(model_result, (list, )) and len(model_result) > 0 and 'message_id' in model_result[0]:
             assert scrub_ids_and_timestamps(model_result) == scrub_ids_and_timestamps(network_result)
         else:
-            model_result == network_result
+            assert model_result == network_result
         return network_result
 
     # Each of these rules are changing the state of the state machine.
@@ -77,6 +75,8 @@ class ChatValidator(RuleBasedStateMachine):
             network_create_room_event = self.network[creator].chat[CHAT_VERSION].create_room(room_name=room_name)
             room_channel = network_create_room_event['room']['channel']
             model_create_room_event = self.model.create_room(creator, room_channel, room_name)
+            print(network_create_room_event)
+            print(model_create_room_event)
             assert network_create_room_event == model_create_room_event
             return room_channel
         except ContractError as network_error:
@@ -139,3 +139,13 @@ class ChatValidator(RuleBasedStateMachine):
     @rule(getter=key_aliases)
     def get_rooms(self, getter):
         return self.assert_results_match('get_rooms', getter)
+
+    @rule(room_channel=room_channels, promoter=key_aliases, promotee=key_aliases)
+    def promote_to_owner(self, promoter, room_channel, promotee):
+        assume(room_channel != FATAL_ERROR)
+        return self.assert_results_match('promote_to_owner', promoter, room_channel=room_channel, member=promotee)
+
+    @rule(room_channel=room_channels, demoter=key_aliases, demotee=key_aliases)
+    def demote_owner(self, demoter, room_channel, demotee):
+        assume(room_channel != FATAL_ERROR)
+        return self.assert_results_match('demote_owner', demoter, room_channel=room_channel, owner=demotee)
