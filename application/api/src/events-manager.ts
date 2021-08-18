@@ -17,26 +17,13 @@ export const initialize_events = (primus : Primus) => {
                         }
                         spark.write({
                             "event": e.type,
-                            "data" : e.data
+                            "data" : await um.filter_out_ka(e.data)
                         })
                     }
                 }
             }
         }
     })/**/
-
-    function monitor_sparks() {
-        let s : string = "";
-        primus.forEach(function (spark : any, next : any) {
-            s += ` ${spark.id} ${spark.readyState}`
-            spark.write("THIS IS A TEST")
-            next();
-        }, function(err) {
-        })
-        console.log(s);
-        setTimeout(monitor_sparks, 1000)
-    }
-    monitor_sparks();
 
     primus.on('connection', async (spark) => {
         spark.on('data', async (msg) => {

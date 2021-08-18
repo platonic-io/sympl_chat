@@ -61,31 +61,41 @@ function get_message_and_add(message_id, room_channel) {
     })
 }
 
-function add_message(message, channel) {
+function add_message(message, channel, sender=true) {
     if(channel === room_channel) {
         let msg_dom = document.createElement("p");
-        msg_dom.innerHTML = `${message.sender}: ${message.body}`;
-        msg_dom.id = message.message_id
+        if(sender) {
+            msg_dom.innerHTML = `${message.sender}: ${message.body}`;
+            msg_dom.id = message.message_id
+        } else {
+            msg_dom.innerHTML = message;
+            msg_dom.style.class="msg-event"
+        }
         document.querySelector("#messages").appendChild(msg_dom)
         let msg_list_dom = document.querySelector("#message-list-container")
         msg_list_dom.scrollTo(0, msg_list_dom.scrollHeight);
+        return true;
+    } else {
+        return false;
     }
 }
 
-function load_messages() {
-    if(room_channel) {
+function load_messages(channel) {
+    if(channel) {
         document.querySelector("#messages").innerHTML = "";
-        call_api("POST", "get_messages", { "room_channel" : room_channel} ).then( messages => {
+        call_api("POST", "get_messages", { "room_channel" : channel} ).then(async  messages => {
             for(let message of messages) {
-                add_message(message, room_channel);
+                if(!add_message(message, channel)) {
+                    break;
+                }
             }
         })
-    }       
+    }
 }
 
 window.addEventListener('hashchange', () => {
     room_channel = window.location.hash.substr(1);
-    load_messages();
+    load_messages(room_channel);
 })
 
 window.addEventListener('load', () => {
