@@ -12,6 +12,6 @@ function create_room() {
     call_api("POST", "create_room", {
         "room_name" : room_name
     }).then( e => {
-        console.log(e);
+        window.frameElement.parentElement.remove();
     })
 }

@@ -39,6 +39,9 @@ async function init() {
                 })
             })
         }
+    } else {
+        document.body.remove();
+        window.location.href = "/room"
     }
 }
 

@@ -20,6 +20,9 @@ primus.on("data", async (data) => {
                 break;
             case "InviteToRoomEvent":
                 add_message(`${data.data.inviter} added ${data.data.invitee}`, data.data.room.channel, false);
+                if(![...document.querySelector("#room-items").children].map(e => e.id).includes(data.data.room.channel)) {
+                    add_room(data.data.room);
+                }
                 break;
             case "RemoveFromRoomEvent":
                 add_message(`${data.data.remover} removed ${data.data.removee}`, data.data.room.channel, false);
@@ -29,6 +32,9 @@ primus.on("data", async (data) => {
                 break;
             case "PromoteToEvent":
                 add_message(`${data.data.inviter} promoted ${data.data.invitee}`, data.data.room.channel, false);
+                break;
+            case "CreateRoomEvent":
+                add_room(data.data.room);
                 break;
         }
         

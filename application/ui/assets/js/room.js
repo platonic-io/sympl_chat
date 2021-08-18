@@ -21,9 +21,9 @@ function init() {
         }
     })
 
-    let info_el = document.querySelector("#link-info");
-    info_el.href = `${info_el.href}#${room_channel}`
+    document.querySelector("button#new-room").addEventListener('click',create_popup("/room/create"));
 
+    room_change();
 }
 
 var start, finsih
@@ -96,10 +96,56 @@ function load_messages(channel) {
     }
 }
 
-window.addEventListener('hashchange', () => {
+function create_popup(src) {
+    return (e) => {
+        let info = document.createElement("div")
+        info.style.position = "absolute";
+        info.style.zIndex = 200;
+        info.style.height = "75%"
+        info.style.width = "75%"
+        info.style.top = "12.5%"
+        info.style.left = "12.5%"
+        info.style.backgroundColor = "white"
+        info.style.display = "flex";
+        info.style.flexDirection = "column"
+        info.id="iframe-popup"
+        
+        let button = document.createElement("button")
+        button.innerHTML = 'X'
+        button.addEventListener('click', (e) => {
+            info.remove();
+        })
+
+        let link = document.createElement("iframe")
+        link.style.flexGrow = "1"
+        link.style.border = "none"
+        link.src = src
+
+        info.appendChild(button)
+        info.appendChild(link)
+
+        document.body.appendChild(info)
+    }
+}
+
+var info_click_event_listener;
+
+function room_change() {
     room_channel = window.location.hash.substr(1);
     load_messages(room_channel);
+
+    if(info_click_event_listener) {
+        document.querySelector("button#info").removeEventListener('click', info_click_event_listener)
+    }
+    info_click_event_listener = create_popup(`/room/info#${room_channel}`);
+    document.querySelector("button#info").addEventListener('click', info_click_event_listener );
+}
+
+window.addEventListener('hashchange', () => {
+    room_change();
 })
+
+
 
 window.addEventListener('load', () => {
     init();
