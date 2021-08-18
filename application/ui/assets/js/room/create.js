@@ -12,6 +12,8 @@ function create_room() {
     call_api("POST", "create_room", {
         "room_name" : room_name
     }).then( e => {
+        let close_event = new CustomEvent('close',{});
+        window.frameElement.parentElement.dispatchEvent(close_event);
         window.frameElement.parentElement.remove();
     })
 }

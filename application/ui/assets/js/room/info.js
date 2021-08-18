@@ -10,6 +10,8 @@ async function init() {
         await update_page_room();
 
         if(page_room !== undefined) {
+            
+            document.querySelector("#room-header").innerHTML = page_room.name;
 
             client_is_owner = page_room.owners.includes(localStorage.username);
 

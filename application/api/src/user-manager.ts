@@ -1,4 +1,3 @@
-import { create } from 'domain';
 import * as fs from 'fs';
 import Koa, { Context, Request } from 'koa';
 import {networkClient, chat} from './assembly-wrapper';
@@ -121,6 +120,7 @@ export const is_key_alias = async function is_key_alias(ka: string) : Promise<bo
  */
 export const filter_out_ka = async function filter_out_ka(object) : Promise<JSON> {
     let temp = JSON.stringify(object)
+    console.log(object, temp)
     let key_alias_regex = /KA-[0-9]{16}/g
     let kas = [...temp.matchAll(key_alias_regex)];
 
@@ -128,5 +128,6 @@ export const filter_out_ka = async function filter_out_ka(object) : Promise<JSON
         let username = (await get_user_from_ka(kas[i][0])).replaceAll('"', '\\"');
         temp = temp.replaceAll(kas[i][0], username);
     }
+    console.log(temp)
     return JSON.parse(temp);
 }

@@ -36,6 +36,9 @@ primus.on("data", async (data) => {
             case "CreateRoomEvent":
                 add_room(data.data.room);
                 break;
+            case "DeleteRoomEvent":
+                document.querySelector(`#${data.data.room.channel}`).remove()
+                break;
         }
         
     }

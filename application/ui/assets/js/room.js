@@ -24,6 +24,7 @@ function init() {
     document.querySelector("button#new-room").addEventListener('click',create_popup("/room/create"));
 
     room_change();
+
 }
 
 var start, finsih
@@ -86,7 +87,13 @@ function add_message(message, channel, sender=true) {
 function load_messages(channel) {
     if(channel) {
         document.querySelector("#messages").innerHTML = "";
-        call_api("POST", "get_messages", { "room_channel" : channel} ).then(async  messages => {
+        call_api("POST", "get_messages", { "room_channel" : channel} ).then(async response => {
+            if(response.error) {
+                return
+            }
+
+            let messages = response;
+            console.log(messages)
             for(let message of messages) {
                 if(!add_message(message, channel)) {
                     break;
@@ -98,6 +105,25 @@ function load_messages(channel) {
 
 function create_popup(src) {
     return (e) => {
+
+        let background_button = document.createElement("button")
+        background_button.style.position = "absolute";
+        background_button.style.width = "100vw";
+        background_button.style.minHeight = "100vh";
+        background_button.style.zIndex = 199
+        background_button.style.opacity = 0.75;
+        background_button.style.top = 0;
+        background_button.style.left = 0;
+        background_button.style.backgroundColor = "black";
+        background_button.style.border = "none";
+        background_button.appendChild(document.createElement("p"))
+    
+
+        let link = document.createElement("iframe")
+        link.style.flexGrow = "1"
+        link.style.border = "none"
+        link.src = src
+
         let info = document.createElement("div")
         info.style.position = "absolute";
         info.style.zIndex = 200;
@@ -112,18 +138,21 @@ function create_popup(src) {
         
         let button = document.createElement("button")
         button.innerHTML = 'X'
-        button.addEventListener('click', (e) => {
+        
+        function close() {
             info.remove();
-        })
-
-        let link = document.createElement("iframe")
-        link.style.flexGrow = "1"
-        link.style.border = "none"
-        link.src = src
+            background_button.remove();
+        }
+        
+        button.addEventListener('click', close)
+        background_button.addEventListener('click', close)
 
         info.appendChild(button)
         info.appendChild(link)
 
+        info.addEventListener('close', e => {background_button.remove()})
+
+        document.body.appendChild(background_button)
         document.body.appendChild(info)
     }
 }
@@ -133,6 +162,10 @@ var info_click_event_listener;
 function room_change() {
     room_channel = window.location.hash.substr(1);
     load_messages(room_channel);
+
+    document.querySelectorAll("#room-items a").forEach(element => {
+        element.classList = element.id === room_channel ? ["selected-room"] : []
+    })
 
     if(info_click_event_listener) {
         document.querySelector("button#info").removeEventListener('click', info_click_event_listener)

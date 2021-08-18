@@ -71,11 +71,13 @@ scrollbar-width: none;  /* Firefox */
     flex-grow: 1;
 }
 
-#rooms-list-container {
-}
-
 #room-items {
     flex-grow: 1;
+}
+
+#room-items a.selected-room {
+    background-color: #AFAFAF;
+    padding-right: 10px;
 }
 
 #room-items a {
