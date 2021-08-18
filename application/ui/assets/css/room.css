@@ -43,7 +43,22 @@ html, body {
 
 #rooms {
     min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 50px);
+    max-height: calc(100vh - 50px);
+    overflow-y: scroll;
 }
+/* Hide scrollbar for Chrome, Safari and Opera */
+#rooms::-webkit-scrollbar {
+display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+#rooms {
+-ms-overflow-style: none;  /* IE and Edge */
+scrollbar-width: none;  /* Firefox */
+} 
 
 #send-message {
     display: flex;
@@ -54,4 +69,32 @@ html, body {
 }
 #send-message input {
     flex-grow: 1;
+}
+
+#rooms-list-container {
+}
+
+#room-items {
+    flex-grow: 1;
+}
+
+#room-items a {
+    text-decoration: none;
+    display: block;
+    width: 96%;
+    margin: 0 2%;
+    color: tomato;
+    background-color: white;
+    min-height: 50px;
+    line-height: 50px;
+}
+
+#room-items a:visited {
+    color: tomato;
+}
+
+#room-items a:hover {
+    cursor: pointer;
+    color: red;
+    background-color: gray;
 }

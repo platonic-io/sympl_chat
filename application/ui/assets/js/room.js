@@ -38,13 +38,11 @@ function send_message(e) {
 }
 
 function add_room(room) {
-    let li = document.createElement("li");
-    li.id = room.channel;
     let link = document.createElement("a")
+    link.id = room.channel;
     link.href = `/room#${room.channel}`;
     link.innerHTML = room.name;
-    li.appendChild(link);
-    document.querySelector("#room-items").appendChild(li);
+    document.querySelector("#room-items").appendChild(link);
 } 
 
 function get_message_and_add(message_id, room_channel) {
@@ -61,6 +59,9 @@ function get_message_and_add(message_id, room_channel) {
     })
 }
 
+//add a message, if it is part of the correct room
+//return true or false based on  whether the adding
+//succeeded
 function add_message(message, channel, sender=true) {
     if(channel === room_channel) {
         let msg_dom = document.createElement("p");
@@ -80,6 +81,8 @@ function add_message(message, channel, sender=true) {
     }
 }
 
+//load messages on screen, but break the loop
+//if the messages were from a different room
 function load_messages(channel) {
     if(channel) {
         document.querySelector("#messages").innerHTML = "";

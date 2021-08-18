@@ -30,6 +30,14 @@ async function init() {
                     await create_user_item(client_is_owner, user);
                 }
             })
+
+            document.querySelector("#btn-delete").addEventListener('click', (e) => {
+                call_api("POST", "delete_room", {
+                    "room_channel" : room_channel
+                }).then( async response => {
+                    console.log(response)
+                })
+            })
         }
     }
 }
