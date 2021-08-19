@@ -37,8 +37,12 @@ async function init() {
                 call_api("POST", "delete_room", {
                     "room_channel" : room_channel
                 }).then( async response => {
-                    console.log(response)
-                })
+                    if(!response.error) {
+                        let close_event = new CustomEvent('close',{});
+                        window.frameElement.parentElement.dispatchEvent(close_event);
+                        window.frameElement.parentElement.remove();
+                    }
+                }) 
             })
         }
     } else {

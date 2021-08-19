@@ -89,6 +89,9 @@ scrollbar-width: none;  /* Firefox */
 #room-items {
     flex-grow: 1;
 }
+.room-specific {
+    visibility: hidden;
+}
 
 #room-items a.selected-room {
     background-color: #d8d8d8;

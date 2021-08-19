@@ -6,6 +6,13 @@ async function create_user(e) {
             localStorage.username = response.username;
             window.location.href = "/room"
         }
+    } else if(response.error) {
+        let error = document.createElement("p");
+        error.style.color = "tomato";
+        error.innerHTML = "Error: " + response.error.message;
+        let holder = document.querySelector("#input-holder")
+        let username = document.querySelector("#inp-username")
+        holder.insertBefore(error, username);
     }
 }
 

@@ -26,9 +26,7 @@ function init() {
 
 }
 
-var start, finsih
 function send_message(e) {
-    start = new Date();
     let input_element = document.querySelector("#inp-send-message")
     call_api("POST", "send_message", {
         "room_channel":room_channel, 
@@ -54,11 +52,6 @@ function get_message_and_add(message_id, room_channel) {
         "room_channel": room_channel
     }).then(message => {
         add_message(message.message,room_channel);
-        // Do things here
-        finish = new Date();
-        var difference = new Date();
-        difference.setTime(finish.getTime() - start.getTime());
-        console.log( difference.getMilliseconds() );
     })
 }
 
