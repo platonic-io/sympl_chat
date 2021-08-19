@@ -21,3 +21,11 @@ for(let script_path of includes) {
     };
     document.head.appendChild(script);
 }
+
+
+function dom_safe(str) {
+    return str //str.replaceAll("<", "&lt;")
+//        .replaceAll(">", "&gt;")
+//        .replaceAll('"', "&quot;")
+//        .replaceAll('&', "&amp;");
+}

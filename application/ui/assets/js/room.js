@@ -43,7 +43,7 @@ function add_room(room) {
     link.href = `/room#${room.channel}`;
     
     let text_label = document.createElement('p')
-    text_label.innerHTML = room.name;
+    text_label.textContent = room.name;
     link.appendChild(text_label)
     document.querySelector("#room-items").appendChild(link);
 } 
@@ -69,10 +69,10 @@ function add_message(message, channel, sender=true) {
     if(channel === room_channel) {
         let msg_dom = document.createElement("p");
         if(sender) {
-            msg_dom.innerHTML = `${message.sender}: ${message.body}`;
+            msg_dom.textContent = `${message.sender}: ${message.body}`.replaceAll("&quot;", "\"");
             msg_dom.id = message.message_id
         } else {
-            msg_dom.innerHTML = message;
+            msg_dom.textContent = message.replaceAll("&quot;", "\"");
             msg_dom.style.class="msg-event"
         }
         document.querySelector("#messages").appendChild(msg_dom)
@@ -88,7 +88,7 @@ function add_message(message, channel, sender=true) {
 //if the messages were from a different room
 function load_messages(channel) {
     if(channel) {
-        document.querySelector("#messages").innerHTML = "";
+        document.querySelector("#messages").textContent = "";
         call_api("POST", "get_messages", { "room_channel" : channel} ).then(async response => {
             if(response.error) {
                 return false
@@ -145,7 +145,7 @@ function create_popup(src) {
         button_container.style.minHeight = "25px";
 
         let button = document.createElement("button")
-        button.innerHTML = 'X';
+        button.textContent = 'X';
         button.id = "close-button";
         button.style.width = "25px";
 
@@ -193,14 +193,12 @@ function room_change() {
 
     info_click_event_listener = create_popup(`/room/info#${room_channel}`);
     document.querySelector("#btn-info").addEventListener('click', info_click_event_listener );
-    document.querySelector("#room-name").innerHTML = document.querySelector(`#${room_channel}`).innerHTML;
+    document.querySelector("#room-name").textContent = document.querySelector(`#${room_channel}`).textContent;
 }
 
 window.addEventListener('hashchange', () => {
     room_change();
 })
-
-
 
 window.addEventListener('load', () => {
     init();

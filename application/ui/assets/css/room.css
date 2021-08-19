@@ -92,7 +92,6 @@ scrollbar-width: none;  /* Firefox */
 
 #room-items a.selected-room {
     background-color: #d8d8d8;
-    padding-right: 10px;
 }
 
 #room-items a {
