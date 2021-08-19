@@ -1,11 +1,3 @@
-/*fetch("/api/create_user?username=bob1", {
-    method: "post"
-}).then( (res) => {
-    return res.json();
-}).then((data) => {
-    console.log(data)
-})*/
-
 const api_base = "/api"
 async function call_api(method, api_method, parameters={}, headers={}, data="") {
     url = `${api_base}/${api_method}`
@@ -17,7 +9,7 @@ async function call_api(method, api_method, parameters={}, headers={}, data="") 
         }
         url += params_temp.join('&')
     }
-    if( (!localStorage.username) && method !== "create_user") {
+    if( (!localStorage.username) && api_method !== "create_user") {
         throw new Error("Error, no username created yet")
     }
     headers["username"] = localStorage.username;
@@ -31,8 +23,14 @@ async function call_api(method, api_method, parameters={}, headers={}, data="") 
         options.body = data;
     }
 
-    return fetch(url, options).then((res) => {
-        let result = res.json()
+    return fetch(url, options).then(async (res) => {
+        let result = await res.json()
+        if(result.error) {
+            if(result.error.message === "Unauthorized Request!") {
+                localStorage.username = "";
+                window.location.href = "/"
+            }
+        }
         return result;
     })
 }

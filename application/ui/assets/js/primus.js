@@ -1,7 +1,6 @@
 var primus = new Primus('http://localhost:8081/primus', { websockets: true });
 
 primus.on('open', () => {
-    console.log("test")
     primus.write({ "type" : "initial_message", 
                    "data" : { "username": localStorage["username"] } 
                 })
@@ -42,9 +41,4 @@ primus.on("data", async (data) => {
         }
         
     }
-})
-
-
-primus.on("reconnect", (data) => {
-    console.log(data);
 })

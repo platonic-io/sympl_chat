@@ -8,7 +8,10 @@ function init() {
         for(let room of rooms) {
             add_room(room);
         }
+
+        room_change();
     })
+
     load_messages();
 
     window.scrollTo(0,0);
@@ -22,8 +25,6 @@ function init() {
     })
 
     document.querySelector("button#new-room").addEventListener('click',create_popup("/room/create"));
-
-    room_change();
 
 }
 
@@ -93,7 +94,6 @@ function load_messages(channel) {
             }
 
             let messages = response;
-            console.log(messages)
             for(let message of messages) {
                 if(!add_message(message, channel)) {
                     break;
@@ -136,9 +136,16 @@ function create_popup(src) {
         info.style.flexDirection = "column"
         info.id="iframe-popup"
         
+        let button_container = document.createElement("div");
+        button_container.style.display = "flex";
+        button_container.style.justifyContent = "flex-end";
+        button_container.style.minHeight = "25px";
+
         let button = document.createElement("button")
-        button.innerHTML = 'X'
-        
+        button.innerHTML = 'X';
+        button.id = "close-button";
+        button.style.width = "25px";
+
         function close() {
             info.remove();
             background_button.remove();
@@ -147,7 +154,9 @@ function create_popup(src) {
         button.addEventListener('click', close)
         background_button.addEventListener('click', close)
 
-        info.appendChild(button)
+        button_container.appendChild(button);
+
+        info.appendChild(button_container)
         info.appendChild(link)
 
         info.addEventListener('close', e => {background_button.remove()})
@@ -168,10 +177,12 @@ function room_change() {
     })
 
     if(info_click_event_listener) {
-        document.querySelector("button#info").removeEventListener('click', info_click_event_listener)
+        document.querySelector("#btn-info").removeEventListener('click', info_click_event_listener)
     }
+
     info_click_event_listener = create_popup(`/room/info#${room_channel}`);
-    document.querySelector("button#info").addEventListener('click', info_click_event_listener );
+    document.querySelector("#btn-info").addEventListener('click', info_click_event_listener );
+    document.querySelector("#room-name").innerHTML = document.querySelector(`#${room_channel}`).innerHTML;
 }
 
 window.addEventListener('hashchange', () => {
