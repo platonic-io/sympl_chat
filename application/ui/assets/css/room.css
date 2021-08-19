@@ -18,6 +18,7 @@ html, body {
     height: 50px;
     display: flex;
     align-items: center;
+    background: rgb(223, 223, 223);
 }
 
 #chat-main {
@@ -52,6 +53,7 @@ html, body {
     min-height: calc(100vh - 50px);
     max-height: calc(100vh - 50px);
     overflow-y: scroll;
+    background-color: #b4b3b3;
 }
 /* Hide scrollbar for Chrome, Safari and Opera */
 #rooms::-webkit-scrollbar {
@@ -76,10 +78,6 @@ scrollbar-width: none;  /* Firefox */
 
 #send-message input {
     flex-grow: 1;
-    border: none;
-    outline: none;
-    line-height: 100%;
-    padding: 10px;
 }
 
 #send-message input:focus {
@@ -91,7 +89,7 @@ scrollbar-width: none;  /* Firefox */
 }
 
 #room-items a.selected-room {
-    background-color: #AFAFAF;
+    background-color: #d8d8d8;
     padding-right: 10px;
 }
 
@@ -103,7 +101,8 @@ scrollbar-width: none;  /* Firefox */
     color: tomato;
     background-color: white;
     min-height: 50px;
-    line-height: 50px;
+    display: flex;
+    align-items: center;
 }
 
 #room-items a:visited {
@@ -123,7 +122,12 @@ scrollbar-width: none;  /* Firefox */
 }
 
 #logo {
-    flex-basis: 200;
+    flex-basis: 200px;
+    justify-content: space-between;
+}
+
+#logo h2 {
+    margin: 0 10px;
 }
 
 #info {
@@ -134,17 +138,5 @@ scrollbar-width: none;  /* Firefox */
 
 .menu-bar button {
     padding: 0 10px;
-}
-
-button {
-    border: none;
-    height: inherit;
-    line-height: 100%;
-    background-color: white;
-}
-
-button:hover {
-    cursor: pointer;
-    background-color: tomato;
 }
 

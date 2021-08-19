@@ -12,8 +12,6 @@ function init() {
         room_change();
     })
 
-    load_messages();
-
     window.scrollTo(0,0);
 
     //events 
@@ -43,7 +41,10 @@ function add_room(room) {
     let link = document.createElement("a")
     link.id = room.channel;
     link.href = `/room#${room.channel}`;
-    link.innerHTML = room.name;
+    
+    let text_label = document.createElement('p')
+    text_label.innerHTML = room.name;
+    link.appendChild(text_label)
     document.querySelector("#room-items").appendChild(link);
 } 
 
@@ -90,7 +91,7 @@ function load_messages(channel) {
         document.querySelector("#messages").innerHTML = "";
         call_api("POST", "get_messages", { "room_channel" : channel} ).then(async response => {
             if(response.error) {
-                return
+                return false
             }
 
             let messages = response;
@@ -100,7 +101,9 @@ function load_messages(channel) {
                 }
             }
         })
+        return true;
     }
+    return false;
 }
 
 function create_popup(src) {
@@ -131,7 +134,7 @@ function create_popup(src) {
         info.style.width = "75%"
         info.style.top = "12.5%"
         info.style.left = "12.5%"
-        info.style.backgroundColor = "white"
+        info.style.backgroundColor = "#e7e7e7"
         info.style.display = "flex";
         info.style.flexDirection = "column"
         info.id="iframe-popup"
@@ -170,7 +173,11 @@ var info_click_event_listener;
 
 function room_change() {
     room_channel = window.location.hash.substr(1);
-    load_messages(room_channel);
+    if(load_messages(room_channel)) {
+        document.querySelector("#inp-send-message").style.opacity = "1"
+    } else {
+        document.querySelector("#inp-send-message").style.opacity = "0"
+    };
 
     document.querySelectorAll("#room-items a").forEach(element => {
         element.classList = element.id === room_channel ? ["selected-room"] : []

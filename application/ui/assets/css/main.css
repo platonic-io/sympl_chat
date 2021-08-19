@@ -3,3 +3,22 @@
     padding: 0;
     font-family: sans-serif;
 }
+
+input {
+    border: none;
+    outline: none;
+    line-height: 100%;
+    padding: 10px;
+}
+
+button {
+    border: none;
+    height: inherit;
+    line-height: 100%;
+    background-color: white;
+}
+
+button:hover {
+    cursor: pointer;
+    background-color: tomato;
+}

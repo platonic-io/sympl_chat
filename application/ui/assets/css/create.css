@@ -1,0 +1,21 @@
+
+body {
+    display: flex;
+    flex-direction: column;
+    margin: 50px 10px;
+}
+#input-holder {
+    display: flex;
+    flex-direction: column;
+}
+
+#filler-div {
+    margin: 10px;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+button {
+    padding: 20px;
+}

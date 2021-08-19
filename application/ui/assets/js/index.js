@@ -11,7 +11,7 @@ async function create_user(e) {
 
 window.addEventListener('load',(e) => {
     document.querySelector("#btn-go").addEventListener('click', create_user)
-    document.querySelector("#inp-username").addEventListener('keyPress', (e) => {
+    document.querySelector("#inp-username").addEventListener('keypress', (e) => {
         if(e.keyCode === 13) {
             create_user(e);
         }
