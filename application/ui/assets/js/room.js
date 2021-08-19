@@ -174,9 +174,13 @@ var info_click_event_listener;
 function room_change() {
     room_channel = window.location.hash.substr(1);
     if(load_messages(room_channel)) {
-        document.querySelector("#inp-send-message").style.opacity = "1"
+        document.querySelectorAll(".room-specific").forEach((el) => {
+            el.style.visibility = 'visible'
+        })
     } else {
-        document.querySelector("#inp-send-message").style.opacity = "0"
+        document.querySelectorAll(".room-specific").forEach((el) => {
+            el.style.visibility = 'hidden'
+        })
     };
 
     document.querySelectorAll("#room-items a").forEach(element => {

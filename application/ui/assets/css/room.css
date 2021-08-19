@@ -23,6 +23,7 @@ html, body {
 
 #chat-main {
     display: flex;
+    background-color: white;
 }
 
 #message-container {
@@ -31,6 +32,7 @@ html, body {
     flex-direction: column;
     min-height: calc(100vh - 50px);
     max-height: calc(100vh - 50px);
+    background-color: #cecece;
 }
 
 #message-list-container {
