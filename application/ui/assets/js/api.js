@@ -13,7 +13,7 @@ async function call_api(method, api_method, parameters={}, headers={}, data="") 
         url += '?';
         params_temp = []
         for(let key in parameters) {
-            params_temp.push(`${key}=${parameters[key]}`)
+            params_temp.push(`${encodeURIComponent(key)}=${encodeURIComponent(parameters[key].replaceAll('"', '&quot;'))}`)
         }
         url += params_temp.join('&')
     }
