@@ -15,7 +15,7 @@ primus.on("data", async (data) => {
         switch(event) {
             case "SendMessageEvent":
                 get_message_and_add(data.data.message_id, data.data.room.channel)
-                if(room_channel != data.data.room_channel) {
+                if(room_channel !== data.data.room.channel) {
                     document.querySelector("#"  + data.data.room.channel ).classList.add("unread");
                 }
                 break;
