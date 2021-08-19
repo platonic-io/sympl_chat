@@ -184,6 +184,8 @@ function room_change() {
         document.querySelector("#btn-info").removeEventListener('click', info_click_event_listener)
     }
 
+    document.querySelector(`#${room_channel}`).classList.remove("unread")
+
     info_click_event_listener = create_popup(`/room/info#${room_channel}`);
     document.querySelector("#btn-info").addEventListener('click', info_click_event_listener );
     document.querySelector("#room-name").textContent = document.querySelector(`#${room_channel}`).textContent;

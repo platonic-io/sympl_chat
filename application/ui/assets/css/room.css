@@ -98,6 +98,7 @@ scrollbar-width: none;  /* Firefox */
 }
 
 #room-items a {
+    z-index: 100;
     text-decoration: none;
     display: block;
     width: 90%;
@@ -142,5 +143,9 @@ scrollbar-width: none;  /* Firefox */
 
 .menu-bar button {
     padding: 0 10px;
+}
+
+.unread {
+    border-left: 10px solid tomato;
 }
 
