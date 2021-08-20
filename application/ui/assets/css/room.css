@@ -18,7 +18,12 @@ html, body {
     height: 50px;
     display: flex;
     align-items: center;
-    background: rgb(223, 223, 223);
+    background: #dfdfdf;
+}
+
+#label-username {
+    background: #dfdfdf;
+    padding:10px;
 }
 
 #chat-main {
@@ -148,4 +153,3 @@ scrollbar-width: none;  /* Firefox */
 .unread {
     border-left: 10px solid tomato;
 }
-

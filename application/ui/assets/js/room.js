@@ -4,7 +4,12 @@ let room_channel = ''
 function init() {
     room_channel = window.location.hash.substr(1);
     //initialize the list of rooms
-    call_api("POST", "get_rooms").then(rooms=> {
+    call_api("POST", "get_rooms").then(response => {
+        if(response.error) {
+            console.log(response.error)
+            return;
+        }
+        let rooms = response;
         for(let room of rooms) {
             add_room(room);
         }
@@ -21,6 +26,8 @@ function init() {
             send_message(e);
         }
     })
+
+    document.querySelector("#label-username").innerHTML = `Welcome, <b>${localStorage.username}</b>`
 
     document.querySelector("button#new-room").addEventListener('click',create_popup("/room/create"));
 

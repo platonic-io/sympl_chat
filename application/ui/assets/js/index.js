@@ -7,12 +7,18 @@ async function create_user(e) {
             window.location.href = "/room"
         }
     } else if(response.error) {
-        let error = document.createElement("p");
-        error.style.color = "tomato";
+
+        let error = document.querySelector("#error-message")
+        if(!error) {
+            error = document.createElement("p");
+            error.id = "error-message"    
+            error.style.color = "tomato";
+            let holder = document.querySelector("#input-holder")
+            let username = document.querySelector("#inp-username")
+            holder.insertBefore(error, username);
+        } 
+
         error.innerHTML = "Error: " + response.error.message;
-        let holder = document.querySelector("#input-holder")
-        let username = document.querySelector("#inp-username")
-        holder.insertBefore(error, username);
     }
 }
 

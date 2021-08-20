@@ -23,12 +23,14 @@ export const auth_middleware = async (ctx: Context, next: any) => {
 
     }
 
-    //if the user is unauthorized is an api but not create_user/
-    if((!await user_is_authorized(ctx.get("username"), ctx.ip) && (ctx.url.startsWith(api_header))) && !ctx.url.includes("create_user"))  {
-        ctx.body = {
-            "error" : {"message" : "Unauthorized Request!"}
+    //if the user is unauthorized is an api method but not create_user/
+    if(!ctx.url.includes("create_user")) {
+        if((!await user_is_authorized(ctx.get("username"), ctx.ip) && (ctx.url.startsWith(api_header))))  {
+            ctx.body = {
+                "error" : {"message" : "Unauthorized Request!"}
+            }
+            return;
         }
-        return;
     }
     return next();
 }
@@ -41,9 +43,9 @@ export const auth_middleware = async (ctx: Context, next: any) => {
  * @returns boolean
  */
 export const user_is_authorized = async function user_is_authorized(user: string, ip: string) : Promise<boolean> {
-    let user_db = JSON.parse(fs.readFileSync(users_db_location, 'utf-8'))
+    let user_db = JSON.parse(fs.readFileSync(users_db_location, 'utf-8'));
     if(user_db[user]) {
-        return true;//user_db[user]["ip"] == ip;
+        return (user_db[user]["ip"] == ip) && user_db[user]["allowed"];
     }
     return false;
 }
@@ -61,7 +63,8 @@ export const create_user = async function create_user(user: string, ip: string) 
     }
     user_db[user] = {
         "ip" : ip,
-        "ka" : await networkClient.nodeClients[0].registerKeyAlias()
+        "ka" : await networkClient.nodeClients[0].registerKeyAlias(),
+        "allowed" : true
     }
     fs.writeFileSync(users_db_location, JSON.stringify(user_db));
     return;
@@ -128,4 +131,20 @@ export const filter_out_ka = async function filter_out_ka(object) : Promise<JSON
         temp = temp.replaceAll(kas[i][0], username);
     }
     return JSON.parse(temp);
+}
+
+/**
+ * This function will delete a user from the stored users database
+ * and deregister their key alias
+ * @param user username of user to delete
+ */
+export const remove_user = async function remove_user(user:string) {
+    let user_db = JSON.parse(fs.readFileSync(users_db_location, 'utf-8'))
+    if(!user_db[user]) {
+        throw new Error("Username does not exist!");
+    }
+    let ka = user_db[user]["ka"];
+    await networkClient.nodeClients[0].deregisterKeyAlias(ka);
+    user_db[user]["allowed"] = false;
+    fs.writeFileSync(users_db_location, JSON.stringify(user_db));
 }
