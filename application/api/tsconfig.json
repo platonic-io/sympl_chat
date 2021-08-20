@@ -14,10 +14,8 @@
       "locale": "en-US",
       "baseUrl": ".",
       "types": [
-        "node"
-      ],
-      "typeRoots": [
-        "./@assembly/contract.d.ts"
+        "node",
+        "jest"
       ],
       "lib": [
         "esnext",
@@ -26,6 +24,9 @@
         "scripthost",
         "es6"
       ],
+    },
+    "typeAcquisition": {
+      "include": ["jest"]
     },
     "include": [
       "src/**/*.ts"
