@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node src/index.ts",
+    "wipe" : "sym mock-network stop -n chat && sym mock-network delete -n chat",
     "build" : "./build.sh",
     "remove-generated": "rm $(npm root)/../users.json && rm $(npm root)/../src/routes/generated/chat.ts"
   },

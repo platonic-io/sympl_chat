@@ -44,19 +44,4 @@ export const initialize_events = (primus : Primus) => {
             }
         })
     })
-/*
-    primus.on('disconnection', async (spark) => {
-        for(let key of Object.keys(sparks)) {
-            //pop the spark ID off the list of IDs associated with that
-            //key
-            if(sparks[key].includes(spark.id)) {
-                sparks[key].pop(spark.id);
-            }
-            //this would mean the user has no more active connections
-            if(sparks[key].length === 0) {
-                delete sparks[key];
-                um.remove_user(await um.get_user_from_ka(key))
-            }
-        }
-    })/* */
 }
