@@ -69,11 +69,32 @@ function add_message(message, channel, sender=true) {
     if(channel === room_channel) {
         let msg_dom = document.createElement("p");
         if(sender) {
-            msg_dom.textContent = `${message.sender}: ${message.body}`.replaceAll("&quot;", "\"");
-            msg_dom.id = message.message_id
+            let p = document.createElement("p")
+            p.textContent = `${message.body}`.replaceAll("&quot;", "\"");
+            p.id = message.message_id
+            p.style.display = "inline-block";
+            p.classList.add("message")
+            p.classList.add(message.sender === localStorage.username ? "user-message" : "other-message")
+            msg_dom.style.textAlign = message.sender === localStorage.username ? "right" : "left"
+            msg_dom.value = message.sender
+            let msg_container = document.querySelector("#messages")
+            console.log(msg_container)
+            if(msg_container.childNodes.length > 0) {    
+                if(msg_container.childNodes[msg_container.childNodes.length-1].value !== msg_dom.value) {
+                    let user_label = document.createElement("p");
+                    user_label.textContent = message.sender;
+                    msg_dom.appendChild(user_label);
+                }
+            } else {
+                let user_label = document.createElement("p");
+                user_label.textContent = message.sender;
+                msg_dom.appendChild(user_label);
+            }
+            msg_dom.appendChild(p)
         } else {
             msg_dom.textContent = message.replaceAll("&quot;", "\"");
             msg_dom.style.class="msg-event"
+            msg_dom.style.textAlign="center"
         }
         document.querySelector("#messages").appendChild(msg_dom)
         let msg_list_dom = document.querySelector("#message-list-container")

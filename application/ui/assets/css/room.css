@@ -44,6 +44,7 @@ html, body {
     flex-grow: 1;
     overflow-y: scroll;
     padding-left: 10px;
+    padding-right: 10px;
     padding-bottom: 10px;
     padding-top: 10px;
 }
@@ -152,4 +153,18 @@ scrollbar-width: none;  /* Firefox */
 
 .unread {
     border-left: 10px solid tomato;
+}
+
+
+.user-message {
+    background-color: cadetblue;
+}
+
+.other-message {
+    background-color: rgb(160, 160, 160);
+}
+
+.message {
+    padding: 10px;
+    border-radius: 10px;
 }

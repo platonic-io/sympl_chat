@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "test": "jest",
+    "pretest" : "sym mock-network stop -n chat && sym mock-network delete -n chat && npm run build",
     "coverage": "jest --coverage",
     "start": "ts-node src/index.ts",
     "wipe": "sym mock-network stop -n chat && sym mock-network delete -n chat",
