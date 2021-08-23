@@ -158,13 +158,19 @@ scrollbar-width: none;  /* Firefox */
 
 .user-message {
     background-color: cadetblue;
+    margin-left: 50px;
 }
 
 .other-message {
     background-color: rgb(160, 160, 160);
+    margin-right: 50px;
 }
 
 .message {
     padding: 10px;
     border-radius: 10px;
+    white-space: pre-wrap;
+    max-width: calc(100vw - 250px);
+    word-break: break-word;
+    text-align: left;
 }
