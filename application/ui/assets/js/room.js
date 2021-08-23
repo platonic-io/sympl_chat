@@ -2,8 +2,13 @@
 let room_channel = ''
 let allowed_in_room = false;
 
+if(!localStorage.unread) {
+    localStorage.unread = [];
+}
+
 async function init() {
     room_channel = window.location.hash.substr(1);
+    console.log("init");
     //initialize the list of rooms
     let response = await call_api("POST", "get_rooms");
 
@@ -52,6 +57,7 @@ function add_room(room) {
     let text_label = document.createElement('p')
     text_label.textContent = room.name;
     link.appendChild(text_label)
+    console.log(room)
     document.querySelector("#room-items").appendChild(link);
 } 
 
@@ -232,7 +238,10 @@ async function room_change() {
     };
 
     document.querySelectorAll("#room-items a").forEach(element => {
-        element.classList = element.id === room_channel ? ["selected-room"] : []
+        element.classList.remove("selected-room")
+        if(element.id === room_channel) {
+            element.classList.add("selected-room")
+        }
     })
 
     if(info_click_event_listener) {
