@@ -25,6 +25,8 @@ primus.on("data", async (data) => {
                 if(![...document.querySelector("#room-items").children].map(e => e.id).includes(data.data.room.channel)) {
                     add_room(data.data.room);
                 }
+                //ensure the send button and textbox are visible if the person invited is currently looking
+                //at the room. 
                 if(room_channel === data.data.room.channel && data.data.invitee === localStorage.username) {
                     document.querySelector("#send-message.room-specific").style.visibility = "visible";
                 }

@@ -15,9 +15,6 @@ async function init() {
     let rooms = response;
     for(let room of rooms) {
         add_room(room);
-        if (room_channel == room.channel) {
-            allowed_in_room = room.members.includes(localStorage.username)
-        }
     }
 
     room_change();
@@ -32,10 +29,10 @@ async function init() {
         }
     })
 
+    //add the username text
     document.querySelector("#label-username").innerHTML = `Welcome, <b>${localStorage.username}</b>`
 
     document.querySelector("button#new-room").addEventListener('click',create_popup("/room/create"));
-
 }
 
 function send_message(e) {
@@ -67,9 +64,14 @@ function get_message_and_add(message_id, room_channel) {
     })
 }
 
-//add a message, if it is part of the correct room
-//return true or false based on  whether the adding
-//succeeded
+/**
+ * add a message to the window
+ * @param {*} message - message content
+ * @param {*} channel - room channel
+ * @param {*} sender - true or false (this dictates whether the message is a notification about 
+ * the room or an actual message someone sent)
+ * @returns true or false based on whether the message was added
+ */
 function add_message(message, channel, sender=true) {
     if(channel === room_channel) {
         let msg_dom = document.createElement("p");
@@ -83,7 +85,6 @@ function add_message(message, channel, sender=true) {
             msg_dom.style.textAlign = message.sender === localStorage.username ? "right" : "left"
             msg_dom.value = message.sender
             let msg_container = document.querySelector("#messages")
-            console.log(msg_container)
             if(msg_container.childNodes.length > 0) {    
                 if(msg_container.childNodes[msg_container.childNodes.length-1].value !== msg_dom.value) {
                     let user_label = document.createElement("p");
@@ -131,6 +132,12 @@ async function load_messages(channel) {
     return false;
 }
 
+/**
+ * create a pop-up window on the room page from some
+ * src that gets loaded into an iframe
+ * @param {*} src 
+ * @returns function that creates the popup to add in the event_listener of a button
+ */
 function create_popup(src) {
     return (e) => {
 
@@ -201,6 +208,7 @@ async function room_change() {
 
     let rooms = await call_api("POST", "get_rooms");
 
+    //get the room to see if the user is an actual member of the room
     if(!rooms.error) {
         for(let room of rooms) {
             if(room.channel === room_channel) {
