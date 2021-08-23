@@ -15,6 +15,8 @@ import { chat_routes } from './routes/chat';
 import { create_primus } from './primus-wrapper';
 import serve from 'koa-static';
 
+const PORT = 8081
+
 //overall koa app
 const app : Koa = new Koa();
 
@@ -55,6 +57,8 @@ app.use(mount('/api', api));
 //serve the ui
 app.use(mount('/', serve(path.join(__dirname, "../../ui"))));
 
-server_instance.listen(8081);
+server_instance.listen(PORT, () => {
+    console.log(`Server listening at: http://localhost:${PORT}`)
+});
 
 fs.writeFileSync(`${__dirname}/static/primus.js`, primus.library())

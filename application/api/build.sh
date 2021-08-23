@@ -1,10 +1,10 @@
 #!/bin/sh
 NETWORK_NAME=chat
-if [$1]
+if [ $1 ]
 then
     PORT=$1
 else
-    PORT=18888
+    PORT=28888
 fi
 
 if test -f "./network_config.json"; then
