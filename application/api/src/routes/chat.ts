@@ -1,4 +1,4 @@
-import Koa, {Context, Request} from 'koa';
+import Koa, {Context} from 'koa';
 import { assembly_router } from './generated/chat';
 import * as um from '../user-manager';
 

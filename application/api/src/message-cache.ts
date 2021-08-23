@@ -1,4 +1,4 @@
-import { networkClient, chat } from './assembly-wrapper';
+import { chat } from './assembly-wrapper';
 
 //variable to hold the cache for the messages
 export const message_cache = {

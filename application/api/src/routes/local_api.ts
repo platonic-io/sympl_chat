@@ -1,5 +1,4 @@
 import * as um from '../user-manager';
-import { networkClient, chat } from '../assembly-wrapper';
 import { Context } from 'koa';
 import { message_cache, updateCache } from '../message-cache';
 

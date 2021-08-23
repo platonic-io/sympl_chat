@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import Koa, { Context, Request } from 'koa';
-import {networkClient, chat} from './assembly-wrapper';
+import { Context } from 'koa';
+import {networkClient} from './assembly-wrapper';
 
 const users_db_location = `${__dirname}/../users.json`
 const api_header = '/api'

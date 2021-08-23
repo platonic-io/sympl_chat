@@ -1,13 +1,11 @@
 import Koa, {Context} from 'koa';
 import Router from 'koa-router';
 import mount from 'koa-mount';
-import Serve from 'koa-static'
 import Primus from 'primus';
 import { auth_middleware } from './user-manager'
 import http from 'http';
 import * as fs from 'fs';
 import path from 'path';
-import {networkClient, chat} from './assembly-wrapper';
 import { initialize_events } from './events-manager';
 //routes
 import * as local_api from './routes/local_api';
