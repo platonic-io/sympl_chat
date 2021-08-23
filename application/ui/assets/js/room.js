@@ -209,6 +209,7 @@ function create_popup(src) {
 
 var info_click_event_listener;
 
+//runs if a different room is selected
 async function room_change() {
     room_channel = window.location.hash.substr(1);
 
@@ -223,6 +224,7 @@ async function room_change() {
         }
     }
 
+    //load messages into the selected room
     if(await load_messages(room_channel)) {
         document.querySelectorAll(".room-specific").forEach((el) => {
             el.style.visibility = 'visible'
@@ -237,6 +239,7 @@ async function room_change() {
         })
     };
 
+    //modify the element that is `selected` via the selected element class name
     document.querySelectorAll("#room-items a").forEach(element => {
         element.classList.remove("selected-room")
         if(element.id === room_channel) {
@@ -244,11 +247,14 @@ async function room_change() {
         }
     })
 
+    //remove the info button event (because now it needs to exist for 
+    //the currently selected room)
     if(info_click_event_listener) {
         document.querySelector("#btn-info").removeEventListener('click', info_click_event_listener)
     }
     document.querySelector(`#${room_channel}`).classList.remove("unread")
 
+    //add the event listener for clicking the info button
     info_click_event_listener = create_popup(`/room/info#${room_channel}`);
     document.querySelector("#btn-info").addEventListener('click', info_click_event_listener );
     document.querySelector("#room-name").textContent = document.querySelector(`#${room_channel}`).textContent;
