@@ -1,21 +1,26 @@
 
 let room_channel = ''
+let allowed_in_room = false;
 
-function init() {
+async function init() {
     room_channel = window.location.hash.substr(1);
     //initialize the list of rooms
-    call_api("POST", "get_rooms").then(response => {
-        if(response.error) {
-            console.log(response.error)
-            return;
-        }
-        let rooms = response;
-        for(let room of rooms) {
-            add_room(room);
-        }
+    let response = await call_api("POST", "get_rooms");
 
-        room_change();
-    })
+    if(response.error) {
+        console.log(response.error)
+        return;
+    }
+
+    let rooms = response;
+    for(let room of rooms) {
+        add_room(room);
+        if (room_channel == room.channel) {
+            allowed_in_room = room.members.includes(localStorage.username)
+        }
+    }
+
+    room_change();
 
     window.scrollTo(0,0);
 
@@ -107,21 +112,20 @@ function add_message(message, channel, sender=true) {
 
 //load messages on screen, but break the loop
 //if the messages were from a different room
-function load_messages(channel) {
+async function load_messages(channel) {
     if(channel) {
         document.querySelector("#messages").textContent = "";
-        call_api("POST", "get_messages", { "room_channel" : channel} ).then(async response => {
-            if(response.error) {
-                return false
-            }
+        let response = await call_api("POST", "get_messages", { "room_channel" : channel} )
+        if(response.error) {
+            return false
+        }
 
-            let messages = response;
-            for(let message of messages) {
-                if(!add_message(message, channel)) {
-                    break;
-                }
+        let messages = response;
+        for(let message of messages) {
+            if(!add_message(message, channel)) {
+                break;
             }
-        })
+        }
         return true;
     }
     return false;
@@ -192,12 +196,27 @@ function create_popup(src) {
 
 var info_click_event_listener;
 
-function room_change() {
+async function room_change() {
     room_channel = window.location.hash.substr(1);
-    if(load_messages(room_channel)) {
+
+    let rooms = await call_api("POST", "get_rooms");
+
+    if(!rooms.error) {
+        for(let room of rooms) {
+            if(room.channel === room_channel) {
+                allowed_in_room = room.members.includes(localStorage.username)
+            }
+        }
+    }
+
+    if(await load_messages(room_channel)) {
         document.querySelectorAll(".room-specific").forEach((el) => {
             el.style.visibility = 'visible'
         })
+        if(!allowed_in_room) {
+            document.querySelector("#send-message.room-specific").style.visibility = "hidden";
+            add_message("You were removed from this room!", room_channel, false)
+        }
     } else {
         document.querySelectorAll(".room-specific").forEach((el) => {
             el.style.visibility = 'hidden'
@@ -211,7 +230,6 @@ function room_change() {
     if(info_click_event_listener) {
         document.querySelector("#btn-info").removeEventListener('click', info_click_event_listener)
     }
-
     document.querySelector(`#${room_channel}`).classList.remove("unread")
 
     info_click_event_listener = create_popup(`/room/info#${room_channel}`);
@@ -223,6 +241,6 @@ window.addEventListener('hashchange', () => {
     room_change();
 })
 
-window.addEventListener('load', () => {
-    init();
+window.addEventListener('load', async () => {
+    await init();
 })

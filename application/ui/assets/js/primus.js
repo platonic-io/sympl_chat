@@ -1,4 +1,4 @@
-var primus = new Primus('http://localhost:8081/primus', { websockets: true });
+var primus = new Primus('/primus', { websockets: true });
 
 primus.on('open', () => {
     primus.write({ "type" : "initial_message", 
@@ -21,12 +21,21 @@ primus.on("data", async (data) => {
                 break;
             case "InviteToRoomEvent":
                 add_message(`${data.data.inviter} added ${data.data.invitee}`, data.data.room.channel, false);
+                //if the room is not present in the list of rooms, then add it to the list of rooms
                 if(![...document.querySelector("#room-items").children].map(e => e.id).includes(data.data.room.channel)) {
                     add_room(data.data.room);
                 }
+                if(room_channel === data.data.room.channel && data.data.invitee === localStorage.username) {
+                    document.querySelector("#send-message.room-specific").style.visibility = "visible";
+                }
                 break;
             case "RemoveFromRoomEvent":
-                add_message(`${data.data.remover} removed ${data.data.removee}`, data.data.room.channel, false);
+                if(data.data.removee = localStorage.username) {
+                    add_message(`You have been removed from the room by ${data.data.remover}`, data.data.room.channel, false);
+                    document.querySelector("#send-message.room-specific").style.visibility = "hidden";
+                } else {
+                    add_message(`${data.data.remover} removed ${data.data.removee}`, data.data.room.channel, false);
+                }
                 break;
             case "DemoteOwnerEvent":
                 add_message(`${data.data.demoter} demoted ${data.data.demotee}`, data.data.room.channel, false);
