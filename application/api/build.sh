@@ -4,7 +4,7 @@ if [ $1 ]
 then
     PORT=$1
 else
-    PORT=28888
+    PORT=18888
 fi
 
 if test -f "./network_config.json"; then
