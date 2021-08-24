@@ -26,13 +26,16 @@ primus.on("data", async (data) => {
                     add_room(data.data.room);
                 }
                 //ensure the send button and textbox are visible if the person invited is currently looking
-                //at the room. 
+                //at the room. There's an instance where this is hidden if you are removed from a room you
+                //are looking at. 
                 if(room_channel === data.data.room.channel && data.data.invitee === localStorage.username) {
                     document.querySelector("#send-message.room-specific").style.visibility = "visible";
                 }
+                console.log(data);  
                 break;
             case "RemoveFromRoomEvent":
-                if(data.data.removee = localStorage.username) {
+                console.log(data, localStorage.username)
+                if(data.data.removee == localStorage.username) {
                     add_message(`You have been removed from the room by ${data.data.remover}`, data.data.room.channel, false);
                     document.querySelector("#send-message.room-specific").style.visibility = "hidden";
                 } else {
@@ -54,6 +57,5 @@ primus.on("data", async (data) => {
                 window.location.hash = "";
                 break;
         }
-        
     }
 })
