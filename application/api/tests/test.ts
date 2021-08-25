@@ -1,17 +1,18 @@
 import * as Mocha from 'mocha';
 import * as Sinon from 'sinon';
-import { networkClient, chat } from '../src/assembly-wrapper';
-import * as um from '../src/user-manager'
-import { createUser, getMessage, getUsers } from '../src/routes/local_api';
 import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import chaiThings from 'chai-things';
 import chaiLike from 'chai-like';
 import fs from 'fs';
 import { Context, Request } from 'koa';
-import { create_user } from '../src/user-manager';
 import { expect } from 'chai';
-import { create } from 'domain';
+//import applicaation modules
+import { networkClient, chat } from '../src/assembly-wrapper';
+import * as um from '../src/user-manager'
+import { createUser, getMessage, getUsers } from '../src/routes/local_api';
+import * as api_middlewares from '../src/routes/chat';
+//use chai extensions
 chai.use(chaiAsPromised);
 chai.use(chaiThings);
 chai.use(chaiLike);
@@ -109,18 +110,6 @@ describe('User Manager', async () => {
         json_dummy_data = await um.filter_out_ka(json_dummy_data);
         expect(json_dummy_data).to.eql(json_swapped_data);
     })
-    it("tests swap users with key aliases from arbitray json", async () => {
-        let demo_ka = create_new_ka();
-        rks.returns(demo_ka);
-        await um.create_user("bob", "0.0.0.0");
-        let json_dummy_data  = {};
-        let json_swapped_data = {};
-        json_dummy_data["bob"] = "test-data"
-        json_swapped_data["bob"] = "test-data"
-        json_dummy_data = await um.filter_out_ka(json_dummy_data);
-        expect(json_dummy_data).to.eql(json_swapped_data);
-    })
-    
 })
 
 describe('Local Api Routes', async () => {
@@ -155,5 +144,38 @@ describe('Local Api Routes', async () => {
             await getUsers(context);
             chai.expect(context.body).to.be.an('array').that.contains.something.like([])
         })  
+    })
+})
+
+describe('Chat Middleware', async () => {
+    beforeEach( () => {
+        fs.writeFileSync("users.json", "{}");        
+    })
+
+    it("tests filter usernames", async () => {
+        let context = create_new_context();
+        let demo_ka_1 = create_new_ka();
+        rks.returns(demo_ka_1);
+        await um.create_user("bob", "0.0.0.0");
+        context.request.query["member_to_remove"] = "bob";
+        context.request.query["room_channel"] = "RID-SHLDFHDSLFHDSFDSFDHSFHDSLFHDS"
+        //run the function
+        await api_middlewares.chat_filter_user(context, ()=>{});
+
+        expect(context.state).to.eql({"member_to_remove" : demo_ka_1, "room_channel" : "RID-SHLDFHDSLFHDSFDSFDHSFHDSLFHDS"})
+    })
+
+    it("tests filter out ka from ctx.body", async () => {
+        let demo_ka = create_new_ka();
+        rks.returns(demo_ka);
+        await um.create_user("bob", "0.0.0.0");
+        let json_dummy_data  = {};
+        let json_swapped_data = {};
+        json_dummy_data[demo_ka] = "test-data"
+        json_swapped_data["bob"] = "test-data"
+        let context = create_new_context()
+        context.body = json_dummy_data;
+        await api_middlewares.chat_filter_ka(context, () => {})
+        expect(context.body).to.eql(json_swapped_data);
     })
 })
