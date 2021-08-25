@@ -12,16 +12,16 @@ export const createUser = async function createUser(ctx: Context) {
         await um.create_user(un, ctx.request.ip);
         ctx.body = {"username":ctx.request.query.username};
     } else {
-        throw new Error('No Username Supplied!');
+        return Promise.reject(Error('No Username Supplied!'));
    }
 }
 
 export const getMessage = async function get_message(ctx: Context) {
     if(!ctx.request.query.room_channel) {
-        throw new Error('Missing room_channel in parameters list!')
+        return Promise.reject(Error('Missing room_channel in parameters list!'));
     }
     if(!ctx.request.query.message_id) {
-        throw new Error('Missing message_id in parameters list')
+        return Promise.reject(Error('Missing message_id in parameters list'));
     }
     
     let room_channel = ctx.request.query.room_channel.toString();
@@ -32,7 +32,7 @@ export const getMessage = async function get_message(ctx: Context) {
     }
 
     if(!message_cache[room_channel][message_id]) {
-        throw new Error('Message does not exist');
+        return Promise.reject(Error('Message does not exist'));
     }
 
     ctx.body = {
