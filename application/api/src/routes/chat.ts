@@ -1,10 +1,9 @@
 import Koa, {Context} from 'koa';
 import { assembly_router } from './generated/chat';
 import * as um from '../user-manager';
-
 const assembly : Koa = new Koa();
 
-assembly.use(async (ctx:Context, next: any) => {
+export const chat_filter_user = async (ctx:Context, next: any) => {
     //swaps supplied 'usernames' for the associated key alias
     //from the users.json file
     for(let key in JSON.parse((JSON.stringify(ctx.request.query)))) {
@@ -21,9 +20,11 @@ assembly.use(async (ctx:Context, next: any) => {
                                         await um.get_ka_from_user(value) : value;
     }
     return next();
-})
+}
 
-assembly.use(async (ctx:Context, next: any) => {
+assembly.use(chat_filter_user);
+
+export const chat_filter_ka = async (ctx:Context, next: any) => {
     //replaces all 'key_aliases' from the return event in assembly
     //with the corresponding username stored in the users.json file. It uses
     //a regex to recognize the key aliases and then replaces them
@@ -32,7 +33,9 @@ assembly.use(async (ctx:Context, next: any) => {
     if(body_temp !== undefined) {
         ctx.body = await um.filter_out_ka(ctx.body)
     }
-})
+}
+
+assembly.use(chat_filter_ka);
 
 //the routes middleware for the assembly functions
 assembly.use(assembly_router.middleware());
