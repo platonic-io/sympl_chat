@@ -12,6 +12,8 @@ import { networkClient, chat } from '../src/assembly-wrapper';
 import * as um from '../src/user-manager'
 import { createUser, getMessage, getUsers } from '../src/routes/local_api';
 import * as api_middlewares from '../src/routes/chat';
+import { updateCache } from '../src/message-cache';
+import { create } from 'domain';
 //use chai extensions
 chai.use(chaiAsPromised);
 chai.use(chaiThings);
@@ -145,6 +147,23 @@ describe('Local Api Routes', async () => {
             chai.expect(context.body).to.be.an('array').that.contains.something.like([])
         })  
     })
+    it("tests get message from message cache", async () => {
+        let messages : any[] = [
+            {"message_id" : "m1", "message" : "Hello "},
+            {"message_id" : "m2", "message" : "World!"}
+        ]
+
+        Sinon.stub(chat, "getMessages").returns(new Promise<any[]>((res, rej) => {
+            res(messages);
+        }))
+        await updateCache("KA-55555", "RID-99999");
+        
+        let context : Context = create_new_context();
+        context.request.query["room_channel"] = "RID-99999";
+        context.request.query["message_id"] = "m1";
+        await getMessage(context);
+        expect(context.body["message"]).to.eql({"message_id" : "m1", "message" : "Hello "});
+    })
 })
 
 describe('Chat Middleware', async () => {
@@ -178,4 +197,11 @@ describe('Chat Middleware', async () => {
         await api_middlewares.chat_filter_ka(context, () => {})
         expect(context.body).to.eql(json_swapped_data);
     })
+})
+
+describe('', async () => {
+    beforeEach( () => {
+        fs.writeFileSync("users.json", "{}");        
+    })
+
 })
