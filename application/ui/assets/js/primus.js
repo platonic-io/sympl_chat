@@ -45,8 +45,8 @@ primus.on("data", async (data) => {
             case "DemoteOwnerEvent":
                 add_message(`${data.data.demoter} demoted ${data.data.demotee}`, data.data.room.channel, false);
                 break;
-            case "PromoteToEvent":
-                add_message(`${data.data.inviter} promoted ${data.data.invitee}`, data.data.room.channel, false);
+            case "PromoteToOwnerEvent":
+                add_message(`${data.data.promoter} promoted ${data.data.promotee}`, data.data.room.channel, false);
                 break;
             case "CreateRoomEvent":
                 add_room(data.data.room);
