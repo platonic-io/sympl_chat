@@ -16,3 +16,7 @@ This will run the build script `build.sh`. It will start a mock-network named ch
 
 ### Running the Application Server
 `npm start`
+
+### Testing
+Testing is implemented with Mocha, Sinon and Chai, and can be run with the command:
+`npm t`
