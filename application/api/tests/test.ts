@@ -79,19 +79,19 @@ describe('User Manager', async () => {
         await um.create_user("bob", "0.0.0.1");
         await expect(um.user_is_authorized("bob","0.0.0.0")).to.eventually.be.false;;
     })
-    it("tests user authorized; authorization middleware", async() => {
+    it("tests user authorized (api route); authorization middleware", async() => {
         let demo_ka = create_new_ka()
         rks.returns(demo_ka);
         await um.create_user("bob", "0.0.0.0");
         let context : Context = create_new_context();
         context.request.headers["username"] = "bob";
         context.ip = "0.0.0.0";
-        context.url = "/anything";
+        context.url = "/api/anything";
         await um.auth_middleware(context, () => {});
         expect(context.body).to.be.equal(undefined);
         expect(context.state.user).to.be.equal(demo_ka);
     })
-    it("tests user unauthorized; authorization middleware", async() => {
+    it("tests user unauthorized (ip); authorization middleware", async() => {
         rks.returns(create_new_ka());
         await um.create_user("bob", "0.0.0.1");
         let context : Context = create_new_context();
@@ -102,7 +102,17 @@ describe('User Manager', async () => {
         //ensure the message comes back with an error
         expect(Object.keys(context.body)).to.include('error');
         expect(context.body["error"]["message"]).to.equal('Unauthorized Request!');
-        expect(context.state.user).to.be.equal(undefined);
+    })
+    it("tests user unauthorized (username); authorization middleware", async() => {
+        let context : Context = create_new_context();
+        context.request.headers["username"] = "bob";
+        context.ip = "0.0.0.9";
+        context.url = "/api/anything";
+        await um.auth_middleware(context, () => {});
+        //ensure the message comes back with an error
+        expect(Object.keys(context.body)).to.include('error');
+        expect(context.body["error"]["message"]).to.equal('Unauthorized Request!');
+        expect(context.state.user).to.be.undefined;
     })
     it("tests filter out key aliases from arbitray json", async () => {
         let demo_ka = create_new_ka();

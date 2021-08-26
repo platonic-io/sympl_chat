@@ -5,6 +5,8 @@ import {networkClient} from './assembly-wrapper';
 const users_db_location = `${__dirname}/../users.json`
 const api_header = '/api'
 
+//create the local "db" of usernames
+//(it's just a json file)
 if (!fs.existsSync(users_db_location)) {
     fs.writeFileSync(users_db_location, "{}")
 } else {
@@ -17,12 +19,6 @@ if (!fs.existsSync(users_db_location)) {
 
 //auth middleware
 export const auth_middleware = async (ctx: Context, next: any) => {
-    try {
-        ctx.state.user = await get_ka_from_user(ctx.get('username'));
-    } catch {
-
-    }
-
     //if the user is unauthorized is an api method but not create_user/
     if(!ctx.url.includes("create_user")) {
         if((!await user_is_authorized(ctx.get("username"), ctx.ip) && (ctx.url.startsWith(api_header))))  {
@@ -31,6 +27,13 @@ export const auth_middleware = async (ctx: Context, next: any) => {
             }
             return;
         }
+    }
+    
+    if(ctx.url.startsWith(api_header) && !ctx.url.startsWith(`${api_header}/create_user`)) {
+        //ctx.state.user becomes the key alias of the associated username
+        //and is used in later middlewares, ctx.get('username') is
+        //the username that the user understands
+        ctx.state.user = await get_ka_from_user(ctx.get('username'));
     }
     return next();
 }
@@ -78,7 +81,7 @@ export const create_user = async function create_user(user: string, ip: string) 
 export const get_ka_from_user = async function get_user_ka(user:string) : Promise<string> {
     let user_db = JSON.parse(fs.readFileSync(users_db_location, 'utf-8'));
     if(!user_db[user]) {
-        throw new Error("User does not exist!");
+        return Promise.reject(Error("User does not exist!"));
     }
     return user_db[user]["ka"];
 }
@@ -95,7 +98,7 @@ export const get_user_from_ka = async function get_user_from_ka(ka:string) : Pro
             return user;
         }
     }
-    throw new Error("KA not associated with a user!")
+    return Promise.reject(Error("KA not associated with a user!"));
 }
 
 /**
@@ -141,7 +144,7 @@ export const filter_out_ka = async function filter_out_ka(object) : Promise<JSON
 export const remove_user = async function remove_user(user:string) {
     let user_db = JSON.parse(fs.readFileSync(users_db_location, 'utf-8'))
     if(!user_db[user]) {
-        throw new Error("Username does not exist!");
+        return Promise.reject(Error("Username does not exist!"));
     }
     let ka = user_db[user]["ka"];
     await networkClient.nodeClients[0].deregisterKeyAlias(ka);

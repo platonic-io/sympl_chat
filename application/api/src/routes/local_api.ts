@@ -27,6 +27,7 @@ export const getMessage = async function get_message(ctx: Context) {
     let room_channel = ctx.request.query.room_channel.toString();
     let message_id   = ctx.request.query.message_id.toString();
 
+    //if the message or room does not exist in the message cache, then cache it!
     if(!message_cache[room_channel] || !message_cache[room_channel][message_id]) {
         await updateCache(ctx.state.user, room_channel)
     }

@@ -8,12 +8,11 @@ if(!localStorage.unread) {
 
 async function init() {
     room_channel = window.location.hash.substr(1);
-    console.log("init");
     //initialize the list of rooms
     let response = await call_api("POST", "get_rooms");
 
     if(response.error) {
-        console.log(response.error)
+        console.log(response.error);
         return;
     }
 
@@ -50,14 +49,13 @@ function send_message(e) {
 }
 
 function add_room(room) {
-    let link = document.createElement("a")
+    let link = document.createElement("a");
     link.id = room.channel;
     link.href = `/room#${room.channel}`;
     
     let text_label = document.createElement('p')
     text_label.textContent = room.name;
-    link.appendChild(text_label)
-    console.log(room)
+    link.appendChild(text_label);
     document.querySelector("#room-items").appendChild(link);
 } 
 

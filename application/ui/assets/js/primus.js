@@ -31,10 +31,8 @@ primus.on("data", async (data) => {
                 if(room_channel === data.data.room.channel && data.data.invitee === localStorage.username) {
                     document.querySelector("#send-message.room-specific").style.visibility = "visible";
                 }
-                console.log(data);  
                 break;
             case "RemoveFromRoomEvent":
-                console.log(data, localStorage.username)
                 if(data.data.removee == localStorage.username) {
                     add_message(`You have been removed from the room by ${data.data.remover}`, data.data.room.channel, false);
                     document.querySelector("#send-message.room-specific").style.visibility = "hidden";
