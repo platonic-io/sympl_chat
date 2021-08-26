@@ -1,12 +1,12 @@
 //if you don't have a username yet
 if(!localStorage.username && window.location.pathname !== "/") {
-    window.location.href = "/"
+    window.location.href = "/";
 }
 
 let js_dir = "/assets/js"
 let js_file = window.location.pathname + ".js"
 if(js_file === "/.js") {
-    js_file = "/index.js"
+    js_file = "/index.js";
 }
 let includes = [
     {"src":`${js_dir}/api.js`},

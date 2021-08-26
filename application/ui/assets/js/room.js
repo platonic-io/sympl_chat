@@ -34,17 +34,17 @@ async function init() {
     })
 
     //add the username text
-    document.querySelector("#label-username").innerHTML = `Welcome, <b>${localStorage.username}</b>`
+    document.querySelector("#label-username").innerHTML = `Welcome, <b>${localStorage.username}</b>`;
 
     document.querySelector("button#new-room").addEventListener('click',create_popup("/room/create"));
 }
 
 function send_message(e) {
-    let input_element = document.querySelector("#inp-send-message")
+    let input_element = document.querySelector("#inp-send-message");
     call_api("POST", "send_message", {
         "room_channel":room_channel, 
         "message":input_element.value
-    })
+    });
     input_element.value = "";
 }
 
@@ -65,7 +65,7 @@ function get_message_and_add(message_id, room_channel) {
         "room_channel": room_channel
     }).then(message => {
         add_message(message.message,room_channel);
-    })
+    });
 }
 
 /**
@@ -80,15 +80,15 @@ function add_message(message, channel, sender=true) {
     if(channel === room_channel) {
         let msg_dom = document.createElement("p");
         if(sender) {
-            let p = document.createElement("p")
+            let p = document.createElement("p");
             p.textContent = `${message.body}`.replaceAll("&quot;", "\"");
-            p.id = message.message_id
+            p.id = message.message_id;
             p.style.display = "inline-block";
-            p.classList.add("message")
-            p.classList.add(message.sender === localStorage.username ? "user-message" : "other-message")
-            msg_dom.style.textAlign = message.sender === localStorage.username ? "right" : "left"
-            msg_dom.value = message.sender
-            let msg_container = document.querySelector("#messages")
+            p.classList.add("message");
+            p.classList.add(message.sender === localStorage.username ? "user-message" : "other-message");
+            msg_dom.style.textAlign = message.sender === localStorage.username ? "right" : "left";
+            msg_dom.value = message.sender;
+            let msg_container = document.querySelector("#messages");
             if(msg_container.childNodes.length > 0) {    
                 if(msg_container.childNodes[msg_container.childNodes.length-1].value !== msg_dom.value) {
                     let user_label = document.createElement("p");
@@ -103,11 +103,11 @@ function add_message(message, channel, sender=true) {
             msg_dom.appendChild(p)
         } else {
             msg_dom.textContent = message.replaceAll("&quot;", "\"");
-            msg_dom.style.class="msg-event"
-            msg_dom.style.textAlign="center"
+            msg_dom.style.class="msg-event";
+            msg_dom.style.textAlign="center";
         }
-        document.querySelector("#messages").appendChild(msg_dom)
-        let msg_list_dom = document.querySelector("#message-list-container")
+        document.querySelector("#messages").appendChild(msg_dom);
+        let msg_list_dom = document.querySelector("#message-list-container");
         msg_list_dom.scrollTo(0, msg_list_dom.scrollHeight);
         return true;
     } else {
@@ -120,9 +120,9 @@ function add_message(message, channel, sender=true) {
 async function load_messages(channel) {
     if(channel) {
         document.querySelector("#messages").textContent = "";
-        let response = await call_api("POST", "get_messages", { "room_channel" : channel} )
+        let response = await call_api("POST", "get_messages", { "room_channel" : channel} );
         if(response.error) {
-            return false
+            return false;
         }
 
         let messages = response;

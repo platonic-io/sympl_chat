@@ -8,7 +8,7 @@ primus.on('open', () => {
 
 primus.on("data", async (data) => {
     if(data.event) {
-        let event = data.event.split('/').pop()
+        let event = data.event.split('/').pop();
         //When you receive a sendmessage event
         //get the message, then display it on the screen
         //if it is the correct message
@@ -50,7 +50,7 @@ primus.on("data", async (data) => {
                 add_room(data.data.room);
                 break;
             case "DeleteRoomEvent":
-                document.querySelector(`#${data.data.room.channel}`).remove()
+                document.querySelector(`#${data.data.room.channel}`).remove();
                 //clear the screen of the old url
                 window.location.hash = "";
                 break;

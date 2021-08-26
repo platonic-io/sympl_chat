@@ -25,9 +25,9 @@ app.use(async (ctx: Context, next: any) => {
     } catch(e) {
         ctx.status = e.status || 500;
         ctx.body = {"error": {"message":e.message}};
-        console.log(e)
+        console.log(e);
     }
-})
+});
 
 //create an http server instance to wrap the koa app
 //and for use with Primus
@@ -40,7 +40,7 @@ const api_router : Router = new Router();
 //local web-server specific routes
 api_router.get("/get_users", local_api.getUsers);
 api_router.post("/create_user", local_api.createUser);
-api_router.post("/get_message", local_api.getMessage)
+api_router.post("/get_message", local_api.getMessage);
 //mount both local assembly routes to api
 api.use(api_router.middleware());
 api.use(mount('/', chat_routes)); //routes that go to assembly
@@ -56,7 +56,7 @@ app.use(mount('/api', api));
 app.use(mount('/', serve(path.join(__dirname, "../../ui"))));
 
 server_instance.listen(PORT, () => {
-    console.log(`Server listening at: http://localhost:${PORT}`)
+    console.log(`Server listening at: http://localhost:${PORT}`);
 });
 
-fs.writeFileSync(`${__dirname}/static/primus.js`, primus.library())
+fs.writeFileSync(`${__dirname}/static/primus.js`, primus.library());

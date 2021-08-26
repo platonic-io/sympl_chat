@@ -13,7 +13,6 @@ import * as um from '../src/user-manager'
 import { createUser, getMessage, getUsers } from '../src/routes/local_api';
 import * as api_middlewares from '../src/routes/chat';
 import { updateCache } from '../src/message-cache';
-import { create } from 'domain';
 //use chai extensions
 chai.use(chaiAsPromised);
 chai.use(chaiThings);

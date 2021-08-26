@@ -8,12 +8,12 @@ const api_header = '/api'
 //create the local "db" of usernames
 //(it's just a json file)
 if (!fs.existsSync(users_db_location)) {
-    fs.writeFileSync(users_db_location, "{}")
+    fs.writeFileSync(users_db_location, "{}");
 } else {
     try {
-        JSON.parse(fs.readFileSync(users_db_location, 'utf-8'))
+        JSON.parse(fs.readFileSync(users_db_location, 'utf-8'));
     } catch {
-        fs.writeFileSync(users_db_location, "{}")
+        fs.writeFileSync(users_db_location, "{}");
     }
 }
 
@@ -106,7 +106,7 @@ export const get_user_from_ka = async function get_user_from_ka(ka:string) : Pro
  * @returns list string[] of users
  */
 export const list_users = async function list_users() : Promise<string[]> {
-    return Object.keys(JSON.parse(fs.readFileSync(users_db_location, 'utf-8')))
+    return Object.keys(JSON.parse(fs.readFileSync(users_db_location, 'utf-8')));
 }
 
 /**
@@ -115,7 +115,7 @@ export const list_users = async function list_users() : Promise<string[]> {
  * @returns boolean
  */
 export const is_key_alias = async function is_key_alias(ka: string) : Promise<boolean> {
-    return Boolean(ka.match(/KA-[0-9]{16}/g))
+    return Boolean(ka.match(/KA-[0-9]{16}/g));
 }
 
 /**
@@ -125,8 +125,8 @@ export const is_key_alias = async function is_key_alias(ka: string) : Promise<bo
  * @returns JSON object
  */
 export const filter_out_ka = async function filter_out_ka(object) : Promise<JSON> {
-    let temp = JSON.stringify(object)
-    let key_alias_regex = /KA-[0-9]{16}/g
+    let temp = JSON.stringify(object);
+    let key_alias_regex = /KA-[0-9]{16}/g;
     let kas = [...temp.matchAll(key_alias_regex)];
 
     for(let i = 0; i < kas.length; i++ ) {
