@@ -3,7 +3,7 @@ var primus = new Primus("/primus", { websockets: true });
 primus.on("open", () => {
   primus.write({
     type: "initial_message",
-    data: { username: localStorage["username"] },
+    username: localStorage["username"],
   });
 });
 
