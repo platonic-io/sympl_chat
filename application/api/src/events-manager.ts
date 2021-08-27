@@ -1,6 +1,6 @@
 import { networkClient } from "./assembly-wrapper";
 import Primus, { Spark } from "primus";
-import * as um from "./user-manager";
+import * as userManager from "./user-manager";
 
 const sparks = {};
 
@@ -13,7 +13,7 @@ async function send_event_response(primus, member, e) {
       }
       spark.write({
         event: e.type,
-        data: await um.filter_out_ka(e.data),
+        data: await userManager.filter_out_ka(e.data),
       });
     }
   }
@@ -39,11 +39,16 @@ export const initialize_events = (primus: Primus) => {
       if (msg.username) {
         try {
           //get the key alias associated with the user
-          let key_alias = await um.get_ka_from_user(msg.username);
+          let key_alias = await userManager.get_ka_from_user(msg.username);
           //parse incoming messages from a connection
           switch (msg.type) {
             case "initial_message":
-              if (await um.user_is_authorized(msg.username, spark.address.ip)) {
+              if (
+                await userManager.user_is_authorized(
+                  msg.username,
+                  spark.address.ip
+                )
+              ) {
                 if (!sparks[key_alias]) {
                   sparks[key_alias] = [];
                 }

@@ -1,15 +1,15 @@
-import * as um from "../user-manager";
+import * as userManager from "../user-manager";
 import { Context } from "koa";
 import { message_cache, updateCache } from "../message-cache";
 
 export const getUsers = async function getUsers(ctx: Context) {
-  ctx.body = await um.list_users();
+  ctx.body = await userManager.list_users();
 };
 
 export const createUser = async function createUser(ctx: Context) {
   if (ctx.request.query.username) {
     let un: string = ctx.request.query.username.toString();
-    await um.create_user(un, ctx.request.ip);
+    await userManager.create_user(un, ctx.request.ip);
     ctx.body = { username: ctx.request.query.username };
   } else {
     return Promise.reject(Error("No Username Supplied!"));
@@ -40,6 +40,8 @@ export const getMessage = async function get_message(ctx: Context) {
   }
 
   ctx.body = {
-    message: await um.filter_out_ka(message_cache[room_channel][message_id]),
+    message: await userManager.filter_out_ka(
+      message_cache[room_channel][message_id]
+    ),
   };
 };

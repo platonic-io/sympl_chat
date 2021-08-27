@@ -1,6 +1,6 @@
 import Koa, { Context } from "koa";
 import { assembly_router } from "./generated/chat";
-import * as um from "../user-manager";
+import * as userManager from "../user-manager";
 const assembly: Koa = new Koa();
 
 export const chat_filter_user = async (ctx: Context, next: any) => {
@@ -19,7 +19,7 @@ export const chat_filter_user = async (ctx: Context, next: any) => {
     //routes file.
     ctx.state[key] =
       key.includes("owner") || key.includes("member")
-        ? await um.get_ka_from_user(value)
+        ? await userManager.get_ka_from_user(value)
         : value;
   }
   return next();
@@ -34,7 +34,7 @@ export const chat_filter_ka = async (ctx: Context, next: any) => {
   await next();
   let body_temp = JSON.stringify(ctx.body);
   if (body_temp !== undefined) {
-    ctx.body = await um.filter_out_ka(ctx.body);
+    ctx.body = await userManager.filter_out_ka(ctx.body);
   }
 };
 
