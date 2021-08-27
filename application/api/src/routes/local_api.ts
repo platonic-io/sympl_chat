@@ -8,8 +8,8 @@ export const getUsers = async function getUsers(ctx: Context) {
 
 export const createUser = async function createUser(ctx: Context) {
   if (ctx.request.query.username) {
-    let un: string = ctx.request.query.username.toString();
-    await userManager.create_user(un, ctx.request.ip);
+    let username: string = ctx.request.query.username.toString();
+    await userManager.create_user(username, ctx.request.ip);
     ctx.body = { username: ctx.request.query.username };
   } else {
     return Promise.reject(Error("No Username Supplied!"));
