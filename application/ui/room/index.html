@@ -1,42 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Room</title>
     <script src="/assets/js/helper.js"></script>
     <script src="/primus/primus.js"></script>
     <script src="/assets/js/primus.js" defer></script>
-    <link rel="stylesheet" href="/assets/css/room.css">
-    <link rel="stylesheet" href="/assets/css/main.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/assets/css/room.css" />
+    <link rel="stylesheet" href="/assets/css/main.css" />
+  </head>
+  <body>
     <div id="menu-bar">
-        <div id="logo" class="menu-bar">
-            <h2>Symchat</h2>
-            <button id="new-room" value="">New Room</button>
-        </div>
-        <div id="info" class="menu-bar">
-            <div id="label-username"></div>
-            <h2 id="room-name"></h2>
-            <button id="btn-info" class="room-specific" value="">Info</button>
-        </div>
+      <div id="logo" class="menu-bar">
+        <h2>Symchat</h2>
+        <button id="new-room" value="">New Room</button>
+      </div>
+      <div id="info" class="menu-bar">
+        <div id="label-username"></div>
+        <h2 id="room-name"></h2>
+        <button id="btn-info" class="room-specific" value="">Info</button>
+      </div>
     </div>
     <div id="chat-main">
-        <div id="rooms">
-            <div id="room-items"></div>
+      <div id="rooms">
+        <div id="room-items"></div>
+      </div>
+      <div id="message-container" class="room-specific">
+        <div id="message-list-container">
+          <div id="messages"></div>
         </div>
-        <div id="message-container" class="room-specific">
-            <div id="message-list-container">
-                <div id="messages">
-                </div>
-            </div>
-            <div id="send-message" class="room-specific">
-                <input type="text" placeholder="Enter a message..." name="send-message" id="inp-send-message">
-                <button id="btn-send-message">^</button>
-            </div>
+        <div id="send-message" class="room-specific">
+          <input
+            type="text"
+            placeholder="Enter a message..."
+            name="send-message"
+            id="inp-send-message"
+          />
+          <button id="btn-send-message">^</button>
         </div>
+      </div>
     </div>
-</body>
+  </body>
 </html>

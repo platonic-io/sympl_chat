@@ -1,30 +1,30 @@
 h1 {
-    margin-left: 10px;
+  margin-left: 10px;
 }
 h2 {
-    margin: 20px;
+  margin: 20px;
 }
 .item {
-    display: flex;
-    width: 100%;
-    line-height:30px;
+  display: flex;
+  width: 100%;
+  line-height: 30px;
 }
 .item p {
-    flex-grow: 1;
+  flex-grow: 1;
 }
 .item button {
-    min-width: 100px;
+  min-width: 100px;
 }
 
-.members-container p{
-    margin-left: 50px;
+.members-container p {
+  margin-left: 50px;
 }
 
 #btn-delete {
-    padding:20px;
-    margin: 10px;
+  padding: 20px;
+  margin: 10px;
 }
 
 #invite-members p {
-    margin-left: 50px;
+  margin-left: 50px;
 }
