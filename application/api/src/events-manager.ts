@@ -37,24 +37,28 @@ export const initialize_events = (primus: Primus) => {
   primus.on("connection", async (spark) => {
     spark.on("data", async (msg) => {
       if (msg.username) {
-        //get the key alias associated with the user
-        let key_alias = await um.get_ka_from_user(msg.username);
-        //parse incoming messages from a connection
-        switch (msg.type) {
-          case "initial_message":
-            if (um.user_is_authorized(msg.username, spark.address.ip)) {
-              if (!sparks[key_alias]) {
-                sparks[key_alias] = [];
+        try {
+          //get the key alias associated with the user
+          let key_alias = await um.get_ka_from_user(msg.username);
+          //parse incoming messages from a connection
+          switch (msg.type) {
+            case "initial_message":
+              if (await um.user_is_authorized(msg.username, spark.address.ip)) {
+                if (!sparks[key_alias]) {
+                  sparks[key_alias] = [];
+                }
+                sparks[key_alias].push(spark.id);
               }
-              sparks[key_alias].push(spark.id);
-            }
-            break;
-          default:
-            console.error("Error, unsupported message!", msg);
-            break;
+              break;
+            default:
+              spark.write({ error: "Error, unsupported message!" });
+              break;
+          }
+        } catch (e) {
+          spark.write({ error: e.message.toString() });
         }
       } else {
-        console.error("Error, No username supplied!");
+        spark.write({ error: "Error, no username supplied!" });
       }
     });
   });

@@ -89,5 +89,7 @@ primus.on("data", async (data) => {
         window.location.hash = "";
         break;
     }
+  } else if (data.error) {
+    console.log(data);
   }
 });
