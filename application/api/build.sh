@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 NETWORK_NAME=chat
 if [ $1 ]
 then

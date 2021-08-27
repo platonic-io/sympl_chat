@@ -15,7 +15,6 @@
       "baseUrl": ".",
       "types": [
         "node",
-        "jest"
       ],
       "lib": [
         "esnext",
@@ -25,9 +24,6 @@
         "es6"
       ],
     },
-    "typeAcquisition": {
-      "include": ["jest"]
-    },
     "include": [
       "src/**/*.ts"
     ],
@@ -35,4 +31,4 @@
       "node_modules",
       "tests"
     ]
-  }
+}
