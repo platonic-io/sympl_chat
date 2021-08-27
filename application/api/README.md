@@ -20,3 +20,14 @@ This will run the build script `build.sh`. It will start a mock-network named ch
 ### Testing
 Testing is implemented with Mocha, Sinon and Chai, and can be run with the command:
 `npm run test`
+
+### UI
+
+The UI uses some aspectes of the Javascript API (`fetch()` and websockets) which may not be supported in some browsers. The below list is the untested, non-exhaustive list of supported browsers (produced with info from [MDN](https://developer.mozilla.org)). It has been tested and works on Firefox 91.0.2 and Safari 14.1.2
+
+Chrome >42
+Edge >14
+Firefox >39
+Opera >29
+Safari >10.1
+Internet Explorer: NO
