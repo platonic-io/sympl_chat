@@ -32,7 +32,8 @@ async function call_api(
   if (method == "POST") {
     options.body = data;
   }
-
+  console.log("req:", method, api_method, parameters, headers, data)
+  
   return fetch(url, options).then(async (res) => {
     let result = await res.json();
     if (result.error) {
@@ -41,6 +42,7 @@ async function call_api(
         window.location.href = "/";
       }
     }
+    console.log("res", result)
     return result;
   });
 }

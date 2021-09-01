@@ -13,7 +13,7 @@ async function send_event_response(primus, member, e) {
       }
       spark.write({
         event: e.type,
-        data: await userManager.filter_out_ka(e.data),
+        data: e.data,
       });
     }
   }

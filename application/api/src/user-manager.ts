@@ -69,13 +69,12 @@ export const user_is_authorized = async function user_is_authorized(
  * @returns void
  */
 export const create_user = async function create_user(
-  user: string,
   ip: string
 ): Promise<string> {
   let user_db = JSON.parse(fs.readFileSync(users_db_location, "utf-8"));
-  user = await networkClient.nodeClients[0].registerKeyAlias();
+  let user = await networkClient.nodeClients[0].registerKeyAlias();
   if (user_db[user]) {
-    return Promise.reject(new Error("Username already exists!"));
+    return Promise.reject(new Error("Key alias already exists!?"));
   }
   user_db[user] = {
     ip: ip,
@@ -154,11 +153,11 @@ export const is_key_alias = async function is_key_alias(
  * and return a JSON objec with the KA's swapped for their equivalent usernames
  * @param object JSON object to filter the ka
  * @returns JSON object
- */
 export const filter_out_ka = async function filter_out_ka(
   object,
   contacts_list_owner: string = ""
 ): Promise<JSON> {
+  return object;
   let temp = JSON.stringify(object);
   let key_alias_regex = /KA-[0-9]{16}/g;
   let kas = [...temp.matchAll(key_alias_regex)];
@@ -170,7 +169,7 @@ export const filter_out_ka = async function filter_out_ka(
     temp = temp.replaceAll(kas[i][0], username);
   }
   return JSON.parse(temp);
-};
+};*/
 
 /**
  * This function will delete a user from the stored users database

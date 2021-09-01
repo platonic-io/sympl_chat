@@ -1,9 +1,8 @@
 import Koa, { Context } from "koa";
 import { assembly_router } from "./generated/chat";
-import * as userManager from "../user-manager";
 const assembly: Koa = new Koa();
 
-export const chat_filter_user = async (ctx: Context, next: any) => {
+export const move_query_to_state = async (ctx: Context, next: any) => {
   //swaps supplied 'usernames' for the associated key alias
   //from the users.json file
   for (let key in JSON.parse(JSON.stringify(ctx.request.query))) {
@@ -17,31 +16,12 @@ export const chat_filter_user = async (ctx: Context, next: any) => {
     //set the value of ctx.state[key] to the value of ctx.request.query[key]
     //this makes the query parameters nice and easy for the auto generated
     //routes file.
-    ctx.state[key] =
-      key.includes("owner") || key.includes("member")
-        ? await userManager.get_ka_from_user(value)
-        : value;
+    ctx.state[key] = value;
   }
   return next();
 };
 
-assembly.use(chat_filter_user);
-
-export const chat_filter_ka = async (ctx: Context, next: any) => {
-  //replaces all 'key_aliases' from the return event in assembly
-  //with the corresponding username stored in the users.json file. It uses
-  //a regex to recognize the key aliases and then replaces them
-  await next();
-  let body_temp = JSON.stringify(ctx.body);
-  if (body_temp !== undefined) {
-    ctx.body = await userManager.filter_out_ka(
-      ctx.body,
-      ctx.get("username") ? ctx.get("username") : ""
-    );
-  }
-};
-
-assembly.use(chat_filter_ka);
+assembly.use(move_query_to_state);
 
 //the routes middleware for the assembly functions
 assembly.use(assembly_router.middleware());

@@ -51,46 +51,29 @@ describe("User Manager", async () => {
   it("tests creating user and getting key_alias", async () => {
     let demo_ka = create_new_ka();
     rks.returns(demo_ka);
-    await userManager.create_user("bob", "0.0.0.0");
-    let ka = await userManager.get_ka_from_user("bob");
+    await userManager.create_user("0.0.0.0");
+    let ka = await userManager.get_ka_from_user(demo_ka);
     chai.expect(ka).to.equal(demo_ka);
-  });
-
-  it("tests duplicate user", async () => {
-    rks.returns(create_new_ka());
-    await chai.expect(userManager.create_user("steve1", "0.0.0.0")).to.be
-      .fulfilled;
-    await chai
-      .expect(userManager.create_user("steve1", "0.0.0.0"))
-      .to.eventually.be.rejectedWith(Error);
-  });
-
-  it("tests getting username from key_alias", async () => {
-    let demo_ka = create_new_ka();
-    rks.returns(demo_ka);
-    await userManager.create_user("bob", "0.0.0.0");
-    let user = await userManager.get_user_from_ka(demo_ka);
-    chai.expect(user).to.equal("bob");
   });
 
   it("tests user authorized", async () => {
     rks.returns(create_new_ka());
-    await userManager.create_user("bob", "0.0.0.0");
-    await expect(userManager.user_is_authorized("bob", "0.0.0.0")).to.eventually
+    let user = await userManager.create_user("0.0.0.0");
+    await expect(userManager.user_is_authorized(user, "0.0.0.0")).to.eventually
       .be.true;
   });
   it("tests user unauthorized", async () => {
     rks.returns(create_new_ka());
-    await userManager.create_user("bob", "0.0.0.1");
-    await expect(userManager.user_is_authorized("bob", "0.0.0.0")).to.eventually
+    let user = await userManager.create_user("0.0.0.1");
+    await expect(userManager.user_is_authorized(user, "0.0.0.0")).to.eventually
       .be.false;
   });
   it("tests user authorized (api route); authorization middleware", async () => {
     let demo_ka = create_new_ka();
     rks.returns(demo_ka);
-    await userManager.create_user("bob", "0.0.0.0");
+    let user = await userManager.create_user("0.0.0.0");
     let context: Context = create_new_context();
-    context.request.headers["username"] = "bob";
+    context.request.headers["username"] = user;
     context.ip = "0.0.0.0";
     context.url = "/api/anything";
     await userManager.auth_middleware(context, () => {});
@@ -99,9 +82,9 @@ describe("User Manager", async () => {
   });
   it("tests user unauthorized (ip); authorization middleware", async () => {
     rks.returns(create_new_ka());
-    await userManager.create_user("bob", "0.0.0.1");
+    let user = await userManager.create_user("0.0.0.1");
     let context: Context = create_new_context();
-    context.request.headers["username"] = "bob";
+    context.request.headers["username"] = user;
     context.ip = "0.0.0.9";
     context.url = "/api/anything";
     await userManager.auth_middleware(context, () => {});
@@ -109,9 +92,9 @@ describe("User Manager", async () => {
     expect(Object.keys(context.body)).to.include("error");
     expect(context.body["error"]["message"]).to.equal("Unauthorized Request!");
   });
-  it("tests user unauthorized (username); authorization middleware", async () => {
+  it("tests user unauthorized (ka); authorization middleware", async () => {
     let context: Context = create_new_context();
-    context.request.headers["username"] = "bob";
+    context.request.headers["username"] = "ahsdlfhakdhflad";
     context.ip = "0.0.0.9";
     context.url = "/api/anything";
     await userManager.auth_middleware(context, () => {});
@@ -120,17 +103,6 @@ describe("User Manager", async () => {
     expect(context.body["error"]["message"]).to.equal("Unauthorized Request!");
     expect(context.state.user).to.be.undefined;
   });
-  it("tests filter out key aliases from arbitray json", async () => {
-    let demo_ka = create_new_ka();
-    rks.returns(demo_ka);
-    await userManager.create_user("bob", "0.0.0.0");
-    let json_dummy_data = {};
-    let json_swapped_data = {};
-    json_dummy_data[demo_ka] = "test-data";
-    json_swapped_data["bob"] = "test-data";
-    json_dummy_data = await userManager.filter_out_ka(json_dummy_data);
-    expect(json_dummy_data).to.eql(json_swapped_data);
-  });
 });
 
 describe("Local Api Routes", async () => {
@@ -138,27 +110,13 @@ describe("Local Api Routes", async () => {
     fs.writeFileSync("users.json", "{}");
   });
   it("tests creating a user", async () => {
-    rks.returns(create_new_ka());
+    let demo_ka = create_new_ka();
+    rks.returns(demo_ka);
     let context: Context = create_new_context();
-    context.request.query.username = "bob";
     context.request.ip = "0.0.0.0";
     //run the api
-    await createUser(context);
-    chai.expect(context.body["username"]).to.be.equal("bob");
-  });
-
-  it("tests getting multiple users", async () => {
-    rks.returns(create_new_ka());
-    await userManager.create_user("alice", "0.0.0.0");
-    await userManager.create_user("bob", "0.0.0.0");
-    await userManager.create_user("eve", "0.0.0.0");
-    let context: Context = create_new_context();
-    //run the api
-    await getUsers(context);
-    chai
-      .expect(context.body)
-      .to.be.an("array")
-      .that.contains.something.like(["alice", "bob", "eve"]);
+    let user = await createUser(context);
+    chai.expect(context.body["username"]).to.be.equal(demo_ka);
   });
 
   it("tests getting no users", async () => {
@@ -172,6 +130,7 @@ describe("Local Api Routes", async () => {
         .that.contains.something.like([]);
     });
   });
+
   it("tests get message from message cache", async () => {
     let messages: any[] = [
       { message_id: "m1", message: "Hello " },
@@ -194,6 +153,29 @@ describe("Local Api Routes", async () => {
       message: "Hello ",
     });
   });
+  it("tests adding a contact", async () => {
+    rks.callsFake(create_new_ka);
+    let alice = await userManager.create_user("0.0.0.0");
+    let bob = await userManager.create_user("0.0.0.0");
+    await userManager.add_contact(alice, bob, "bob");
+    let contacts = await userManager.get_contacts(alice);
+    chai.expect(contacts[bob]).to.equal("bob");
+  });
+  it("tests removing a contact", async () => {
+    rks.callsFake(create_new_ka);
+    let alice = await userManager.create_user("0.0.0.0");
+    let bob = await userManager.create_user("0.0.0.0");
+    await userManager.add_contact(alice, bob, "bob");
+    await userManager.remove_contact(alice, bob);
+    let contacts = await userManager.get_contacts(alice);
+    chai.expect(contacts[bob]).to.equal(undefined);
+  });
+  it("tests nonexistent a contact", async () => {
+    rks.callsFake(create_new_ka);
+    let alice = await userManager.create_user("0.0.0.0");
+    let contacts = await userManager.get_contacts(alice);
+    chai.expect(contacts["gibberish"]).to.equal(undefined);
+  });
 });
 
 describe("Chat Middleware", async () => {
@@ -201,33 +183,19 @@ describe("Chat Middleware", async () => {
     fs.writeFileSync("users.json", "{}");
   });
 
-  it("tests filter usernames", async () => {
+  it("tests moving query params to the state object", async () => {
     let context = create_new_context();
     let demo_ka_1 = create_new_ka();
     rks.returns(demo_ka_1);
-    await userManager.create_user("bob", "0.0.0.0");
-    context.request.query["member_to_remove"] = "bob";
+    await userManager.create_user("0.0.0.0");
+    context.request.query["member_to_remove"] = demo_ka_1;
     context.request.query["room_channel"] = "RID-SHLDFHDSLFHDSFDSFDHSFHDSLFHDS";
     //run the function
-    await api_middlewares.chat_filter_user(context, () => {});
+    await api_middlewares.move_query_to_state(context, () => {});
 
     expect(context.state).to.eql({
       member_to_remove: demo_ka_1,
       room_channel: "RID-SHLDFHDSLFHDSFDSFDHSFHDSLFHDS",
     });
-  });
-
-  it("tests filter out ka from ctx.body", async () => {
-    let demo_ka = create_new_ka();
-    rks.returns(demo_ka);
-    await userManager.create_user("bob", "0.0.0.0");
-    let json_dummy_data = {};
-    let json_swapped_data = {};
-    json_dummy_data[demo_ka] = "test-data";
-    json_swapped_data["bob"] = "test-data";
-    let context = create_new_context();
-    context.body = json_dummy_data;
-    await api_middlewares.chat_filter_ka(context, () => {});
-    expect(context.body).to.eql(json_swapped_data);
   });
 });

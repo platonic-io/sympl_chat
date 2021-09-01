@@ -7,28 +7,20 @@ export const getUsers = async function getUsers(ctx: Context) {
   let user_list = (await networkClient.listKeyAliases())[0];
   ctx.body = await Promise.all(
     user_list.map(async (e) => {
-      console.log(
-        e,
-        await userManager.get_user_from_ka(e, ctx.get("username"), true)
-      );
       return await userManager.get_user_from_ka(e, ctx.get("username"), true);
     })
   );
-  console.log(ctx.body);
 };
 
 export const createUser = async function createUser(ctx: Context) {
+  let username = await userManager.create_user(ctx.request.ip);
+  ctx.body = { username: username };
   if (ctx.request.query.username) {
-    let username: string = ctx.request.query.username.toString();
-    username = await userManager.create_user(username, ctx.request.ip);
     userManager.add_contact(
       username,
       username,
       ctx.request.query.username.toString()
     );
-    ctx.body = { username: username };
-  } else {
-    return Promise.reject(Error("No Username Supplied!"));
   }
 };
 
@@ -56,9 +48,7 @@ export const getMessage = async function get_message(ctx: Context) {
   }
 
   ctx.body = {
-    message: await userManager.filter_out_ka(
-      message_cache[room_channel][message_id]
-    ),
+    message: message_cache[room_channel][message_id],
   };
 };
 
