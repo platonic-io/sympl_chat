@@ -42,6 +42,7 @@ api_router.get("/get_users", local_api.getUsers);
 api_router.post("/create_user", local_api.createUser);
 api_router.post("/get_message", local_api.getMessage);
 api_router.post("/get_contacts", local_api.getContacts);
+api_router.post("/update_contact", local_api.updateContact);
 //mount both local assembly routes to api
 api.use(api_router.middleware());
 api.use(mount("/", chat_routes)); //routes that go to assembly

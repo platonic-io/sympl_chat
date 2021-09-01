@@ -173,3 +173,8 @@ body {
   word-break: break-word;
   text-align: left;
 }
+
+#btn-contacts {
+  line-height: 30px;
+  padding: 0 10px;
+}

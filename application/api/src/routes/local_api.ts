@@ -65,3 +65,17 @@ export const getMessage = async function get_message(ctx: Context) {
 export const getContacts = async function get_contacts(ctx: Context) {
   ctx.body = await userManager.get_contacts(ctx.get("username"));
 };
+
+export const updateContact = async function update_contact(ctx: Context) {
+  if (!ctx.request.query.key_alias) {
+    return Promise.reject(Error("Key Alias not supplied!"));
+  }
+  let key_alias = ctx.request.query.key_alias.toString();
+  let contact_name = ctx.request.query.contact_name.toString();
+  if (contact_name === "") {
+    userManager.remove_contact(ctx.state.user, key_alias);
+  } else {
+    userManager.add_contact(ctx.state.user, key_alias, contact_name);
+  }
+  ctx.body = { message: "success!" };
+};

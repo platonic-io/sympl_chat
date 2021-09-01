@@ -45,6 +45,10 @@ async function init() {
   document
     .querySelector("button#new-room")
     .addEventListener("click", create_popup("/room/create"));
+
+  document
+    .querySelector("button#btn-contacts")
+    .addEventListener("click", create_popup("/contacts"));
 }
 
 function send_message(e) {
