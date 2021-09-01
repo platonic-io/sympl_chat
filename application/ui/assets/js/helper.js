@@ -3,6 +3,15 @@ if (!localStorage.username && window.location.pathname !== "/") {
   window.location.href = "/";
 }
 
+let contacts = [];
+
+function get_friendly_contact_name(ka) {
+  if (contacts[ka]) {
+    return contacts[ka];
+  }
+  return ka;
+}
+
 let js_dir = "/assets/js";
 let js_file = window.location.pathname + ".js";
 if (js_file === "/.js") {
@@ -21,3 +30,7 @@ for (let script_path of includes) {
   }
   document.head.appendChild(script);
 }
+
+window.addEventListener("load", async () => {
+  contacts = await call_api("POST", "get_contacts");
+});

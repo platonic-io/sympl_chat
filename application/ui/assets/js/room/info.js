@@ -58,7 +58,7 @@ async function create_user_item(client_is_owner, user) {
   user_item.className = "item";
 
   let user_label = document.createElement("p");
-  user_label.innerHTML = user;
+  user_label.innerHTML = get_friendly_contact_name(user);
 
   let user_add_button = document.createElement("button");
   user_add_button.innerHTML = "+";
@@ -106,7 +106,7 @@ async function create_member_item(client_is_owner, member) {
   member_item.id = member;
   member_item.className = "item";
 
-  label.innerHTML = member;
+  label.innerHTML = get_friendly_contact_name(member);
   member_item.appendChild(label);
 
   if (client_is_owner) {
@@ -130,7 +130,7 @@ async function create_member_item(client_is_owner, member) {
           member_item.remove();
           create_member_item(client_is_owner, member);
         } else {
-          alert(`ERROR: ${response.error.error.message}`);
+          alert(`ERROR: ${JSON.stringify(response, null)}`);
         }
       });
     });
@@ -149,7 +149,7 @@ async function create_member_item(client_is_owner, member) {
             await create_user_item(client_is_owner, member);
           }
         } else {
-          alert(`ERROR: ${response.error.error.message}`);
+          alert(`ERROR: ${response}`);
         }
       });
     });

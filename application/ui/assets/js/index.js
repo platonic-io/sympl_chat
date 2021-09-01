@@ -6,10 +6,8 @@ async function create_user(e) {
     (headers = { username: potential_username })
   );
   if (response.username) {
-    if (response.username == potential_username) {
-      localStorage.username = response.username;
-      window.location.href = "/room";
-    }
+    localStorage.username = response.username;
+    window.location.href = "/room";
   } else if (response.error) {
     let error = document.querySelector("#error-message");
     if (!error) {

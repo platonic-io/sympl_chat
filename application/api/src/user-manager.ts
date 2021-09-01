@@ -71,18 +71,20 @@ export const user_is_authorized = async function user_is_authorized(
 export const create_user = async function create_user(
   user: string,
   ip: string
-): Promise<void> {
+): Promise<string> {
   let user_db = JSON.parse(fs.readFileSync(users_db_location, "utf-8"));
+  user = await networkClient.nodeClients[0].registerKeyAlias();
   if (user_db[user]) {
     return Promise.reject(new Error("Username already exists!"));
   }
   user_db[user] = {
     ip: ip,
-    ka: await networkClient.nodeClients[0].registerKeyAlias(),
+    ka: user,
     allowed: true,
+    contacts: {},
   };
   fs.writeFileSync(users_db_location, JSON.stringify(user_db));
-  return Promise.resolve();
+  return Promise.resolve(user);
 };
 
 /**
@@ -94,6 +96,9 @@ export const get_ka_from_user = async function get_user_ka(
   user: string
 ): Promise<string> {
   let user_db = JSON.parse(fs.readFileSync(users_db_location, "utf-8"));
+  if (await is_key_alias(user)) {
+    return user;
+  }
   if (!user_db[user]) {
     return Promise.reject(Error("User does not exist!"));
   }
@@ -106,15 +111,23 @@ export const get_ka_from_user = async function get_user_ka(
  * @returns username string
  */
 export const get_user_from_ka = async function get_user_from_ka(
-  ka: string
+  ka: string,
+  contacts_list_owner: string = "",
+  suppress_error: boolean = true
 ): Promise<string> {
   let user_db = JSON.parse(fs.readFileSync(users_db_location, "utf-8"));
-  for (let user in user_db) {
-    if (ka === user_db[user]["ka"]) {
+
+  for (let user of Object.keys(user_db)) {
+    if (ka === user_db[user].ka) {
       return user;
     }
   }
-  return Promise.reject(Error("KA not associated with a user!"));
+
+  if (!suppress_error) {
+    return Promise.reject(Error("KA not associated with a user!"));
+  } else {
+    return ka;
+  }
 };
 
 /**
@@ -143,14 +156,17 @@ export const is_key_alias = async function is_key_alias(
  * @returns JSON object
  */
 export const filter_out_ka = async function filter_out_ka(
-  object
+  object,
+  contacts_list_owner: string = ""
 ): Promise<JSON> {
   let temp = JSON.stringify(object);
   let key_alias_regex = /KA-[0-9]{16}/g;
   let kas = [...temp.matchAll(key_alias_regex)];
 
   for (let i = 0; i < kas.length; i++) {
-    let username = (await get_user_from_ka(kas[i][0])).replaceAll('"', '\\"');
+    let username = (
+      await get_user_from_ka(kas[i][0], contacts_list_owner)
+    ).replaceAll('"', '\\"');
     temp = temp.replaceAll(kas[i][0], username);
   }
   return JSON.parse(temp);
@@ -170,4 +186,28 @@ export const remove_user = async function remove_user(user: string) {
   await networkClient.nodeClients[0].deregisterKeyAlias(ka);
   user_db[user]["allowed"] = false;
   fs.writeFileSync(users_db_location, JSON.stringify(user_db));
+};
+
+export const add_contact = async function add_contact(
+  user: string,
+  contact_key_alias: string,
+  contact_name: string
+) {
+  let user_db = JSON.parse(fs.readFileSync(users_db_location, "utf-8"));
+  user_db[user].contacts[contact_key_alias] = contact_name;
+  fs.writeFileSync(users_db_location, JSON.stringify(user_db));
+};
+
+export const remove_contact = async function remove_contact(
+  user: string,
+  contact_key_alias: string
+) {
+  let user_db = JSON.parse(fs.readFileSync(users_db_location, "utf-8"));
+  delete user_db[user].contacts[contact_key_alias];
+  fs.writeFileSync(users_db_location, JSON.stringify(user_db));
+};
+
+export const get_contacts = async function get_contacts(user: string) {
+  let user_db = JSON.parse(fs.readFileSync(users_db_location, "utf-8"));
+  return user_db[user].contacts ? user_db[user].contacts : [];
 };

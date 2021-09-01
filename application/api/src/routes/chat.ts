@@ -34,7 +34,10 @@ export const chat_filter_ka = async (ctx: Context, next: any) => {
   await next();
   let body_temp = JSON.stringify(ctx.body);
   if (body_temp !== undefined) {
-    ctx.body = await userManager.filter_out_ka(ctx.body);
+    ctx.body = await userManager.filter_out_ka(
+      ctx.body,
+      ctx.get("username") ? ctx.get("username") : ""
+    );
   }
 };
 

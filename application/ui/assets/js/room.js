@@ -23,7 +23,6 @@ async function init() {
   room_change();
 
   window.scrollTo(0, 0);
-
   //events
   document
     .querySelector("#btn-send-message")
@@ -39,7 +38,9 @@ async function init() {
   //add the username text
   document.querySelector(
     "#label-username"
-  ).innerHTML = `Welcome, <b>${localStorage.username}</b>`;
+  ).innerHTML = `Welcome, <b>${get_friendly_contact_name(
+    localStorage.username
+  )}</b>`;
 
   document
     .querySelector("button#new-room")
@@ -107,12 +108,12 @@ function add_message(message, channel, sender = true) {
             .value !== msg_dom.value
         ) {
           let user_label = document.createElement("p");
-          user_label.textContent = message.sender;
+          user_label.textContent = get_friendly_contact_name(message.sender);
           msg_dom.appendChild(user_label);
         }
       } else {
         let user_label = document.createElement("p");
-        user_label.textContent = message.sender;
+        user_label.textContent = get_friendly_contact_name(message.sender);
         msg_dom.appendChild(user_label);
       }
       msg_dom.appendChild(p);
