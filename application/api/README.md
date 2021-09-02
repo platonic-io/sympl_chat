@@ -17,6 +17,10 @@ This will run the build script `build.sh`. It will start a mock-network named ch
 ### Running the Application Server
 `npm start`
 
+The application server can also be run on a different port or node by specifying parameters like the following: `npm start port=<port_num> node=<node_num>`. 
+
+An example command would be: `npm start port=8082 node=1`.
+
 ### Testing
 Testing is implemented with Mocha, Sinon and Chai, and can be run with the command:
 `npm run test`

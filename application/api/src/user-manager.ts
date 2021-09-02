@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import { Context } from "koa";
-import { networkClient } from "./assembly-wrapper";
+import { networkClient, nodeClient } from "./assembly-wrapper";
 
 const users_db_location = `${__dirname}/../users.json`;
 const api_header = "/api";
@@ -72,7 +72,7 @@ export const create_user = async function create_user(
   ip: string
 ): Promise<string> {
   let user_db = JSON.parse(fs.readFileSync(users_db_location, "utf-8"));
-  let user = await networkClient.nodeClients[0].registerKeyAlias();
+  let user = await nodeClient.registerKeyAlias();
   if (user_db[user]) {
     return Promise.reject(new Error("Key alias already exists!?"));
   }
@@ -149,29 +149,6 @@ export const is_key_alias = async function is_key_alias(
 };
 
 /**
- * this will take a JSON object that contains key aliases
- * and return a JSON objec with the KA's swapped for their equivalent usernames
- * @param object JSON object to filter the ka
- * @returns JSON object
-export const filter_out_ka = async function filter_out_ka(
-  object,
-  contacts_list_owner: string = ""
-): Promise<JSON> {
-  return object;
-  let temp = JSON.stringify(object);
-  let key_alias_regex = /KA-[0-9]{16}/g;
-  let kas = [...temp.matchAll(key_alias_regex)];
-
-  for (let i = 0; i < kas.length; i++) {
-    let username = (
-      await get_user_from_ka(kas[i][0], contacts_list_owner)
-    ).replaceAll('"', '\\"');
-    temp = temp.replaceAll(kas[i][0], username);
-  }
-  return JSON.parse(temp);
-};*/
-
-/**
  * This function will delete a user from the stored users database
  * and deregister their key alias
  * @param user username of user to delete
@@ -182,7 +159,7 @@ export const remove_user = async function remove_user(user: string) {
     return Promise.reject(Error("Username does not exist!"));
   }
   let ka = user_db[user]["ka"];
-  await networkClient.nodeClients[0].deregisterKeyAlias(ka);
+  await nodeClient.deregisterKeyAlias(ka);
   user_db[user]["allowed"] = false;
   fs.writeFileSync(users_db_location, JSON.stringify(user_db));
 };

@@ -23,6 +23,12 @@ body {
 
 #label-username {
   background: #dfdfdf;
+  margin-bottom: 5px;
+}
+
+#username-container {
+  display: flex;
+  flex-direction: column;
   padding: 10px;
 }
 
@@ -177,4 +183,8 @@ body {
 #btn-contacts {
   line-height: 30px;
   padding: 0 10px; 
+}
+
+#label-key-alias {
+  font-size: 12px;
 }

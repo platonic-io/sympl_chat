@@ -13,7 +13,17 @@ import { chat_routes } from "./routes/chat";
 import { create_primus } from "./primus-wrapper";
 import serve from "koa-static";
 
-const PORT = 8081;
+let PORT = 8081;
+for (let arg of process.argv) {
+  if (arg.includes("port")) {
+    let temp = parseInt(arg.split("=")[1]);
+    if (String(temp) === "NaN") {
+      console.error("Provided port is incorrect, using default 8081");
+    } else {
+      PORT = temp;
+    }
+  }
+}
 
 //overall koa app
 const app: Koa = new Koa();

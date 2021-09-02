@@ -1,7 +1,7 @@
 let room_channel = "";
 let allowed_in_room = false;
 
-const popup_close = new Event('popupClose');
+const popup_close = new Event("popupClose");
 
 if (!localStorage.unread) {
   localStorage.unread = [];
@@ -44,11 +44,15 @@ async function init() {
     localStorage.username
   )}</b>`;
 
+  document.querySelector(
+    "#label-key-alias"
+  ).innerHTML = `Key Alias: ${localStorage.username}`;
+
   document
     .querySelector("button#new-room")
     .addEventListener("click", create_popup("/room/create"));
 
-    document
+  document
     .querySelector("button#btn-contacts")
     .addEventListener("click", create_popup("/contacts"));
 }
@@ -291,9 +295,9 @@ async function room_change() {
   ).textContent;
 }
 
-document.addEventListener('popupClose', async () => {
+document.addEventListener("popupClose", async () => {
   contacts = await call_api("POST", "get_contacts");
-})
+});
 
 window.addEventListener("hashchange", () => {
   room_change();

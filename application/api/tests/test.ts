@@ -8,7 +8,7 @@ import fs from "fs";
 import { Context, Request } from "koa";
 import { expect } from "chai";
 //import applicaation modules
-import { networkClient, chat } from "../src/assembly-wrapper";
+import { networkClient, chat, nodeClient } from "../src/assembly-wrapper";
 import * as userManager from "../src/user-manager";
 import {
   createUser,
@@ -46,9 +46,7 @@ function create_new_ka() {
   return `KA-${str}`;
 }
 
-let rks = Sinon.stub(networkClient.nodeClients[0], "registerKeyAlias").returns(
-  create_new_ka()
-);
+let rks = Sinon.stub(nodeClient, "registerKeyAlias").returns(create_new_ka());
 
 describe("User Manager", async () => {
   beforeEach(() => {

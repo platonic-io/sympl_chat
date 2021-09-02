@@ -1,4 +1,4 @@
-import { networkClient } from "./assembly-wrapper";
+import { networkClient, nodeClient } from "./assembly-wrapper";
 import Primus, { Spark } from "primus";
 import * as userManager from "./user-manager";
 
@@ -20,7 +20,7 @@ async function send_event_response(primus, member, e) {
 }
 
 export const initialize_events = (primus: Primus) => {
-  networkClient.nodeClients[0].on("*", async (e) => {
+  nodeClient.on("*", async (e) => {
     let event_meta = e.type.split("/");
     if (event_meta[event_meta.length - 1].includes("Event")) {
       for (let member of e.data.room.members) {
