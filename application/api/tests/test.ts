@@ -10,7 +10,13 @@ import { expect } from "chai";
 //import applicaation modules
 import { networkClient, chat } from "../src/assembly-wrapper";
 import * as userManager from "../src/user-manager";
-import { createUser, getMessage, getUsers } from "../src/routes/local_api";
+import {
+  createUser,
+  getMessage,
+  getUsers,
+  getContacts,
+  updateContact,
+} from "../src/routes/local_api";
 import * as api_middlewares from "../src/routes/chat";
 import { updateCache } from "../src/message-cache";
 //use chai extensions
@@ -57,13 +63,13 @@ describe("User Manager", async () => {
   });
 
   it("tests user authorized", async () => {
-    rks.returns(create_new_ka());
+    rks.callsFake(create_new_ka);
     let user = await userManager.create_user("0.0.0.0");
     await expect(userManager.user_is_authorized(user, "0.0.0.0")).to.eventually
       .be.true;
   });
   it("tests user unauthorized", async () => {
-    rks.returns(create_new_ka());
+    rks.callsFake(create_new_ka);
     let user = await userManager.create_user("0.0.0.1");
     await expect(userManager.user_is_authorized(user, "0.0.0.0")).to.eventually
       .be.false;
@@ -81,7 +87,7 @@ describe("User Manager", async () => {
     expect(context.state.user).to.be.equal(demo_ka);
   });
   it("tests user unauthorized (ip); authorization middleware", async () => {
-    rks.returns(create_new_ka());
+    rks.callsFake(create_new_ka);
     let user = await userManager.create_user("0.0.0.1");
     let context: Context = create_new_context();
     context.request.headers["username"] = user;
@@ -102,6 +108,40 @@ describe("User Manager", async () => {
     expect(Object.keys(context.body)).to.include("error");
     expect(context.body["error"]["message"]).to.equal("Unauthorized Request!");
     expect(context.state.user).to.be.undefined;
+  });
+  it("tests adding a contact", async () => {
+    rks.callsFake(create_new_ka);
+    let alice = await userManager.create_user("0.0.0.0");
+    let bob = await userManager.create_user("0.0.0.0");
+    await userManager.add_contact(alice, bob, "bob");
+    let contacts = await userManager.get_contacts(alice);
+    chai.expect(contacts[bob]).to.equal("bob");
+  });
+  it("tests removing a contact", async () => {
+    rks.callsFake(create_new_ka);
+    let alice = await userManager.create_user("0.0.0.0");
+    let bob = await userManager.create_user("0.0.0.0");
+    await userManager.add_contact(alice, bob, "bob");
+    await userManager.remove_contact(alice, bob);
+    let contacts = await userManager.get_contacts(alice);
+    chai.expect(contacts[bob]).to.equal(undefined);
+  });
+  it("tests nonexistent a contact", async () => {
+    rks.callsFake(create_new_ka);
+    let alice = await userManager.create_user("0.0.0.0");
+    let contacts = await userManager.get_contacts(alice);
+    chai.expect(contacts["gibberish"]).to.equal(undefined);
+  });
+  it("tests updating a contact", async () => {
+    rks.callsFake(create_new_ka);
+    let alice = await userManager.create_user("0.0.0.0");
+    let bob = await userManager.create_user("0.0.0.0");
+    await userManager.add_contact(alice, bob, "bob");
+    let contacts = await userManager.get_contacts(alice);
+    chai.expect(contacts[bob]).to.equal("bob");
+    await userManager.add_contact(alice, bob, "bob2");
+    contacts = await userManager.get_contacts(alice);
+    chai.expect(contacts[bob]).to.equal("bob2");
   });
 });
 
@@ -148,33 +188,54 @@ describe("Local Api Routes", async () => {
     context.request.query["room_channel"] = "RID-99999";
     context.request.query["message_id"] = "m1";
     await getMessage(context);
-    expect(context.body["message"]).to.eql({
+    chai.expect(context.body["message"]).to.eql({
       message_id: "m1",
       message: "Hello ",
     });
   });
-  it("tests adding a contact", async () => {
+  it("tests adding and getting contact", async () => {
     rks.callsFake(create_new_ka);
+    let context: Context = create_new_context();
     let alice = await userManager.create_user("0.0.0.0");
     let bob = await userManager.create_user("0.0.0.0");
-    await userManager.add_contact(alice, bob, "bob");
+    context.state.user = alice;
+    context.request.query.key_alias = bob;
+    context.request.query.contact_name = "bob";
+    await updateContact(context);
     let contacts = await userManager.get_contacts(alice);
-    chai.expect(contacts[bob]).to.equal("bob");
+    chai.expect(contacts[bob]).to.be.equal("bob");
+  });
+  it("tests updating a contact", async () => {
+    rks.callsFake(create_new_ka);
+    let context: Context = create_new_context();
+    let alice = await userManager.create_user("0.0.0.0");
+    let bob = await userManager.create_user("0.0.0.0");
+    context.state.user = alice;
+    context.request.query.key_alias = bob;
+    context.request.query.contact_name = "bob";
+    await updateContact(context);
+    let contacts = await userManager.get_contacts(alice);
+    chai.expect(contacts[bob]).to.be.equal("bob");
+    context.request.query.contact_name = "bob2";
+    await updateContact(context);
+    contacts = await userManager.get_contacts(alice);
+    chai.expect(contacts[bob]).to.be.equal("bob2");
   });
   it("tests removing a contact", async () => {
     rks.callsFake(create_new_ka);
+    let context: Context = create_new_context();
     let alice = await userManager.create_user("0.0.0.0");
     let bob = await userManager.create_user("0.0.0.0");
-    await userManager.add_contact(alice, bob, "bob");
-    await userManager.remove_contact(alice, bob);
+    context.state.user = alice;
+    context.request.query.key_alias = bob;
+    context.request.query.contact_name = "bob";
+    await updateContact(context);
     let contacts = await userManager.get_contacts(alice);
-    chai.expect(contacts[bob]).to.equal(undefined);
-  });
-  it("tests nonexistent a contact", async () => {
-    rks.callsFake(create_new_ka);
-    let alice = await userManager.create_user("0.0.0.0");
-    let contacts = await userManager.get_contacts(alice);
-    chai.expect(contacts["gibberish"]).to.equal(undefined);
+    chai.expect(contacts[bob]).to.be.equal("bob");
+    context.request.query.contact_name = "";
+    await updateContact(context);
+    contacts = await userManager.get_contacts(alice);
+    chai.expect(contacts[bob]).to.be.undefined;
   });
 });
 
