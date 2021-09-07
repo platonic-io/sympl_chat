@@ -97,7 +97,7 @@ async function update_page_room() {
 async function create_member_item(client_is_owner, member) {
   let member_item = document.createElement("li");
   let label = document.createElement("p");
-  let btn_kick = document.createElement("button");
+  let btn_remove = document.createElement("button");
   let btn_promote = document.createElement("button");
 
   let owner = page_room.owners.includes(member);
@@ -135,9 +135,9 @@ async function create_member_item(client_is_owner, member) {
       });
     });
 
-    btn_kick.innerHTML = "Kick";
-    btn_kick.value = member;
-    btn_kick.addEventListener("click", (e) => {
+    btn_remove.innerHTML = "Remove";
+    btn_remove.value = member;
+    btn_remove.addEventListener("click", (e) => {
       call_api("POST", "remove_from_room", {
         room_channel: room_channel,
         member_to_remove: member,
@@ -155,7 +155,7 @@ async function create_member_item(client_is_owner, member) {
     });
 
     member_item.appendChild(btn_promote);
-    member_item.appendChild(btn_kick);
+    member_item.appendChild(btn_remove);
   }
 
   if (owner) {
