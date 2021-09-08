@@ -1,0 +1,34 @@
+{
+    "compilerOptions": {
+      "target": "es6",
+      "module": "CommonJS",
+      "strict": false,
+      "importHelpers": true,
+      "moduleResolution": "node",
+      "resolveJsonModule": true,
+      "experimentalDecorators": true,
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+      "suppressImplicitAnyIndexErrors": true,
+      "sourceMap": true,
+      "locale": "en-US",
+      "baseUrl": ".",
+      "types": [
+        "node",
+      ],
+      "lib": [
+        "esnext",
+        "dom",
+        "dom.iterable",
+        "scripthost",
+        "es6"
+      ],
+    },
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "node_modules",
+      "tests"
+    ]
+}
