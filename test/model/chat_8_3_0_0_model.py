@@ -138,10 +138,10 @@ class ChatModel:
 
     def invite_to_room(self, inviter, room_channel, new_member):
         room = self._get_room(inviter, room_channel)
-        if new_member in room.members:
-            raise ContractError("Member {} already in room {}.".format(new_member, room_channel))
         if inviter not in room.owners:
             raise ContractError(f"{inviter} is not an owner of the room {room.channel}.")
+        if new_member in room.members:
+            raise ContractError("Member {} already in room {}.".format(new_member, room_channel))
         if room.is_deleted:
             raise ContractError(f"{room.channel} is deleted.")
 

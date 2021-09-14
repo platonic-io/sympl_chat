@@ -17,13 +17,9 @@ def get_events(network, chat_8, name):
     return network.__getitem__(chat_8(name).key_alias).events()
 
 @pytest.mark.usefixtures('network', 'store', 'chat_8')
-@pytest.mark.fails_remote
 class TestChatCoverage():
     def test_create_room(self, chat_8, network):
         chat_8('alice').create_room(room_name=ROOM_NAME)
-        print("\n\n\n\n\n\n")
-        [print(x) for x in get_events(network, chat_8, 'alice')]
-        print("\n\n\n\n\n\n")
         assert _is_room_event_present(get_events(network, chat_8, 'alice'), ROOM_NAME, 'CreateRoomEvent')
 
     def test_delete_room(self, chat_8, network):

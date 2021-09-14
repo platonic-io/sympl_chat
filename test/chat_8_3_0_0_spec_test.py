@@ -19,8 +19,8 @@ MESSAGES_PER_ROOM = 2500
 USERS_PER_ROOM = 10
 
 
-@pytest.mark.fails_remote  # as of 2018-04-30 this takes about ten minutes on a real network, which is a bit too long
 @pytest.mark.usefixtures('network', 'store', 'chat_8')
+@pytest.mark.proptest  # as of 2018-04-30 this takes about ten minutes on a real network, which is a bit too long
 class TestChatStress():
     def test_stress(self, chat_8, store, network):
         message = 'x' * MESSAGE_LENGTH

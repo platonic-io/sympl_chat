@@ -86,3 +86,5 @@ Steps:
 pytest test/<test file name>.py --network-config=~/.symbiont/assembly-dev/mock-network/default/network-config.json --contract-path=./
 ```
 
+There are also two property tests and a stress test, which can be run by passing `--proptests` to the pytest command, but these will take a long time (>15 minutes) to run.
+
