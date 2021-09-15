@@ -212,8 +212,8 @@ def _get_room(room_channel: ChannelName) -> Room:
     room = cvm.storage.get(room_channel, RoomStatic, Identifier('room'))
     #check if the room exists
     if isinstance(room,  None):
-        room_channel_str : str = room_channel
-        cvm.error(f"Room for channel {room_channel_str} not found.")
+            room_channel_str : str = room_channel
+            cvm.error(f"Room for channel {room_channel_str} not found.")
     return room
 
 @helper
@@ -222,9 +222,9 @@ def _guard_input(input_description: str, input_: str) -> None:
         cvm.error(f"{input_description} cannot be empty.")
     nb = chr(0)
     if isinstance(nb, None):
-       cvm.error("Cannot compute null byte")
-    if nb in input_:
-        cvm.error(f"{input_description} cannot contain null byte.")
+        cvm.error("Cannot compute null byte")
+        if nb in input_:
+            cvm.error(f"{input_description} cannot contain null byte.")
     if len(input_) > 4000:
         cvm.error(f"{input_description} cannot be longer than 4000 characters.")
 
@@ -524,26 +524,39 @@ def _get_messages(room_channel: ChannelName) -> List[Message]:
     if room.is_deleted:
         room_channel_str : str = room_channel
         cvm.error(f'Room {room_channel_str} has been deleted. Cannot get messages.')
-    messages = cvm.storage.query(MessageStatic).in_channel(room_channel).values()
-    def compare(lhs: Message, rhs: Message) -> bool:
-        lt : int = lhs.timestamp
-        return lt < rhs.timestamp
-    return std.sort_by(messages, compare)
+    return cvm.storage.query_history(MessageStatic).in_channel(room_channel).order_by('timestamp', desc=False).values()
 
-@helper
+@clientside_helper
 def _get_rooms() -> List[Room]:
-    rooms : List[Room] = [r for r in cvm.storage.query(RoomStatic).values() if not r.is_deleted]
-    def compare(lhs: Room, rhs: Room) -> bool:
-        ln : str = lhs.name
-        lc : str = lhs.channel
-        if (ln < rhs.name):
+    
+    rows : List[HistoricalRow[Room]] = cvm.storage.query_history(RoomStatic).where("is_deleted", False).order_by('channel', desc=True).execute()
+    
+    def compare(lhs: HistoricalRow[Room], rhs: HistoricalRow[Room]) -> bool:
+        lt : int = lhs.tx_index
+        lc : str = lhs.channel_name
+        if (lc < rhs.channel_name):
             return True
-        elif (ln == rhs.name):
-            return lc < rhs.channel
+        elif (lc == rhs.channel_name):
+            return lt > rhs.tx_index
         else:
             return False
+    rows = std.sort_by(rows, compare)
+    
+    hist_row = rows[0]
 
-    return std.sort_by(rooms, compare)
+    if isinstance(hist_row, HistoricalRow[Room]):
+        old_room = hist_row.value
+        ret_list : List[Room] = [old_room]
+
+        for row in rows:
+            old_room_channel_str : str = old_room.channel
+            if old_room_channel_str != row.value.channel:
+                ret_list = ret_list + [row.value]
+            old_room = row.value
+        
+        return ret_list
+    else:
+        return []
 
 @clientside_helper
 def _promote_to_owner(room_channel: ChannelName, member: KeyAlias) -> None:
