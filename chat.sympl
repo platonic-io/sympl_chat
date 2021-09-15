@@ -524,33 +524,35 @@ def _get_messages(room_channel: ChannelName) -> List[Message]:
     if room.is_deleted:
         room_channel_str : str = room_channel
         cvm.error(f'Room {room_channel_str} has been deleted. Cannot get messages.')
-    return cvm.storage.query_history(MessageStatic).in_channel(room_channel).order_by('timestamp', desc=False).values()
+    return cvm.storage.query_history(MessageStatic).in_channel(room_channel).order_by('timestamp', desc=True).values()
 
 @clientside_helper
 def _get_rooms() -> List[Room]:
     
-    rows : List[HistoricalRow[Room]] = cvm.storage.query_history(RoomStatic).where("is_deleted", False).order_by('channel', desc=True).execute()
+    rows : List[HistoricalRow[Room]] = cvm.storage.query_history(RoomStatic).order_by('channel', desc=True).execute()
     
     def compare(lhs: HistoricalRow[Room], rhs: HistoricalRow[Room]) -> bool:
         lt : int = lhs.tx_index
         lc : str = lhs.channel_name
+        ln : str = lhs.value.name
         if (lc < rhs.channel_name):
-            return True
+            return ln < rhs.value.name
         elif (lc == rhs.channel_name):
             return lt > rhs.tx_index
         else:
-            return False
+            return ln < rhs.value.name
     rows = std.sort_by(rows, compare)
     
     hist_row = rows[0]
 
     if isinstance(hist_row, HistoricalRow[Room]):
         old_room = hist_row.value
-        ret_list : List[Room] = [old_room]
+        
+        ret_list : List[Room] = [old_room] if not old_room.is_deleted else []
 
         for row in rows:
             old_room_channel_str : str = old_room.channel
-            if old_room_channel_str != row.value.channel:
+            if old_room_channel_str != row.value.channel and not row.value.is_deleted:
                 ret_list = ret_list + [row.value]
             old_room = row.value
         
