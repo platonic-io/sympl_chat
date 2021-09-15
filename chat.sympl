@@ -519,11 +519,11 @@ def send_message_checks(room_channel: ChannelName, message: str) -> None:
 @clientside_helper
 def _get_messages(room_channel: ChannelName) -> List[Message]:
     # check that the room exists and is accessible
-    room = _get_room(room_channel)
-    room_channel_str : str = room_channel
-    if room.is_deleted:
-        room_channel_str : str = room_channel
-        cvm.error(f'Room {room_channel_str} has been deleted. Cannot get messages.')
+    #room = _get_room(room_channel)
+    #room_channel_str : str = room_channel
+    #if room.is_deleted:
+    #    room_channel_str : str = room_channel
+    #    cvm.error(f'Room {room_channel_str} has been deleted. Cannot get messages.')
     return cvm.storage.query_history(MessageStatic).in_channel(room_channel).order_by('timestamp', desc=True).values()
 
 @clientside_helper
