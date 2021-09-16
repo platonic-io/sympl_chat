@@ -212,8 +212,8 @@ def _get_room(room_channel: ChannelName) -> Room:
     room = cvm.storage.get(room_channel, RoomStatic, Identifier('room'))
     #check if the room exists
     if isinstance(room,  None):
-            room_channel_str : str = room_channel
-            cvm.error(f"Room for channel {room_channel_str} not found.")
+        room_channel_str : str = room_channel
+        cvm.error(f"Room for channel {room_channel_str} not found.")
     return room
 
 @helper
@@ -223,8 +223,8 @@ def _guard_input(input_description: str, input_: str) -> None:
     nb = chr(0)
     if isinstance(nb, None):
         cvm.error("Cannot compute null byte")
-        if nb in input_:
-            cvm.error(f"{input_description} cannot contain null byte.")
+    if nb in input_:
+        cvm.error(f"{input_description} cannot contain null byte.")
     if len(input_) > 4000:
         cvm.error(f"{input_description} cannot be longer than 4000 characters.")
 
@@ -518,13 +518,14 @@ def send_message_checks(room_channel: ChannelName, message: str) -> None:
 
 @clientside_helper
 def _get_messages(room_channel: ChannelName) -> List[Message]:
-    # check that the room exists and is accessible
-    #room = _get_room(room_channel)
-    #room_channel_str : str = room_channel
-    #if room.is_deleted:
-    #    room_channel_str : str = room_channel
-    #    cvm.error(f'Room {room_channel_str} has been deleted. Cannot get messages.')
-    return cvm.storage.query_history(MessageStatic).in_channel(room_channel).order_by('timestamp', desc=True).values()
+    historical_rooms = cvm.storage.query_history(RoomStatic).in_channel(room_channel).values()
+    room = historical_rooms[len(historical_rooms) -1]
+    if isinstance(room, Room):
+        if room.is_deleted:
+            cvm.error(f"Room {room_channel} has been deleted. Cannot get messages.")
+        return cvm.storage.query_history(MessageStatic).in_channel(room_channel).order_by('timestamp', desc=True).values()
+    else:
+        cvm.error(f"Room for channel {room_channel} not found.")
 
 @clientside_helper
 def _get_rooms() -> List[Room]:
