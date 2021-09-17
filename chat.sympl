@@ -518,6 +518,8 @@ def send_message_checks(room_channel: ChannelName, message: str) -> None:
 
 @clientside_helper
 def _get_messages(room_channel: ChannelName) -> List[Message]:
+    #gets all the available messages from the room if you have ever been a member, and if the room isnt deleted
+    # if you've never been a member, it throws an error
     historical_rooms = cvm.storage.query_history(RoomStatic).in_channel(room_channel).values()
     room = historical_rooms[len(historical_rooms) -1]
     if isinstance(room, Room):
@@ -530,6 +532,8 @@ def _get_messages(room_channel: ChannelName) -> List[Message]:
 @clientside_helper
 def _get_rooms() -> List[Room]:
     
+    ##the successive code gets the most recent readable version of the room by the caller (i.e. this gets the current version
+    # if you are still in the room, and if you were kicked out, the version immediately after you were kicked out)
     rows : List[HistoricalRow[Room]] = cvm.storage.query_history(RoomStatic).order_by('channel', desc=True).execute()
     
     def compare(lhs: HistoricalRow[Room], rhs: HistoricalRow[Room]) -> bool:
