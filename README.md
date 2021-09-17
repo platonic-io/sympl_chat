@@ -1,5 +1,7 @@
 # Chat smart contract
 
+<a href="https://iportal.symbiont.io/sdk_docs/docs/intro"><img src="https://img.shields.io/badge/Assembly%20SDK-2.0.0-blue"/></a>
+
 ## Introduction
 
 This smart contract repository is a sample "Chat" `symPL` contract. Hereby included are:
