@@ -222,7 +222,7 @@ def _guard_input(input_description: str, input_: str) -> None:
         cvm.error(f"{input_description} cannot be empty.")
     nb = chr(0)
     if isinstance(nb, None):
-       cvm.error("Cannot compute null byte")
+        cvm.error("Cannot compute null byte")
     if nb in input_:
         cvm.error(f"{input_description} cannot contain null byte.")
     if len(input_) > 4000:
@@ -518,32 +518,52 @@ def send_message_checks(room_channel: ChannelName, message: str) -> None:
 
 @clientside_helper
 def _get_messages(room_channel: ChannelName) -> List[Message]:
-    # check that the room exists and is accessible
-    room = _get_room(room_channel)
-    room_channel_str : str = room_channel
-    if room.is_deleted:
-        room_channel_str : str = room_channel
-        cvm.error(f'Room {room_channel_str} has been deleted. Cannot get messages.')
-    messages = cvm.storage.query(MessageStatic).in_channel(room_channel).values()
-    def compare(lhs: Message, rhs: Message) -> bool:
-        lt : int = lhs.timestamp
-        return lt < rhs.timestamp
-    return std.sort_by(messages, compare)
+    #gets all the available messages from the room if you have ever been a member, and if the room isnt deleted
+    # if you've never been a member, it throws an error
+    historical_rooms = cvm.storage.query_history(RoomStatic).in_channel(room_channel).values()
+    room = historical_rooms[len(historical_rooms) -1]
+    if isinstance(room, Room):
+        if room.is_deleted:
+            cvm.error(f"Room {room_channel} has been deleted. Cannot get messages.")
+        return cvm.storage.query_history(MessageStatic).in_channel(room_channel).order_by('timestamp', desc=True).values()
+    else:
+        cvm.error(f"Room for channel {room_channel} not found.")
 
-@helper
+@clientside_helper
 def _get_rooms() -> List[Room]:
-    rooms : List[Room] = [r for r in cvm.storage.query(RoomStatic).values() if not r.is_deleted]
-    def compare(lhs: Room, rhs: Room) -> bool:
-        ln : str = lhs.name
-        lc : str = lhs.channel
-        if (ln < rhs.name):
-            return True
-        elif (ln == rhs.name):
-            return lc < rhs.channel
-        else:
-            return False
+    ##this function gets the most recent readable version of the room by the caller (i.e. this gets the current version
+    # if you are still in the room, and if you were kicked out, the version immediately after you were kicked out)
 
-    return std.sort_by(rooms, compare)
+    rows : List[HistoricalRow[Room]] = cvm.storage.query_history(RoomStatic).order_by('channel', desc=True).execute()
+    
+    def compare(lhs: HistoricalRow[Room], rhs: HistoricalRow[Room]) -> bool:
+        lt : int = lhs.tx_index
+        lc : str = lhs.channel_name
+        ln : str = lhs.value.name
+        if (lc < rhs.channel_name):
+            return ln < rhs.value.name
+        elif (lc == rhs.channel_name):
+            return lt > rhs.tx_index
+        else:
+            return ln < rhs.value.name
+    rows = std.sort_by(rows, compare)
+    
+    hist_row = rows[0]
+
+    if isinstance(hist_row, HistoricalRow[Room]):
+        old_room = hist_row.value
+        
+        ret_list : List[Room] = [old_room] if not old_room.is_deleted else []
+
+        for row in rows:
+            old_room_channel_str : str = old_room.channel
+            if old_room_channel_str != row.value.channel and not row.value.is_deleted:
+                ret_list = ret_list + [row.value]
+            old_room = row.value
+        
+        return ret_list
+    else:
+        return []
 
 @clientside_helper
 def _promote_to_owner(room_channel: ChannelName, member: KeyAlias) -> None:
