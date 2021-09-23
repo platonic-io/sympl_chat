@@ -5,7 +5,7 @@ set -eo pipefail
 echo "--- Contracts Test Workflow"
 source ./env.sh
 
-sym mock-network start
+sym sandbox start
 
 if ! timeout 30s bash -c 'until curl --silent http://localhost:8888/api/v1; do sleep 1; done'; then
     echo "Timed out waiting for sandbox to start"
