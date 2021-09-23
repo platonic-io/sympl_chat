@@ -26,8 +26,12 @@ jobs:
           command: |
             cd test/
             chmod u+x *.sh
+            echo "Setting up environment"
             ./setup_environment.sh
+            echo "Environment setup"
+            echo "Running tests"
             ./run_tests.sh
+            echo "Tests run"
       - store_artifacts:
           path: ~/.symbiont/assembly-dev/mock-network
 workflows:
