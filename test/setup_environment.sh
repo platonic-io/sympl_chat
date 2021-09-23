@@ -11,3 +11,5 @@ source ./env.sh
 
 # SDK is installed
 EXPECTED_SYMENV="Symbiont Assembly SDK Manager (v1.1.6-0-gd88fdea)"
+
+sym install 2.0.1
