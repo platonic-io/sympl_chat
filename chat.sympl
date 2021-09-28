@@ -33,7 +33,7 @@
 
 # The general structure of the actions that occur in this contract looks like the following:
 #
-# For each action, there is a @clientside and @executable function. Each @clientside function has 
+# For each action, there is a @clientside and @executable function. Each @clientside function has
 # a @clientside_helper function, and each action contains a "checker" function. The checker functions
 # gatekeep actions. For example, in this chat contract, only users who are a 'member' of a room are allowed
 # to send messages to that room. This is checked in send_message_checks. The reason for designating a dedicated
@@ -185,7 +185,7 @@ def send_message(room_channel: ChannelName, message: str) -> None:
 @clientside
 def promote_to_owner(room_channel: ChannelName, member: KeyAlias) -> None:
     """Promotes a current member of a room to owner
-    Promotions to owner of the room 
+    Promotions to owner of the room
     """
     return _promote_to_owner(room_channel, member)
 
@@ -301,7 +301,7 @@ def delete_room_checks(room_channel: ChannelName) -> None:
 @clientside_helper
 def _restore_room(room_channel: ChannelName) -> None:
     room = _get_room(room_channel)
-    
+
     #run the checks for restore room
     restore_room_checks(room_channel)
 
@@ -357,13 +357,13 @@ def _invite_to_room(room_channel: ChannelName, new_member: KeyAlias) -> None:
 def _invite_to_room_execute(new_member: KeyAlias) -> InviteToRoomEvent:
     #get the room channel
     room_channel : ChannelName = cvm.tx.write_channel
-    
+
     room = _get_room(room_channel)
     members = room.members
 
     #perform invite checks
     invite_to_room_checks(room, new_member)
-    
+
     #modify contract storage
     room.members = room.members + [new_member]
     cvm.storage.put(Identifier('room'), room)
@@ -373,7 +373,7 @@ def _invite_to_room_execute(new_member: KeyAlias) -> InviteToRoomEvent:
     cvm.create_event('InviteToRoomEvent', std.json(invite_to_room_event))
     return invite_to_room_event
 
-#runs checks to see if the caller has the correct permissions to invite the 
+#runs checks to see if the caller has the correct permissions to invite the
 #a new member to a room
 @helper
 def invite_to_room_checks(room: Room, new_member: KeyAlias) -> None:
@@ -406,8 +406,8 @@ def _remove_from_room(room_channel: ChannelName, member_to_remove: KeyAlias) -> 
     with PostTxArgs(room_channel):
         _remove_from_room_execute(member_to_remove)
 
-    #rotate the keys so that all members of the chatroom will be able to 
-    #read future messages, and the member we are removing will not be able to 
+    #rotate the keys so that all members of the chatroom will be able to
+    #read future messages, and the member we are removing will not be able to
     #read future messages
     cvm.rotate_key(room_channel)
     for member in room.members:
@@ -419,7 +419,7 @@ def _remove_from_room(room_channel: ChannelName, member_to_remove: KeyAlias) -> 
 def _remove_from_room_execute(member_to_remove: KeyAlias) -> RemoveFromRoomEvent:
     #get the room channel
     room_channel : ChannelName = cvm.tx.write_channel
-    
+
     room = _get_room(room_channel)
     members = room.members
 
@@ -430,7 +430,7 @@ def _remove_from_room_execute(member_to_remove: KeyAlias) -> RemoveFromRoomEvent
 
     #run checks on removing
     remove_from_room_checks(room, member_to_remove, cvm.tx.key_alias)
-  
+
 
     # room.members-remove(member_to_remove)
     mtr: str = member_to_remove
@@ -439,15 +439,15 @@ def _remove_from_room_execute(member_to_remove: KeyAlias) -> RemoveFromRoomEvent
 
     cvm.storage.put(Identifier('room'), room)
     remove_from_room_event = RemoveFromRoomEvent(room=room, remover=cvm.tx.key_alias, removee=member_to_remove)
-    
+
     cvm.create_event('RemoveFromRoomEvent', std.json(remove_from_room_event))
     return remove_from_room_event
 
-#runs checks to see if the caller has the correct permissions to invite the 
+#runs checks to see if the caller has the correct permissions to invite the
 #a new member to a room, throws cvm error if there are issues
 @helper
 def remove_from_room_checks(room: Room, member_to_remove: KeyAlias, caller: KeyAlias) -> None:
-    #check if caller is an owner and has perms to remove 
+    #check if caller is an owner and has perms to remove
     if (not std.contains_using(room.owners, caller, _str_eq)): # and (str(member_to_remove) != str(caller)):
         cvm.error(f"{caller} is not an owner and does not have permission to remove {member_to_remove} from room {room.channel}." )
     #check if member to remove is actually a member of the room
@@ -459,8 +459,8 @@ def remove_from_room_checks(room: Room, member_to_remove: KeyAlias, caller: KeyA
 
     #check if caller is the same as the person to remove... cannot remove yourself
     #### - this is the case because when someone leaves the secure channel, the keys
-    ####   need to change so that the leaving member can no longer decrypt the 
-    ####   information in the secure channel. The keys cannot be rotated if the 
+    ####   need to change so that the leaving member can no longer decrypt the
+    ####   information in the secure channel. The keys cannot be rotated if the
     ####   member leaving doesn't have permissions to (is not an owner), and if
     ####   the owner themselves who is leaving tries to rotate (when keys get rotated)
     ####   the calling 'owner' of the secure channel implicitly knows the new key
@@ -471,7 +471,7 @@ def remove_from_room_checks(room: Room, member_to_remove: KeyAlias, caller: KeyA
 
 @clientside_helper
 def _send_message(room_channel: ChannelName, message: str) -> None:
-    
+
     #run checks on sending the message
     send_message_checks(room_channel, message)
 
@@ -492,9 +492,9 @@ def _send_message_execute(message: str) -> SendMessageEvent:
     message_id = cvm.generate_id('MID')
     new_message = Message(message_id=message_id, sender=cvm.tx.key_alias, body=message, timestamp=cvm.tx.timestamp)
     cvm.storage.put(new_message.message_id, new_message)
-    
+
     # create an event saying there's a new message
-    # Note: the send_message_event doesn't store the contents of 
+    # Note: the send_message_event doesn't store the contents of
     # the message. This was done because it would allow anyone on
     # the blockchain network to read the contents of the message
     send_message_event = SendMessageEvent(room=room, message_id=message_id)
@@ -525,7 +525,7 @@ def _get_messages(room_channel: ChannelName) -> List[Message]:
     if isinstance(room, Room):
         if room.is_deleted:
             cvm.error(f"Room {room_channel} has been deleted. Cannot get messages.")
-        return cvm.storage.query_history(MessageStatic).in_channel(room_channel).order_by('timestamp', desc=True).values()
+        return cvm.storage.query_history(MessageStatic).in_channel(room_channel).order_by('timestamp', False).values()
     else:
         cvm.error(f"Room for channel {room_channel} not found.")
 
@@ -533,42 +533,19 @@ def _get_messages(room_channel: ChannelName) -> List[Message]:
 def _get_rooms() -> List[Room]:
     ##this function gets the most recent readable version of the room by the caller (i.e. this gets the current version
     # if you are still in the room, and if you were kicked out, the version immediately after you were kicked out)
+    results = cvm.storage.query_history(RoomStatic).where('is_deleted', False).order_by('channel', False).order_by('name', False).values()
+    rooms : List[Room] = []
 
-    rows : List[HistoricalRow[Room]] = cvm.storage.query_history(RoomStatic).order_by('channel', desc=True).execute()
-    
-    def compare(lhs: HistoricalRow[Room], rhs: HistoricalRow[Room]) -> bool:
-        lt : int = lhs.tx_index
-        lc : str = lhs.channel_name
-        ln : str = lhs.value.name
-        if (lc < rhs.channel_name):
-            return ln < rhs.value.name
-        elif (lc == rhs.channel_name):
-            return lt > rhs.tx_index
-        else:
-            return ln < rhs.value.name
-    rows = std.sort_by(rows, compare)
-    
-    hist_row = rows[0]
+    for room in results:
+        if not std.contains_using(rooms, room.name, _str_eq):
+            rooms += [room]
 
-    if isinstance(hist_row, HistoricalRow[Room]):
-        old_room = hist_row.value
-        
-        ret_list : List[Room] = [old_room] if not old_room.is_deleted else []
-
-        for row in rows:
-            old_room_channel_str : str = old_room.channel
-            if old_room_channel_str != row.value.channel and not row.value.is_deleted:
-                ret_list = ret_list + [row.value]
-            old_room = row.value
-        
-        return ret_list
-    else:
-        return []
+    return rooms
 
 @clientside_helper
 def _promote_to_owner(room_channel: ChannelName, member: KeyAlias) -> None:
     room = _get_room(room_channel)
-    
+
     #run the checks and error out if there is an issue
     promote_to_owner_checks(member, cvm.tx.key_alias, room)
 
@@ -591,7 +568,7 @@ def _promote_to_owner_execute(member: KeyAlias) -> PromoteToOwnerEvent:
     #run the checks, and error out if there is an issue
     #this is performed on both the executable and clientside sides
     #because a malicious KA and Node Administrator could directly run
-    #any executable function 
+    #any executable function
     promote_to_owner_checks(member, cvm.tx.key_alias, room)
 
     #update the owners list in storage
@@ -616,7 +593,7 @@ def promote_to_owner_checks(member: KeyAlias, caller: KeyAlias, room: Room) -> N
         member_str : str = member
         room_channel_str : str = room_channel
         cvm.error( f"Member {member_str} is not in room {room_channel_str}.")
-    
+
     #check to ensure a member is not already an owner
     if std.contains_using(room.owners, member, _str_eq):
         member_str : str = member
@@ -636,7 +613,7 @@ def promote_to_owner_checks(member: KeyAlias, caller: KeyAlias, room: Room) -> N
 
 @clientside_helper
 def _demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
-    
+
     room = _get_room(room_channel)
 
     #run demote checks
@@ -644,7 +621,7 @@ def _demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
 
     #This will remove the 'owner' from the secure channel
     cvm.remove_owner(room_channel, owner)
-    
+
     #This function allows the @executable function
     #to have access the the channel with which you
     #are attempting to write
@@ -655,7 +632,7 @@ def _demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
 def _demote_owner_execute(owner: KeyAlias) -> DemoteOwnerEvent:
     #get the room channel
     room_channel : ChannelName = cvm.tx.write_channel
-    
+
     room = _get_room(room_channel)
 
     demote_owner_checks(owner, cvm.tx.key_alias, room)
@@ -677,7 +654,7 @@ def demote_owner_checks(owner: KeyAlias, caller: KeyAlias, room: Room) -> None:
     #it takes an owner, caller, and a room channel, and ensures that the caller KA
     #is allowed to demote the owner KA
     room_channel =  room.channel
-    
+
     #check to ensure the owner is already a member of a room
     if not std.contains_using(room.members, owner, _str_eq):
         owner_str : str = owner
@@ -695,7 +672,7 @@ def demote_owner_checks(owner: KeyAlias, caller: KeyAlias, room: Room) -> None:
         owner_str : str = owner
         room_channel_str : str = room_channel
         cvm.error(f'{owner_str} is not an owner of room {room_channel_str}. Cannot demote a non-owner.')
-    
+
     #check to ensure that a room is not deleted
     if room.is_deleted:
         room_channel_str : str = room_channel
