@@ -525,7 +525,7 @@ def _get_messages(room_channel: ChannelName) -> List[Message]:
     if isinstance(room, Room):
         if room.is_deleted:
             cvm.error(f"Room {room_channel} has been deleted. Cannot get messages.")
-        return cvm.storage.query_history(MessageStatic).in_channel(room_channel).order_by('timestamp', False).values()
+        return cvm.storage.query_history(MessageStatic).in_channel(room_channel).order_by('timestamp', True).values()
     else:
         cvm.error(f"Room for channel {room_channel} not found.")
 
@@ -533,14 +533,37 @@ def _get_messages(room_channel: ChannelName) -> List[Message]:
 def _get_rooms() -> List[Room]:
     ##this function gets the most recent readable version of the room by the caller (i.e. this gets the current version
     # if you are still in the room, and if you were kicked out, the version immediately after you were kicked out)
-    results = cvm.storage.query_history(RoomStatic).where('is_deleted', False).order_by('channel', False).order_by('name', False).values()
-    rooms : List[Room] = []
 
-    for room in results:
-        if not std.contains_using(rooms, room.name, _str_eq):
-            rooms += [room]
+    rows : List[HistoricalRow[Room]] = cvm.storage.query_history(RoomStatic).order_by('channel', True).execute()
 
-    return rooms
+    def compare(lhs: HistoricalRow[Room], rhs: HistoricalRow[Room]) -> bool:
+        lt : int = lhs.tx_index
+        lc : str = lhs.channel_name
+        ln : str = lhs.value.name
+        if (lc < rhs.channel_name):
+            return ln < rhs.value.name
+        elif (lc == rhs.channel_name):
+            return lt > rhs.tx_index
+        else:
+            return ln < rhs.value.name
+    rows = std.sort_by(rows, compare)
+
+    ret_list : List[Room] = []
+    hist_row = rows[0]
+
+    if isinstance(hist_row, HistoricalRow[Room]):
+        old_room = hist_row.value
+
+        if not old_room.is_deleted:
+            ret_list += [old_room]
+
+        for row in rows:
+            old_room_channel_str : str = old_room.channel
+            if old_room_channel_str != row.value.channel and not row.value.is_deleted:
+                ret_list += [row.value]
+            old_room = row.value
+
+    return ret_list
 
 @clientside_helper
 def _promote_to_owner(room_channel: ChannelName, member: KeyAlias) -> None:
