@@ -74,5 +74,5 @@ workflows:
     jobs:
       - test-sandbox:
           context: org-global
-      - test-local-network:
-          context: org-global
+#      - test-local-network:
+#          context: org-global
