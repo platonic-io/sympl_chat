@@ -70,7 +70,7 @@ jobs:
       - run:
           name: Run API tests
           command: |
-            cd test/
+            cd application/api
             npm run test
       - store_artifacts:
           path: ~/.symbiont/assembly-dev/dev-network
