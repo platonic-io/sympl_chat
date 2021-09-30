@@ -64,6 +64,7 @@ jobs:
             echo "Setting up environment"
             ./setup_environment.sh
             echo "Environment setup"
+            source ./env.sh
             cd ../application/api
             npm install
             npm run build
