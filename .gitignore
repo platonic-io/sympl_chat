@@ -4,3 +4,5 @@
 *.pyc
 *.cpython
 test/assembly-sdk-pytest-*
+.benchmarks
+.hypothesis
