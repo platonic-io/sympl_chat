@@ -117,5 +117,5 @@ workflows:
           context: org-global
       - test-api:
           context: org-global
-#      - test-local-network:
-#          context: org-global
+      - test-local-network:
+          context: org-global
