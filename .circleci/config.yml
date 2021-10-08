@@ -54,7 +54,7 @@ jobs:
             sudo apt-get update
             sudo apt-get install --assume-yes postgresql libpq-dev jq curl software-properties-common
             sudo add-apt-repository ppa:deadsnakes/ppa --yes
-            sudo apt-get install --assume-yes python3.9-dev python3-pip
+            sudo apt-get install --assume-yes python3.9-dev python3-pip python3-pytest
             sudo apt install nodejs npm
       - run:
           name: Setup environment
@@ -95,7 +95,7 @@ jobs:
             sudo apt-get update
             sudo apt-get install --assume-yes postgresql libpq-dev jq curl software-properties-common
             sudo add-apt-repository ppa:deadsnakes/ppa --yes
-            sudo apt-get install --assume-yes python3.9-dev python3-pip python-pytest
+            sudo apt-get install --assume-yes python3.9-dev python3-pip python3-pytest
       - run:
           name: pytest tests
           command: |
