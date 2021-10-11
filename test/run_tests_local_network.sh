@@ -11,4 +11,4 @@ pip3 install --upgrade pip
 pip3 install $HOME/.symbiont/versions/current/pytest/pytest_assembly-1.0.3-py3-none-any.whl
 
 DEFAULT_NETWORK_CONFIG="$HOME/.symbiont/assembly-dev/dev-network/default/network-config.json"
-pytest-3 ../test/ --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path ../ --baseline -p no:pytest-mp
+pytest ../test/ --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path ../ --baseline -p no:pytest-mp

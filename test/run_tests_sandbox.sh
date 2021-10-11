@@ -19,4 +19,4 @@ sym network publish-contract -d ../
 pip3 install --upgrade pip
 pip3 install $HOME/.symbiont/versions/current/pytest/pytest_assembly-1.0.3-py3-none-any.whl
 
-pytest-3 ../test/ --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path ../
+pytest ../test/ --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path ../
