@@ -121,7 +121,7 @@ schema DemoteOwnerEvent:
 @clientside
 def create_room(room_name: str) -> None:
     """Creates a room with the given name, and emits a CreateRoomEvent.
-    Other room operations require a `room_channel: ChannelName`, which is part of the returned `Room` object.
+    Other room operations require a `room_channel: ChannelName`, which can be retrieved using the get_rooms() method.
     """
     return _create_room(room_name)
 
