@@ -169,7 +169,7 @@ def get_messages(room_channel: ChannelName) -> List[Message]:
 def get_rooms() -> List[Room]:
     """Returns all rooms that the caller has access to, sorted by name.
     It is possible to belong to multiple rooms with the same name. However they will always be disambiguated by their
-    channel name, which is globally unique.
+    ChannelName, which is globally unique.
     """
     return _get_rooms()
 
