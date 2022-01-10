@@ -78,6 +78,7 @@ jobs:
   test-local-network:
     docker:
       - image: cimg/base:2021.04
+    resource_class: large
     steps:
       - add_ssh_keys:
           fingerprints:
