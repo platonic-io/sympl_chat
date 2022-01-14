@@ -44,7 +44,7 @@
 # The calling sequence of actions would look like this
 # @clientside -> @clientside_helper -> @helper checks -> @executable -> @helper checks
 
-# Copyright © 2019 Symbiont.io, all rights reserved.
+# Copyright (c) 2019 Symbiont.io, all rights reserved.
 
 # Proprietary and confidential. Unauthorized copying via any medium is strictly prohibited.
 
