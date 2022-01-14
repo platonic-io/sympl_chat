@@ -120,7 +120,8 @@ schema DemoteOwnerEvent:
 
 @clientside
 def create_room(room_name: str) -> None:
-    """Creates a room with the given name, and returns a CreateRoomEvent.
+    """
+    Creates a room with the given name, and returns a CreateRoomEvent.
     Other room operations require a `room_channel: ChannelName`, which is part of the returned `Room` object.
     """
     return _create_room(room_name)
@@ -128,7 +129,8 @@ def create_room(room_name: str) -> None:
 
 @clientside
 def delete_room(room_channel: ChannelName) -> None:
-    """Deletes a room.
+    """
+    Deletes a room.
     This does not expunge the underlying data, but flags the room as deleted so that it can be restored later if needed.
     Membership is frozen at the time of deletion, and only members of the deleted room can restore it.
     """
@@ -137,14 +139,17 @@ def delete_room(room_channel: ChannelName) -> None:
 
 @clientside
 def restore_room(room_channel: ChannelName) -> None:
-    """Restores a previously deleted room.
-    Membership is frozen at the time of deletion, and only members of the deleted room can restore it."""
+    """
+    Restores a previously deleted room.
+    Membership is frozen at the time of deletion, and only members of the deleted room can restore it.
+    """
     return _restore_room(room_channel)
 
 
 @clientside
 def invite_to_room(room_channel: ChannelName, new_member: KeyAlias) -> None:
-    """Invites a new member to a room.
+    """
+    Invites a new member to a room.
     The caller must already be part of the room.
     """
     return _invite_to_room(room_channel, new_member)
@@ -152,7 +157,8 @@ def invite_to_room(room_channel: ChannelName, new_member: KeyAlias) -> None:
 
 @clientside
 def remove_from_room(room_channel: ChannelName, member_to_remove: KeyAlias) -> None:
-    """Removes a member from a room.
+    """
+    Removes a member from a room.
     A removed member will no longer be able to send or receive messages, add or remove members, nor delete or restore
     the room.
     A member cannot remove themselves if they are the last one in the room.
@@ -161,13 +167,16 @@ def remove_from_room(room_channel: ChannelName, member_to_remove: KeyAlias) -> N
 
 @clientside
 def get_messages(room_channel: ChannelName) -> List[Message]:
-    """Returns all messages in the room, sorted by timestamp."""
+    """
+    Returns all messages in the room, sorted by timestamp.
+    """
     return _get_messages(room_channel)
 
 
 @clientside
 def get_rooms() -> List[Room]:
-    """Returns all rooms that the caller has access to, sorted by name.
+    """
+    Returns all rooms that the caller has access to, sorted by name.
     It is possible to belong to multiple rooms with the same name. However they will always be disambiguated by their
     channel name, which is globally unique.
     """
@@ -176,7 +185,8 @@ def get_rooms() -> List[Room]:
 
 @clientside
 def send_message(room_channel: ChannelName, message: str) -> None:
-    """Sends a message to a room.
+    """
+    Sends a message to a room.
     Messages can be between 1 and 4000 characters long. Messages cannot contain null bytes.
     """
     return _send_message(room_channel, message)
@@ -184,14 +194,16 @@ def send_message(room_channel: ChannelName, message: str) -> None:
 
 @clientside
 def promote_to_owner(room_channel: ChannelName, member: KeyAlias) -> None:
-    """Promotes a current member of a room to owner
+    """
+    Promotes a current member of a room to owner
     Promotions to owner of the room
     """
     return _promote_to_owner(room_channel, member)
 
 @clientside
 def demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
-    """Demotes the owner of a room.
+    """
+    Demotes the owner of a room.
     Does not permit the owners list to be left with no owners. If there is only one owner,
     this will promote another member to owner. If the owner is the only one left in the room,
     the operation will not be permitted
