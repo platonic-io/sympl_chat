@@ -22,9 +22,9 @@ Possible demo extensions:
 
 import pytest
 
-from assembly.lang_8 import ContractRef, ContractError
+from assembly.lang_9 import ContractRef, ContractError
 
-import utils.chat_8_3_0_0_test_utils as utils
+import utils.chat_9_3_0_0_test_utils as utils
 
 
 @pytest.mark.incremental
@@ -33,11 +33,11 @@ class TestChatDemo():
 
     # setup
 
-    CHAT = ContractRef('chat', '3.0.0', 8)
+    CHAT = ContractRef('chat', '3.0.0', 9)
 
     def test_reset(self, network):
         """Start with a clean network."""
-        network.reset(sympl_version=8)
+        network.reset(sympl_version=9)
 
     def test_register_key_aliases(self, network, store):
         """Register identities for two communicating users Alice and Bob, and one evesdropper Eve."""
@@ -54,7 +54,7 @@ class TestChatDemo():
     @pytest.fixture(scope="function")
     def chat(self, network, store):
         """Fixture usage example: chat('alice').create_room(...)"""
-        return lambda sender: network[store[sender]].chat["8-3.0.0"]  # return closure over sender
+        return lambda sender: network[store[sender]].chat["9-3.0.0"]  # return closure over sender
 
     @pytest.fixture(scope="function")
     def room(self, store):
