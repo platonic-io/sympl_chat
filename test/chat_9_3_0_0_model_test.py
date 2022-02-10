@@ -2,7 +2,7 @@ import pytest
 
 from hypothesis import settings
 from chat_9_3_0_0_state_machine import ChatValidator
-from assembly.lang_9 import ContractRef
+from assembly_client.api.contracts import ContractRef
 
 settings_profile = 'chat_model_test'
 settings.register_profile(settings_profile, deadline=None)

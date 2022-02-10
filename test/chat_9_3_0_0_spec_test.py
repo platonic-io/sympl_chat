@@ -5,7 +5,8 @@ Specifications for the Chat 3.0.0 contract.
 import pytest
 import time
 
-from assembly.lang_9 import ContractRef, ContractError
+from assembly_client.api.types.error_types import ContractError
+from assembly_client.api.contracts import ContractRef
 
 import utils.chat_9_3_0_0_test_utils as utils
 
