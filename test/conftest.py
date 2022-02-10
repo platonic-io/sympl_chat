@@ -5,7 +5,7 @@ from assembly_client.api.contracts import ContractRef
 
 @pytest.fixture(scope="function")
 def chat_9(network, store):
-    network.reset(sympl_version=9)
+    network.reset(sympl_version=9, txe_protocol=13)
 
     network.publish([ContractRef('chat', '3.0.0', 9)])
     for alias in ['alice', 'bob']:

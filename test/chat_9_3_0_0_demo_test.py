@@ -38,7 +38,7 @@ class TestChatDemo():
 
     def test_reset(self, network):
         """Start with a clean network."""
-        network.reset(sympl_version=9)
+        network.reset(sympl_version=9, txe_protocol=13)
 
     def test_register_key_aliases(self, network, store):
         """Register identities for two communicating users Alice and Bob, and one evesdropper Eve."""
