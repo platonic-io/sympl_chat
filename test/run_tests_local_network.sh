@@ -8,6 +8,8 @@ source ./env.sh
 sym local-network start --nodes 4
 
 pip3 install --upgrade pip
+
+pip3 install symbiont-io.assembly-client
 pip3 install symbiont-io.pytest-assembly
 
 DEFAULT_NETWORK_CONFIG="$HOME/.symbiont/assembly-dev/dev-network/default/network-config.json"

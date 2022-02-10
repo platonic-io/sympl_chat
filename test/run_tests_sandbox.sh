@@ -17,6 +17,7 @@ DEFAULT_NETWORK_CONFIG="$HOME/.symbiont/assembly-dev/mock-network/default/networ
 sym network publish-contract -d ../
 
 pip3 install --upgrade pip
+pip3 install symbiont-io.assembly-client
 pip3 install symbiont-io.pytest-assembly
 
 pytest ../test/ --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path ../
