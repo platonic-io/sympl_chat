@@ -1,5 +1,5 @@
 from hashlib import new
-from assembly.lang_9 import ContractError
+from assembly_client.api.types.error_types import ContractError
 
 
 class Message:

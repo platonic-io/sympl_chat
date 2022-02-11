@@ -1,6 +1,6 @@
 import pytest
 
-from assembly.api import ContractRef
+from assembly_client.api.contracts import ContractRef
 
 
 @pytest.fixture(scope="function")
