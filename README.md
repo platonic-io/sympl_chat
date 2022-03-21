@@ -80,13 +80,13 @@ and provide feedback/merge it.
 
 Requirements:
 - Install the [pytest plugin](https://iportal.symbiont.io/sdk_docs/docs/testing/index/index.html)
-- Have a mock-network running (we recommend using `sym` to get a mock network up and running quickly)
+- Have a local-network running (we recommend using `sym` to get a mock network up and running quickly)
 
 Steps: 
 - Change directory to the root of this repository
 - Run the following command:
 ```shell
-pytest test/<test file name>.py --network-config=~/.symbiont/assembly-dev/mock-network/default/network-config.json --contract-path=./
+pytest test/<test file name>.py --network-config="$(sym local-network info | jq -r .network_config)" --contract-path=./
 ```
 
 There are also two property tests and a stress test, which can be run by passing `--proptests` to the pytest command, but these will take a long time (>15 minutes) to run.
