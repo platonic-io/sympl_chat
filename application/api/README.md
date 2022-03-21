@@ -9,10 +9,10 @@ Version >v2.0.0 of the Symbiont Assembly SDK, running >v4.3.0
 
 Install modules with `npm install`
 
-### Building and running a mock-network
+### Building and running a local-network
 `npm run build` 
 
-This will run the build script `build.sh`. It will start a mock-network named chat, publish the chat contract (located at `<git_dir>/application/api/`), then generate the routes to the api from a handlebars template file. If for some reason this fails, you can run `npm run wipe` which will run `sym mock-network stop` and `sym mock-network delete` on the mock-network named chat. You can manually specify a different port by running `npm run build <port_number>`. This passes a `--port` argument into the mock-network creation command. This script uses port 18888 as the default base port. 
+This will run the build script `build.sh`. It will start a local-network named chat, publish the chat contract (located at `<git_dir>/application/api/`), then generate the routes to the api from a handlebars template file. If for some reason this fails, you can run `npm run wipe` which will run `sym local-network stop` and `sym local-network delete` on the local-network named chat. You can manually specify a different port by running `npm run build <port_number>`. This passes a `--port` argument into the local-network creation command. This script uses port 18888 as the default base port. 
 
 ### Running the Application Server
 `npm start`
