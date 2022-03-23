@@ -417,14 +417,7 @@ def _remove_from_room(room_channel: ChannelName, member_to_remove: KeyAlias) -> 
     with PostTxArgs(room_channel):
         _remove_from_room_execute(member_to_remove)
 
-    #rotate the keys so that all members of the chatroom will be able to
-    #read future messages, and the member we are removing will not be able to
-    #read future messages
-    cvm.rotate_key(room_channel)
-    for member in room.members:
-        mx : str = member
-        if mx != member_to_remove:
-            cvm.send_key(room_channel, member)
+    
 
 @executable
 def _remove_from_room_execute(member_to_remove: KeyAlias) -> RemoveFromRoomEvent:
@@ -452,6 +445,16 @@ def _remove_from_room_execute(member_to_remove: KeyAlias) -> RemoveFromRoomEvent
     remove_from_room_event = RemoveFromRoomEvent(room=room, remover=cvm.tx.key_alias, removee=member_to_remove)
 
     cvm.create_event('RemoveFromRoomEvent', std.json(remove_from_room_event))
+
+    #rotate the keys so that all members of the chatroom will be able to
+    #read future messages, and the member we are removing will not be able to
+    #read future messages
+    cvm.rotate_key(room_channel)
+    for member in room.members:
+        mx : str = member
+        if mx != member_to_remove:
+            cvm.send_key(room_channel, member)
+
     return remove_from_room_event
 
 #runs checks to see if the caller has the correct permissions to invite the
