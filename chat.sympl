@@ -50,7 +50,7 @@
 
 # """
 
-VERSION : str = "9-3.0.0"
+VERSION : str = "10-3.0.0"
 
 #################
 # public models #

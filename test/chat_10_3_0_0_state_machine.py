@@ -7,9 +7,9 @@ import hypothesis.strategies as st
 
 from assembly_client.api.types.error_types import ContractError
 
-import model.chat_9_3_0_0_model as model
+import model.chat_10_3_0_0_model as model
 
-from utils.chat_9_3_0_0_test_utils import scrub_ids_and_timestamps
+from utils.chat_10_3_0_0_test_utils import scrub_ids_and_timestamps
 
 # global, non-resetting model
 MODEL = None
@@ -17,7 +17,7 @@ MODEL = None
 # constant representing fatal termination states in the state machine
 FATAL_ERROR = None
 
-CHAT_VERSION = "9-3.0.0"
+CHAT_VERSION = "10-3.0.0"
 
 
 class ChatValidator(RuleBasedStateMachine):
