@@ -4,11 +4,11 @@ from assembly_client.api.contracts import ContractRef
 
 
 @pytest.fixture(scope="function")
-def chat_9(network, store):
-    network.reset(sympl_version=9)
+def chat_10(network, store):
+    network.reset(sympl_version=10)
 
-    network.publish([ContractRef('chat', '3.0.0', 9)])
+    network.publish([ContractRef('chat', '3.0.0', 10)])
     for alias in ['alice', 'bob']:
         store[alias] = network.register_key_alias()
 
-    return lambda sender: network[store[sender]].chat["9-3.0.0"]  # return closure over sender
+    return lambda sender: network[store[sender]].chat["10-3.0.0"]  # return closure over sender

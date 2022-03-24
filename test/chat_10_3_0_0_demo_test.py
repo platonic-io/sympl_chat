@@ -25,7 +25,7 @@ import pytest
 from assembly_client.api.contracts import ContractRef
 from assembly_client.api.types.error_types import ContractError
 
-import utils.chat_9_3_0_0_test_utils as utils
+import utils.chat_10_3_0_0_test_utils as utils
 
 
 @pytest.mark.incremental
@@ -34,11 +34,11 @@ class TestChatDemo():
 
     # setup
 
-    CHAT = ContractRef('chat', '3.0.0', 9)
+    CHAT = ContractRef('chat', '3.0.0', 10)
 
     def test_reset(self, network):
         """Start with a clean network."""
-        network.reset(sympl_version=9)
+        network.reset(sympl_version=10)
 
     def test_register_key_aliases(self, network, store):
         """Register identities for two communicating users Alice and Bob, and one evesdropper Eve."""
@@ -55,7 +55,7 @@ class TestChatDemo():
     @pytest.fixture(scope="function")
     def chat(self, network, store):
         """Fixture usage example: chat('alice').create_room(...)"""
-        return lambda sender: network[store[sender]].chat["9-3.0.0"]  # return closure over sender
+        return lambda sender: network[store[sender]].chat["10-3.0.0"]  # return closure over sender
 
     @pytest.fixture(scope="function")
     def room(self, store):
