@@ -3,7 +3,6 @@
 .vscode
 *.pyc
 *.cpython
-test/assembly-sdk-pytest-*
 .benchmarks
 .hypothesis
 *.log

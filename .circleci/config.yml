@@ -41,7 +41,7 @@ jobs:
           command: |
             cd application/api
             npm run test
-  test-local-network:
+  test-lang10:
     docker:
       - image: cimg/base:2022.02
     resource_class: large
@@ -59,17 +59,15 @@ jobs:
           name: pytest tests
           command: |
             sudo apt-get install python3-pip
-
-            cd test/
-            chmod u+x *.sh
-            echo "Running tests - local network"
-            ./run_tests_local_network.sh
-            echo "Tests run"
+            sym local-network start --nodes 4 -l 10
+            DEFAULT_NETWORK_CONFIG="$HOME/.symbiont/assembly-dev/dev-network/default/network-config.json"
+            pip3 install symbiont-io.pytest-assembly~=3.1.0.dev
+            pytest test/lang10 --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path contracts/lang10 --baseline -p no:pytest-mp
 workflows:
   version: 2
   validate_pr:
     jobs:
       - test-api:
           context: org-global
-      - test-local-network:
+      - test-lang10:
           context: org-global
