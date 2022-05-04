@@ -30,10 +30,7 @@ jobs:
       - run:
           name: Setup environment
           command: |
-            cd test/
-            chmod u+x *.sh
-            source ./env.sh
-            cd ../application/api
+            cd application/api
             npm install
             npm run build
       - run:
@@ -63,6 +60,50 @@ jobs:
             DEFAULT_NETWORK_CONFIG="$HOME/.symbiont/assembly-dev/dev-network/default/network-config.json"
             pip3 install symbiont-io.pytest-assembly~=2.0.4.dev
             pytest test/lang10 --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path contracts/lang10 --baseline -p no:pytest-mp
+  test-lang9:
+    docker:
+      - image: cimg/base:2022.02
+    resource_class: large
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "5e:e5:76:27:9b:39:51:8b:ca:bf:46:34:30:e9:11:76"
+      - attach_workspace:
+          at: /tmp/workspace
+      - checkout
+      - assembly-sdk/install_sdk:
+          sdk_version: next
+          symenvrc: CI_SYMENVRC
+      - run:
+          name: pytest tests
+          command: |
+            sudo apt-get install python3-pip
+            sym local-network start --nodes 4 -l 9
+            DEFAULT_NETWORK_CONFIG="$HOME/.symbiont/assembly-dev/dev-network/default/network-config.json"
+            pip3 install symbiont-io.pytest-assembly~=2.0.4.dev
+            pytest test/lang9 --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path contracts/lang9 --baseline -p no:pytest-mp
+  test-lang8:
+    docker:
+      - image: cimg/base:2022.02
+    resource_class: large
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "5e:e5:76:27:9b:39:51:8b:ca:bf:46:34:30:e9:11:76"
+      - attach_workspace:
+          at: /tmp/workspace
+      - checkout
+      - assembly-sdk/install_sdk:
+          sdk_version: next
+          symenvrc: CI_SYMENVRC
+      - run:
+          name: pytest tests
+          command: |
+            sudo apt-get install python3-pip
+            sym local-network start --nodes 4 -l 8
+            DEFAULT_NETWORK_CONFIG="$HOME/.symbiont/assembly-dev/dev-network/default/network-config.json"
+            pip3 install symbiont-io.pytest-assembly~=2.0.4.dev
+            pytest test/lang8 --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path contracts/lang8 --baseline -p no:pytest-mp
 workflows:
   version: 2
   validate_pr:
@@ -70,4 +111,8 @@ workflows:
       - test-api:
           context: org-global
       - test-lang10:
+          context: org-global
+      - test-lang9:
+          context: org-global
+      - test-lang8:
           context: org-global
