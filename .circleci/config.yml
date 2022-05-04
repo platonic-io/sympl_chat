@@ -61,7 +61,7 @@ jobs:
             sudo apt-get install python3-pip
             sym local-network start --nodes 4 -l 10
             DEFAULT_NETWORK_CONFIG="$HOME/.symbiont/assembly-dev/dev-network/default/network-config.json"
-            pip3 install symbiont-io.pytest-assembly~=3.1.0.dev
+            pip3 install symbiont-io.pytest-assembly~=2.0.4.dev
             pytest test/lang10 --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path contracts/lang10 --baseline -p no:pytest-mp
 workflows:
   version: 2
