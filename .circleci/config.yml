@@ -59,7 +59,7 @@ jobs:
             sym local-network start --nodes 4 -l 10
             DEFAULT_NETWORK_CONFIG="$HOME/.symbiont/assembly-dev/dev-network/default/network-config.json"
             pip3 install symbiont-io.pytest-assembly~=2.0.4.dev
-            pytest test/lang10 --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path contracts/lang10 --baseline -p no:pytest-mp
+            pytest lang10/test --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path lang10/contracts --baseline -p no:pytest-mp
   test-lang9:
     docker:
       - image: cimg/base:2022.02
@@ -81,7 +81,7 @@ jobs:
             sym local-network start --nodes 4 -l 9
             DEFAULT_NETWORK_CONFIG="$HOME/.symbiont/assembly-dev/dev-network/default/network-config.json"
             pip3 install symbiont-io.pytest-assembly~=2.0.4.dev
-            pytest test/lang9 --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path contracts/lang9 --baseline -p no:pytest-mp
+            pytest lang9/test --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path lang9/contracts --baseline -p no:pytest-mp
   test-lang8:
     docker:
       - image: cimg/base:2022.02
@@ -103,7 +103,7 @@ jobs:
             sym local-network start --nodes 4 -l 8
             DEFAULT_NETWORK_CONFIG="$HOME/.symbiont/assembly-dev/dev-network/default/network-config.json"
             pip3 install symbiont-io.pytest-assembly~=2.0.4.dev
-            pytest test/lang8 --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path contracts/lang8 --baseline -p no:pytest-mp
+            pytest lang8/test --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path lang8/contracts --baseline -p no:pytest-mp
 workflows:
   version: 2
   validate_pr:
