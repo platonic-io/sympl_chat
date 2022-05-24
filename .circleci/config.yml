@@ -57,8 +57,8 @@ jobs:
           command: |
             sym local-network start --nodes 4 -l 10
       - assembly-sdk/run_pytest:
-        contract_path: lang10/contracts
-        test_path: lang10/tests
+          contract_path: lang10/contracts
+          test_path: lang10/tests
   test-lang9:
     docker:
       - image: cimg/base:2022.02
