@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  assembly-sdk: symbiont-io/assembly-sdk@1.3.0
+  assembly-sdk: symbiont-io/assembly-sdk@1.3.1
 jobs:
   test-api:
     docker:
