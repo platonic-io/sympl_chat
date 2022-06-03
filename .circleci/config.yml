@@ -57,7 +57,6 @@ jobs:
           command: |
             sym local-network start --nodes 4 -l 10
       - assembly-sdk/run_pytest:
-          pytest_version: "2.0.4.dev"
           contract_path: lang10/contracts
           test_path: lang10/tests
   test-lang9:
