@@ -97,10 +97,13 @@ jobs:
           sdk_version: next
           symenvrc: CI_SYMENVRC
       - run:
+          name: Start network
+          command: |
+            sym local-network start --nodes 4 -l 8
+      - run:
           name: pytest tests
           command: |
             sudo apt-get install python3-pip
-            sym local-network start --nodes 4 -l 8
             DEFAULT_NETWORK_CONFIG="$HOME/.symbiont/assembly-dev/dev-network/default/network-config.json"
             pip3 install symbiont-io.pytest-assembly~=2.0.4.dev
             pytest lang8/tests --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path lang8/contracts --baseline -p no:pytest-mp
