@@ -100,7 +100,7 @@ jobs:
           name: Start network
           background: true
           command: |
-            sym local-network start --nodes 4 -l 8
+            sym local-network start --nodes 4 -l 8 &
       - run:
           name: pytest tests
           command: |
