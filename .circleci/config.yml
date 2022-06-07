@@ -63,7 +63,7 @@ jobs:
   test-lang9:
     docker:
       - image: cimg/base:2022.02
-    resource_class: large
+    resource_class: xlarge
     steps:
       - add_ssh_keys:
           fingerprints:
@@ -85,7 +85,7 @@ jobs:
   test-lang8:
     docker:
       - image: cimg/base:2022.02
-    resource_class: large
+    resource_class: xlarge
     steps:
       - add_ssh_keys:
           fingerprints:
