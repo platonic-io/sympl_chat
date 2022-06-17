@@ -52,52 +52,14 @@ jobs:
       - assembly-sdk/install_sdk:
           sdk_version: next
           symenvrc: CI_SYMENVRC
-      - assembly-sdk/run_pytest:
-          pytest_version: "2.0.4.dev"
-          contract_path: lang10/contracts
-          test_path: lang10/tests
-          network_num_nodes: 4
-          network_lang_version: 10
-  test-lang9:
-    docker:
-      - image: cimg/base:2022.02
-    resource_class: xlarge
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "5e:e5:76:27:9b:39:51:8b:ca:bf:46:34:30:e9:11:76"
-      - attach_workspace:
-          at: /tmp/workspace
-      - checkout
-      - assembly-sdk/install_sdk:
-          sdk_version: next
-          symenvrc: CI_SYMENVRC
-      - assembly-sdk/run_pytest:
-          pytest_version: "2.0.4.dev"
-          contract_path: lang9/contracts
-          test_path: lang9/tests
-          network_num_nodes: 4
-          network_lang_version: 9
-  test-lang8:
-    docker:
-      - image: cimg/base:2022.02
-    resource_class: xlarge
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "5e:e5:76:27:9b:39:51:8b:ca:bf:46:34:30:e9:11:76"
-      - attach_workspace:
-          at: /tmp/workspace
-      - checkout
-      - assembly-sdk/install_sdk:
-          sdk_version: next
-          symenvrc: CI_SYMENVRC
-      - assembly-sdk/run_pytest:
-          pytest_version: "2.0.4.dev"
-          contract_path: lang8/contracts
-          test_path: lang8/tests
-          network_num_nodes: 4
-          network_lang_version: 8
+      - run:
+          name: pytest tests
+          command: |
+            sudo apt-get install python3-pip
+            sym local-network start --nodes 4 -l 10
+            DEFAULT_NETWORK_CONFIG="$HOME/.symbiont/assembly-dev/dev-network/default/network-config.json"
+            pip3 install symbiont-io.pytest-assembly~=2.0.4.dev
+            pytest lang10/tests --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path lang10/contracts --baseline -p no:pytest-mp
 workflows:
   version: 2
   validate_pr:
@@ -105,8 +67,4 @@ workflows:
       - test-api:
           context: org-global
       - test-lang10:
-          context: org-global
-      - test-lang9:
-          context: org-global
-      - test-lang8:
           context: org-global
