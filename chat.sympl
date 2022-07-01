@@ -1,0 +1,731 @@
+# """Chat 3.0.0
+
+# Chat is a Symbiont Assembly™ smart contract that implements private messaging. A smart contract (generally referred to
+# as “a contract”) is a code module implementing the logic of a decentralized application. Symbiont smart contract modules
+# are written in a domain-specific language (DSL) and executed in a virtual machine within each node. Assembly’s smart
+# contract language is fully deterministic and has built-in support for true end-to-end transaction privacy (via secure
+# channels).
+
+# Chat allows users (represented as "key aliases") to send messages to each other confidentially in rooms (implemented via
+# secure channels).
+
+# The code is arranged in four sections: models, events, public API, and implementations.
+
+# Models are described by Schema declarations, which define how application data is stored.
+
+# Events are also described by Schemas.
+
+# The public API is defined by @clientside functions, which are accessed by node API clients.
+
+# Functions marked @executable are called by transactions posted to the distributed log, and run on the network as a
+# whole.
+
+# A primary feature of the Symbiont language is its ability to support logic that runs both on a single node, as well as
+# logic that runs on the network as a whole. The former logic is called @clientside logic, while the latter is called
+# @executable logic. However, in a decentralized network, there is no client/server system. These terms are just used to
+# represent local vs. global operations, implemented as code in a single module.
+
+# Notably, all changes to a node’s state must be made by running "executable" logic, in order to maintain consistency in
+# node state. "clientside" logic is used for read-only queries of node state, though it may have the side-effect of
+# constructing and broadcasting a transaction to the network which then in turn triggers "executable" logic. Each smart
+# contract module has isolated storage associated with it, used to store the shared state associated with the logic of the
+# module.
+
+# The general structure of the actions that occur in this contract looks like the following:
+#
+# For each action, there is a @clientside and @executable function. Each @clientside function has
+# a @clientside_helper function, and each action contains a "checker" function. The checker functions
+# gatekeep actions. For example, in this chat contract, only users who are a 'member' of a room are allowed
+# to send messages to that room. This is checked in send_message_checks. The reason for designating a dedicated
+# function for these checks is to also be able to use it in @executable functions. The checks in the @clientside_helper
+# functions are gatekeeping to prevent sending usless transactions to the blockchain, and the checks in the @executable
+# functions are to prevent transactions that do reach the blockchain from executing if they shouldn't
+
+# The calling sequence of actions would look like this
+# @clientside -> @clientside_helper -> @helper checks -> @executable -> @helper checks
+
+# Copyright (c) 2019 Symbiont.io, all rights reserved.
+
+# Proprietary and confidential. Unauthorized copying via any medium is strictly prohibited.
+
+# """
+import prelude version 1.0.0 as prelude
+import std version 1.0.0 as std
+import cvm_base version 1.0.0 as cvm_base
+import cvm_executable version 1.0.0 as cvm_executable
+import cvm_clientside version 1.0.0 as cvm_clientside
+import unqualified globals version 1.0.0
+
+VERSION : str = "10-3.0.0"
+
+#################
+# public models #
+#################
+
+
+# a single message sent by a user through a secure channel
+schema Message:
+    @indexed
+    message_id: Identifier  # identifies the message in storage
+    @indexed
+    sender: KeyAlias  # the key alias that sent the message
+    body: str  # the content of the message
+    timestamp: Timestamp  # the time of the message
+
+# a single room, implemented as a secure channel
+schema Room:
+    @indexed
+    channel: ChannelName  # the secure channel ID that implements the room
+    @indexed
+    name: str  # the human-readable name of the room
+    is_deleted: bool  # to support restoration, deleted rooms are flagged, not expunged
+    members: List[KeyAlias]  # a list of the key aliases that have access to the room
+    owners: List[KeyAlias]   # a list of key aliases that are 'owners' of the room (this should always be a subset of 'members', these people function as admins)
+
+##########
+# events #
+##########
+
+schema CreateRoomEvent:
+    room: Room
+
+schema DeleteRoomEvent:
+    room: Room
+
+schema RestoreRoomEvent:
+    room: Room
+
+schema InviteToRoomEvent:
+    room: Room
+    inviter: KeyAlias
+    invitee: KeyAlias
+
+schema RemoveFromRoomEvent:
+    room: Room
+    remover: KeyAlias
+    removee: KeyAlias
+
+schema SendMessageEvent:
+    room: Room
+    message_id: Identifier
+
+schema PromoteToOwnerEvent:
+    room: Room
+    promoter: KeyAlias
+    promotee: KeyAlias
+
+schema DemoteOwnerEvent:
+    room: Room
+    demoter: KeyAlias
+    demotee: KeyAlias
+
+# ##############
+# # public API #
+# ##############
+
+
+@clientside
+def create_room(room_name: str) -> None:
+    """Creates a room with the given name, and emits a CreateRoomEvent.
+    Other room operations require a `room_channel: ChannelName`, which can be retrieved using the get_rooms() method.
+    """
+    return _create_room(room_name)
+
+
+@clientside
+def delete_room(room_channel: ChannelName) -> None:
+    """
+    Deletes a room.
+    This does not expunge the underlying data, but flags the room as deleted so that it can be restored later if needed.
+    Membership is frozen at the time of deletion, and only members of the deleted room can restore it.
+    """
+    return _delete_room(room_channel)
+
+
+@clientside
+def restore_room(room_channel: ChannelName) -> None:
+    """
+    Restores a previously deleted room.
+    Membership is frozen at the time of deletion, and only members of the deleted room can restore it.
+    """
+    return _restore_room(room_channel)
+
+
+@clientside
+def invite_to_room(room_channel: ChannelName, new_member: KeyAlias) -> None:
+    """
+    Invites a new member to a room.
+    The caller must already be part of the room.
+    """
+    return _invite_to_room(room_channel, new_member)
+
+
+@clientside
+def remove_from_room(room_channel: ChannelName, member_to_remove: KeyAlias) -> None:
+    """
+    Removes a member from a room.
+    A removed member will no longer be able to send or receive messages, add or remove members, nor delete or restore
+    the room.
+    A member cannot remove themselves if they are the last one in the room.
+    """
+    return _remove_from_room(room_channel, member_to_remove)
+
+@clientside
+def get_messages(room_channel: ChannelName) -> List[Message]:
+    """
+    Returns all messages in the room, sorted by timestamp.
+    """
+    return _get_messages(room_channel)
+
+
+@clientside
+def get_rooms() -> List[Room]:
+    """
+    Returns all rooms that the caller has access to, sorted by name.
+    It is possible to belong to multiple rooms with the same name. However they will always be disambiguated by their
+    ChannelName, which is globally unique.
+    """
+    return _get_rooms()
+
+
+@clientside
+def send_message(room_channel: ChannelName, message: str) -> None:
+    """
+    Sends a message to a room.
+    Messages can be between 1 and 4000 characters long. Messages cannot contain null bytes.
+    """
+    return _send_message(room_channel, message)
+
+
+@clientside
+def promote_to_owner(room_channel: ChannelName, member: KeyAlias) -> None:
+    """
+    Promotes a current member of a room to owner
+    Promotions to owner of the room
+    """
+    return _promote_to_owner(room_channel, member)
+
+@clientside
+def demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
+    """
+    Demotes the owner of a room.
+    Does not permit the owners list to be left with no owners. If there is only one owner,
+    this will promote another member to owner. If the owner is the only one left in the room,
+    the operation will not be permitted
+    """
+    return _demote_owner(room_channel, owner)
+
+# # ###################
+# # # implementations #
+# # ###################
+
+# the helper 'decorator' here is used to put the cvm functions
+# in scope into this function
+# the reason there's no associated @executable function
+# is because you don't need to run code across the blockchain
+# in order to simply read information
+@helper
+def _get_room(room_channel: ChannelName) -> Room:
+    room = cvm.storage.get(room_channel, RoomStatic, Identifier('room'))
+    #check if the room exists
+    if isinstance(room,  None):
+        room_channel_str : str = room_channel
+        cvm.error(f"Room for channel {room_channel_str} not found.")
+    return room
+
+@helper
+def _guard_input(input_description: str, input_: str) -> None:
+    if input_ == '':
+        cvm.error(f"{input_description} cannot be empty.")
+    nb = chr(0)
+    if isinstance(nb, None):
+        cvm.error("Cannot compute null byte")
+    if nb in input_:
+        cvm.error(f"{input_description} cannot contain null byte.")
+    if len(input_) > 4000:
+        cvm.error(f"{input_description} cannot be longer than 4000 characters.")
+
+@clientside_helper
+def _create_room(room_name: str) -> None:
+    #this function will run checks on the propsed
+    #room name and cvm.error if there are issues
+    #cvm.error will end the transaction
+    _guard_input("Room name", room_name)
+    room_channel = cvm.new_channel('RID')
+    with PostTxArgs(room_channel):
+        _create_room_execute(room_name)
+
+@executable
+def _create_room_execute(room_name: str) -> CreateRoomEvent:
+    room_channel : ChannelName = cvm.tx.write_channel
+
+    _guard_input("Room name", room_name)
+    room = cvm.storage.get(room_channel, RoomStatic, Identifier('room'))
+    #check if the room exists already. The storage query will return None if the room doesn't exist
+    if isinstance(room, None):
+        room = Room(channel=room_channel, name=room_name, is_deleted=False, members=[cvm.tx.key_alias], owners=[cvm.tx.key_alias])
+        cvm.storage.put(Identifier('room'), room)
+        create_room_event = CreateRoomEvent(room=room)
+        cvm.create_event('CreateRoomEvent', std.json(create_room_event))
+        return create_room_event
+    else:
+        room_channel_str : str = room_channel
+        cvm.error(f'Room {room_channel_str} already exists.')
+
+@clientside_helper
+def _delete_room(room_channel: ChannelName) -> None:
+    room = _get_room(room_channel)
+
+    #delete the checks on the room
+    delete_room_checks(room_channel)
+
+    with PostTxArgs(room_channel):
+        _delete_room_execute()
+
+@executable
+def _delete_room_execute() -> DeleteRoomEvent:
+    #get the room channel
+    room_channel : ChannelName = cvm.tx.write_channel
+
+    room = _get_room(room_channel)
+
+    #run the checks on delete room
+    delete_room_checks(room_channel)
+
+    #modify contract storage
+    room.is_deleted = True
+    cvm.storage.put(Identifier('room'), room)
+
+    #create a restore room event
+    delete_room_event = DeleteRoomEvent(room=room)
+    cvm.create_event('DeleteRoomEvent', std.json(delete_room_event))
+    return delete_room_event
+
+@helper
+def delete_room_checks(room_channel: ChannelName) -> None:
+    room = _get_room(room_channel)
+
+    if room.is_deleted:
+        room_channel_str : str = room_channel
+        cvm.error(f'Room {room_channel_str} already deleted.')
+    if not std.contains_using(room.members, cvm.tx.key_alias, _str_eq):
+        not_a_member : str = cvm.tx.key_alias
+        cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
+    if not std.contains_using(room.owners, cvm.tx.key_alias, _str_eq):
+        not_an_owner: str = cvm.tx.key_alias
+        cvm.error(f"{not_an_owner} is not an owner and does not have permission to delete the room.")
+
+@clientside_helper
+def _restore_room(room_channel: ChannelName) -> None:
+    room = _get_room(room_channel)
+
+    #run the checks for restore room
+    restore_room_checks(room_channel)
+
+    with PostTxArgs(room_channel):
+        _restore_room_execute()
+
+@executable
+def _restore_room_execute() -> RestoreRoomEvent:
+    #get the room channel
+    room_channel : ChannelName = cvm.tx.write_channel
+
+    room = _get_room(room_channel)
+    members = room.members
+
+    #run the checks for restore room
+    restore_room_checks(room_channel)
+
+    #modify contract storage
+    room.is_deleted = False
+    cvm.storage.put(Identifier('room'), room)
+
+    #create a restore room event
+    restore_room_event = RestoreRoomEvent(room=room)
+    cvm.create_event('RestoreRoomEvent', std.json(restore_room_event))
+    return restore_room_event
+
+@helper
+def restore_room_checks(room_channel: ChannelName) -> None:
+    room = _get_room(room_channel)
+
+    if not room.is_deleted:
+        room_channel_str : str = room_channel
+        cvm.error(f'Room {room_channel_str} already active.')
+    if not std.contains_using(room.members, cvm.tx.key_alias, _str_eq):
+        not_a_member : str = cvm.tx.key_alias
+        cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
+    if not std.contains_using(room.owners, cvm.tx.key_alias, _str_eq):
+        not_an_owner: str = cvm.tx.key_alias
+        cvm.error(f"{not_an_owner} is not an owner and does not have permission to restore the room.")
+
+@clientside_helper
+def _invite_to_room(room_channel: ChannelName, new_member: KeyAlias) -> None:
+    room = _get_room(room_channel)
+
+    #perform invite checks
+    invite_to_room_checks(room, new_member)
+
+    cvm.send_key(room_channel, new_member)
+    with PostTxArgs(room_channel):
+        _invite_to_room_execute(new_member)
+
+@executable
+def _invite_to_room_execute(new_member: KeyAlias) -> InviteToRoomEvent:
+    #get the room channel
+    room_channel : ChannelName = cvm.tx.write_channel
+
+    room = _get_room(room_channel)
+    members = room.members
+
+    #perform invite checks
+    invite_to_room_checks(room, new_member)
+
+    #modify contract storage
+    room.members = room.members + [new_member]
+    cvm.storage.put(Identifier('room'), room)
+
+    #creates an invite to room event
+    invite_to_room_event = InviteToRoomEvent(room=room, inviter=cvm.tx.key_alias, invitee=new_member)
+    cvm.create_event('InviteToRoomEvent', std.json(invite_to_room_event))
+    return invite_to_room_event
+
+#runs checks to see if the caller has the correct permissions to invite the
+#a new member to a room
+@helper
+def invite_to_room_checks(room: Room, new_member: KeyAlias) -> None:
+    caller : KeyAlias = cvm.tx.key_alias
+
+    #check if the caller is an owner
+    if not std.contains_using(room.owners, caller, _str_eq):
+        cvm.error(f"{caller} is not an owner of the room {room.channel}.")
+
+    #check if the invitee is already a member
+    if std.contains_using(room.members, new_member, _str_eq):
+        cvm.error(f"Member {new_member} already in room {room.channel}.")
+
+    #check if the room is deleted
+    if room.is_deleted:
+        cvm.error(f"{room.channel} is deleted.")
+
+@clientside_helper
+def _remove_from_room(room_channel: ChannelName, member_to_remove: KeyAlias) -> None:
+    room = _get_room(room_channel)
+    #run checks on removing
+    remove_from_room_checks(room, member_to_remove, cvm.tx.key_alias)
+
+    #if the member to remove is an owner, we want to remove ownership
+    #privileges, and then promote a new owner if there are no
+    #owners left
+    if std.contains_using(room.owners, member_to_remove, _str_eq):
+       _demote_owner(room_channel,member_to_remove)
+
+    with PostTxArgs(room_channel):
+        _remove_from_room_execute(member_to_remove)
+
+    
+
+@executable
+def _remove_from_room_execute(member_to_remove: KeyAlias) -> RemoveFromRoomEvent:
+    #get the room channel
+    room_channel : ChannelName = cvm.tx.write_channel
+
+    room = _get_room(room_channel)
+    members = room.members
+
+    #check to ensure owner member is not an owner, demote him if possible
+    if std.contains_using(room.owners, member_to_remove, _str_eq):
+        with PostTxArgs(room_channel):
+            _demote_owner_execute(member_to_remove)
+
+    #run checks on removing
+    remove_from_room_checks(room, member_to_remove, cvm.tx.key_alias)
+
+
+    # room.members-remove(member_to_remove)
+    mtr: str = member_to_remove
+    rmx : List[KeyAlias] = [m for m in room.members if mtr != m]
+    room.members = rmx
+
+    cvm.storage.put(Identifier('room'), room)
+    remove_from_room_event = RemoveFromRoomEvent(room=room, remover=cvm.tx.key_alias, removee=member_to_remove)
+
+    cvm.create_event('RemoveFromRoomEvent', std.json(remove_from_room_event))
+
+    #rotate the keys so that all members of the chatroom will be able to
+    #read future messages, and the member we are removing will not be able to
+    #read future messages
+    cvm.rotate_key(room_channel)
+    for member in room.members:
+        mx : str = member
+        if mx != member_to_remove:
+            cvm.send_key(room_channel, member)
+
+    return remove_from_room_event
+
+#runs checks to see if the caller has the correct permissions to invite the
+#a new member to a room, throws cvm error if there are issues
+@helper
+def remove_from_room_checks(room: Room, member_to_remove: KeyAlias, caller: KeyAlias) -> None:
+    #check if caller is an owner and has perms to remove
+    if (not std.contains_using(room.owners, caller, _str_eq)): # and (str(member_to_remove) != str(caller)):
+        cvm.error(f"{caller} is not an owner and does not have permission to remove {member_to_remove} from room {room.channel}." )
+    #check if member to remove is actually a member of the room
+    if not std.contains_using(room.members, member_to_remove, _str_eq):
+        cvm.error(f"Member {member_to_remove} not in room {room.channel}.")
+    #check if the room is deleted
+    if room.is_deleted:
+        cvm.error(f"Room {room.channel} is deleted! Operation Denied.")
+
+    #check if caller is the same as the person to remove... cannot remove yourself
+    #### - this is the case because when someone leaves the secure channel, the keys
+    ####   need to change so that the leaving member can no longer decrypt the
+    ####   information in the secure channel. The keys cannot be rotated if the
+    ####   member leaving doesn't have permissions to (is not an owner), and if
+    ####   the owner themselves who is leaving tries to rotate (when keys get rotated)
+    ####   the calling 'owner' of the secure channel implicitly knows the new key
+    mtr_str : str = member_to_remove
+    cal_str : str = caller
+    if mtr_str == cal_str:
+        cvm.error(f"Cannot remove self from room.")
+
+@clientside_helper
+def _send_message(room_channel: ChannelName, message: str) -> None:
+
+    #run checks on sending the message
+    send_message_checks(room_channel, message)
+
+    with PostTxArgs(room_channel):
+        _send_message_execute(message)
+
+@executable
+def _send_message_execute(message: str) -> SendMessageEvent:
+    #get the room channel
+    room_channel : ChannelName = cvm.tx.write_channel
+
+    room = _get_room(room_channel)
+
+    #run checks on sending the message
+    send_message_checks(room_channel, message)
+
+    # create a message
+    message_id = cvm.generate_id('MID')
+    new_message = Message(message_id=message_id, sender=cvm.tx.key_alias, body=message, timestamp=cvm.tx.timestamp)
+    cvm.storage.put(new_message.message_id, new_message)
+
+    # create an event saying there's a new message
+    # Note: the send_message_event doesn't store the contents of
+    # the message. This was done because it would allow anyone on
+    # the blockchain network to read the contents of the message
+    send_message_event = SendMessageEvent(room=room, message_id=message_id)
+    cvm.create_event('SendMessageEvent', std.json(send_message_event))
+    return send_message_event
+
+@helper
+def send_message_checks(room_channel: ChannelName, message: str) -> None:
+    room = _get_room(room_channel)
+    members = room.members
+
+    if not std.contains_using(members, cvm.tx.key_alias, _str_eq):
+        not_a_member : str = cvm.tx.key_alias
+        cvm.error(f'Member {not_a_member} does not belong to the room. Operation denied.')
+
+    if room.is_deleted:
+        room_channel_str : str = room_channel
+        cvm.error(f'Room {room_channel_str} has been deleted. Cannot send message.')
+
+    _guard_input("Message", message)
+
+@clientside_helper
+def _get_messages(room_channel: ChannelName) -> List[Message]:
+    #gets all the available messages from the room if you have ever been a member, and if the room isnt deleted
+    # if you've never been a member, it throws an error
+    historical_rooms = cvm.storage.query_history(RoomStatic).in_channel(room_channel).values()
+    room = historical_rooms[len(historical_rooms) -1]
+    if isinstance(room, Room):
+        if room.is_deleted:
+            cvm.error(f"Room {room_channel} has been deleted. Cannot get messages.")
+        return cvm.storage.query_history(MessageStatic).in_channel(room_channel).order_by('timestamp', True).values()
+    else:
+        cvm.error(f"Room for channel {room_channel} not found.")
+
+@clientside_helper
+def _get_rooms() -> List[Room]:
+    ##this function gets the most recent readable version of the room by the caller (i.e. this gets the current version
+    # if you are still in the room, and if you were kicked out, the version immediately after you were kicked out)
+
+    rows : List[HistoricalRow[Room]] = cvm.storage.query_history(RoomStatic).order_by('channel', True).execute()
+
+    def compare(lhs: HistoricalRow[Room], rhs: HistoricalRow[Room]) -> bool:
+        lt : int = lhs.tx_index
+        lc : str = lhs.channel_name
+        ln : str = lhs.value.name
+        if (lc < rhs.channel_name):
+            return ln < rhs.value.name
+        elif (lc == rhs.channel_name):
+            return lt > rhs.tx_index
+        else:
+            return ln < rhs.value.name
+    rows = std.sort_by(rows, compare)
+
+    ret_list : List[Room] = []
+    hist_row = rows[0]
+
+    if isinstance(hist_row, HistoricalRow[Room]):
+        old_room = hist_row.value
+
+        if not old_room.is_deleted:
+            ret_list += [old_room]
+
+        for row in rows:
+            old_room_channel_str : str = old_room.channel
+            if old_room_channel_str != row.value.channel and not row.value.is_deleted:
+                ret_list += [row.value]
+            old_room = row.value
+
+    return ret_list
+
+@clientside_helper
+def _promote_to_owner(room_channel: ChannelName, member: KeyAlias) -> None:
+    room = _get_room(room_channel)
+
+    #run the checks and error out if there is an issue
+    promote_to_owner_checks(member, cvm.tx.key_alias, room)
+
+    #This will promote the member to 'owner' of the secure channel
+    cvm.add_owner(room_channel, member)
+
+    #This function allows the @executable function
+    #to have access the the channel with which you
+    #are attempting to write
+    with PostTxArgs(room_channel):
+        _promote_to_owner_execute(member)
+
+@executable
+def _promote_to_owner_execute(member: KeyAlias) -> PromoteToOwnerEvent:
+    #get the room channel
+    room_channel : ChannelName = cvm.tx.write_channel
+
+    room = _get_room(room_channel)
+
+    #run the checks, and error out if there is an issue
+    #this is performed on both the executable and clientside sides
+    #because a malicious KA and Node Administrator could directly run
+    #any executable function
+    promote_to_owner_checks(member, cvm.tx.key_alias, room)
+
+    #update the owners list in storage
+    room.owners = room.owners + [member]
+    cvm.storage.put(Identifier('room'), room)
+
+    #create an event for owner promotion, and return the event data
+    promote_to_owner_event = PromoteToOwnerEvent(room=room, promoter=cvm.tx.key_alias, promotee=member)
+    cvm.create_event('PromoteToOwnerEvent', std.json(promote_to_owner_event))
+    return promote_to_owner_event
+
+@helper
+def promote_to_owner_checks(member: KeyAlias, caller: KeyAlias, room: Room) -> None:
+    #This function performs the permission checks for the promote to owner logic
+    #it takes a member, caller, and a room channel, and ensures that the caller KA
+    #is allowed to promote the member KA to an owner
+
+    room_channel = room.channel
+
+    #ensure that the member to promote is actually in the room
+    if not std.contains_using(room.members, member, _str_eq):
+        member_str : str = member
+        room_channel_str : str = room_channel
+        cvm.error( f"Member {member_str} is not in room {room_channel_str}.")
+
+    #check to ensure a member is not already an owner
+    if std.contains_using(room.owners, member, _str_eq):
+        member_str : str = member
+        room_channel_str : str = room_channel
+        cvm.error( f"Member {member_str} is already an owner of room {room_channel_str}.")
+
+    #check to ensure that a room is not deleted
+    if room.is_deleted:
+        room_channel_str : str = room_channel
+        cvm.error( f'Room {room_channel_str} has been deleted. Cannot promote.')
+
+    #ensure that the calling key alias is an owner of the room, and is allowed
+    #to promote others to owner
+    if not std.contains_using(room.owners, caller, _str_eq):
+        not_an_owner : str = caller
+        cvm.error( f'{not_an_owner} is not an owner of the room. Operation denied.')
+
+@clientside_helper
+def _demote_owner(room_channel: ChannelName, owner: KeyAlias) -> None:
+
+    room = _get_room(room_channel)
+
+    #run demote checks
+    demote_owner_checks(owner, cvm.tx.key_alias, room)
+
+    #This will remove the 'owner' from the secure channel
+    cvm.remove_owner(room_channel, owner)
+
+    #This function allows the @executable function
+    #to have access the the channel with which you
+    #are attempting to write
+    with PostTxArgs(room_channel):
+        _demote_owner_execute(owner)
+
+@executable
+def _demote_owner_execute(owner: KeyAlias) -> DemoteOwnerEvent:
+    #get the room channel
+    room_channel : ChannelName = cvm.tx.write_channel
+
+    room = _get_room(room_channel)
+
+    demote_owner_checks(owner, cvm.tx.key_alias, room)
+
+    #update the owners list in storage
+    otr : str = owner
+    new_owners_list : List[KeyAlias] = [o for o in room.owners if otr != o]
+    room.owners = new_owners_list
+    cvm.storage.put(Identifier('room'), room)
+
+    #create an event for owner demotion, and return the event data
+    demote_owner_event = DemoteOwnerEvent(room=room, demoter=cvm.tx.key_alias, demotee=owner)
+    cvm.create_event('DemoteOwnerEvent', std.json(demote_owner_event))
+    return demote_owner_event
+
+@helper
+def demote_owner_checks(owner: KeyAlias, caller: KeyAlias, room: Room) -> None:
+    #This function performs the permission checks for the demote owner logic
+    #it takes an owner, caller, and a room channel, and ensures that the caller KA
+    #is allowed to demote the owner KA
+    room_channel =  room.channel
+
+    #check to ensure the owner is already a member of a room
+    if not std.contains_using(room.members, owner, _str_eq):
+        owner_str : str = owner
+        room_channel_str : str = room_channel
+        cvm.error(f'{owner_str} is not a member of room {room_channel_str}.')
+
+    #ensure that the calling key alias is an owner of the room, and is allowed
+    #to demote others from owner
+    if not std.contains_using(room.owners, caller, _str_eq):
+        not_an_owner : str = caller
+        cvm.error(f'{not_an_owner} is not an owner of the room. Operation denied.')
+
+    #check to ensure the owner to demote is actually an owner
+    if not std.contains_using(room.owners, owner, _str_eq):
+        owner_str : str = owner
+        room_channel_str : str = room_channel
+        cvm.error(f'{owner_str} is not an owner of room {room_channel_str}. Cannot demote a non-owner.')
+
+    #check to ensure that a room is not deleted
+    if room.is_deleted:
+        room_channel_str : str = room_channel
+        cvm.error(f'Room {room_channel_str} has been deleted. Cannot demote.')
+
+    #cannot demote yourself
+    caller_str : str = caller
+    owner_str : str = owner
+    if caller_str == owner_str:
+        cvm.error(f"Cannot demote yourself!")
+
+def _str_eq(str1 : str, str2: str) -> bool:
+    return str1 == str2
