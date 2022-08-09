@@ -24,8 +24,8 @@ simplejson==3.17.6
 six==1.16.0
 sortedcontainers==2.4.0
 statsd==3.3.0
-symbiont-io.assembly-client~=4.0.0.dev
-symbiont-io.pytest-assembly~=4.0.0.dev
+symbiont-io.assembly-client~=3.1.0.dev6
+symbiont-io.pytest-assembly~=3.1.0.dev6
 toml==0.10.2
 urllib3==1.26.9
 wrapt==1.14.1
