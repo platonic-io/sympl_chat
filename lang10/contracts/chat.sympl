@@ -49,6 +49,12 @@
 # Proprietary and confidential. Unauthorized copying via any medium is strictly prohibited.
 
 # """
+import prelude version 1.0.0 as prelude
+import std version 1.0.0 as std
+import cvm_base version 1.0.0 as cvm_base
+import cvm_executable version 1.0.0 as cvm_executable
+import cvm_clientside version 1.0.0 as cvm_clientside
+import unqualified globals version 1.0.0
 
 VERSION : str = "10-1.0.0"
 
