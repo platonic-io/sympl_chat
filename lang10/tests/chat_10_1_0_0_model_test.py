@@ -1,7 +1,7 @@
 import pytest
 
 from hypothesis import settings
-from chat_10_3_0_0_state_machine import ChatValidator
+from chat_10_1_0_0_state_machine import ChatValidator
 from assembly_client.api.contracts import ContractRef
 
 settings_profile = 'chat_model_test'
@@ -11,7 +11,7 @@ settings.load_profile(settings_profile)
 
 def set_up_network(network):
     network.upgrade_protocol(sympl_version=10)
-    chat = ContractRef('chat', '3.0.0', 10)
+    chat = ContractRef('chat', '1.0.0', 10)
     network.publish([chat])
 
 

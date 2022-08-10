@@ -1,12 +1,12 @@
 """
-Specifications for the Chat 3.0.0 contract.
+Specifications for the Chat 1.0.0 contract.
 """
 
 import pytest
 import time
 
 
-import utils.chat_10_3_0_0_test_utils as utils
+import utils.chat_10_1_0_0_test_utils as utils
 
 # Chat messages are up to 4000 Unicode characters long (the same limitation used by Slack).
 MESSAGE_LENGTH = 4000

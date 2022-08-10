@@ -1,4 +1,4 @@
-"""Regression tests for a standard demonstration of the Chat 3.0.0 contract.
+"""Regression tests for a standard demonstration of the Chat 1.0.0 contract.
 
 Demo:
 1. Create users Alice, Bob, and Eve.
@@ -25,7 +25,7 @@ import pytest
 from assembly_client.api.contracts import ContractRef
 from assembly_client.api.types.error_types import ContractError
 
-import utils.chat_10_3_0_0_test_utils as utils
+import utils.chat_10_1_0_0_test_utils as utils
 
 
 @pytest.mark.incremental
@@ -34,7 +34,7 @@ class TestChatDemo():
 
     # setup
 
-    CHAT = ContractRef('chat', '3.0.0', 10)
+    CHAT = ContractRef('chat', '1.0.0', 10)
 
     def test_reset(self, network):
         """Start with a clean network."""
@@ -55,7 +55,7 @@ class TestChatDemo():
     @pytest.fixture(scope="function")
     def chat(self, network, store):
         """Fixture usage example: chat('alice').create_room(...)"""
-        return lambda sender: network[store[sender]].chat["10-3.0.0"]  # return closure over sender
+        return lambda sender: network[store[sender]].chat["10-1.0.0"]  # return closure over sender
 
     @pytest.fixture(scope="function")
     def room(self, store):

@@ -1,5 +1,5 @@
 """
-Event-system test for Chat 3.0.0.
+Event-system test for Chat 1.0.0.
 """
 
 import pytest
@@ -9,7 +9,7 @@ ROOM_NAME = 'room'
 
 def _is_room_event_present(events, room_name, event_type):
     def is_room_event_match(event):
-        return event['type'] == ('chat/10-3.0.0/' + event_type) and event['data']['room']['name'] == room_name
+        return event['type'] == ('chat/10-1.0.0/' + event_type) and event['data']['room']['name'] == room_name
 
     return any([is_room_event_match(event) for event in events])
 

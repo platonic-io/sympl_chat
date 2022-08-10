@@ -1,12 +1,12 @@
 """
-Basic API coverage tests for Chat 3.0.0.
+Basic API coverage tests for Chat 1.0.0.
 """
 
 import pytest
 
 from assembly_client.api.types.error_types import ContractError
 
-import utils.chat_10_3_0_0_test_utils as utils
+import utils.chat_10_1_0_0_test_utils as utils
 
 
 def _assert_error(e, expected):
