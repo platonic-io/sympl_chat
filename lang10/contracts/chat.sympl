@@ -1,9 +1,9 @@
 # """Chat 1.0.0
 
 # Chat is a Symbiont Assembly™ smart contract that implements private messaging. A smart contract (generally referred to
-# as “a contract”) is a code module implementing the logic of a decentralized application. Symbiont smart contract modules
+# as a "contract") is a code module implementing the logic of a decentralized application. Symbiont smart contract modules
 # are written in a domain-specific language (DSL) and executed in a virtual machine within each node. Assembly’s smart
-# contract language is fully deterministic and has built-in support for true end-to-end transaction privacy (via secure
+# contract language, SymPL, is fully deterministic and has built-in support for true end-to-end transaction privacy (via secure
 # channels).
 
 # Chat allows users (represented as "key aliases") to send messages to each other confidentially in rooms (implemented via
@@ -20,14 +20,14 @@
 # Functions marked @executable are called by transactions posted to the distributed log, and run on the network as a
 # whole.
 
-# A primary feature of the Symbiont language is its ability to support logic that runs both on a single node, as well as
+# A primary feature of the SymPL is its ability to support logic that runs both on a single node, as well as
 # logic that runs on the network as a whole. The former logic is called @clientside logic, while the latter is called
 # @executable logic. However, in a decentralized network, there is no client/server system. These terms are just used to
 # represent local vs. global operations, implemented as code in a single module.
 
 # Notably, all changes to a node’s state must be made by running "executable" logic, in order to maintain consistency in
-# node state. "clientside" logic is used for read-only queries of node state, though it may have the side-effect of
-# constructing and broadcasting a transaction to the network which then in turn triggers "executable" logic. Each smart
+# node state. "Clientside" logic is used for read-only queries of node state, though it may have the side-effect of
+# constructing and broadcasting a transaction to the network, which then in turn triggers "executable" logic. Each smart
 # contract module has isolated storage associated with it, used to store the shared state associated with the logic of the
 # module.
 
@@ -36,7 +36,7 @@
 # For each action, there is a @clientside and @executable function. Each @clientside function has
 # a @clientside_helper function, and each action contains a "checker" function. The checker functions
 # gatekeep actions. For example, in this chat contract, only users who are a 'member' of a room are allowed
-# to send messages to that room. This is checked in send_message_checks. The reason for designating a dedicated
+# to send messages to that room. This is checked in send_message_checks(). The reason for designating a dedicated
 # function for these checks is to also be able to use it in @executable functions. The checks in the @clientside_helper
 # functions are gatekeeping to prevent sending usless transactions to the blockchain, and the checks in the @executable
 # functions are to prevent transactions that do reach the blockchain from executing if they shouldn't
@@ -50,7 +50,7 @@
 
 # """
 
-VERSION : str = "10-3.0.0"
+VERSION : str = "10-1.0.0"
 
 #################
 # public models #
