@@ -1,7 +1,7 @@
 # Chat smart contract
 
-<a href="https://portal.symbiont.io/sdk_docs/docs/intro"><img src="https://img.shields.io/badge/Assembly-6.0.0-orange"/></a>
-<a href="https://portal.symbiont.io/sdk_docs/docs/intro"><img src="https://img.shields.io/badge/Assembly%20SDK-4.0.0-blue"/></a>
+<a href="https://portal.symbiont.io/sdk_docs/docs/intro"><img src="https://img.shields.io/badge/Assembly-6.1.0-orange"/></a>
+<a href="https://portal.symbiont.io/sdk_docs/docs/intro"><img src="https://img.shields.io/badge/Assembly%20SDK-4.1.0-blue"/></a>
 
 ## Introduction
 
