@@ -14,7 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@symbiont-io/assembly-client": "*",
+    "@symbiont-io/assembly-client": "^4.0.0",
     "@types/chai-as-promised": "^7.1.4",
     "@types/chai-like": "^1.1.1",
     "@types/chai-things": "^0.0.35",
