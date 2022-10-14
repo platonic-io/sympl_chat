@@ -1,6 +1,6 @@
 version: 2.1
 orbs: 
-  assembly-sdk: symbiont-io/assembly-sdk@1.0.0
+  assembly-sdk: symbiont-io/assembly-sdk@1.6.3
 jobs:
   test-api:
     docker:
@@ -23,7 +23,7 @@ jobs:
             wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 
             sudo apt-get update
-            sudo apt-get install --assume-yes postgresql libpq-dev jq curl software-properties-common
+            sudo apt-get install --assume-yes postgresql-14 libpq-dev jq curl software-properties-common
             sudo add-apt-repository ppa:deadsnakes/ppa --yes
             sudo apt-get install --assume-yes python3.9-dev python3-pip python3-pytest
             sudo apt install nodejs npm
@@ -41,7 +41,7 @@ jobs:
   test-lang10:
     docker:
       - image: cimg/base:2022.02
-    resource_class: xlarge
+    resource_class: 2xlarge
     steps:
       - add_ssh_keys:
           fingerprints:
