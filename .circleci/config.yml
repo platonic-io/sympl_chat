@@ -85,6 +85,12 @@ commands:
                 nodeName=$(basename $dir)
                 mkdir -p /tmp/regression-logs/$nodeName
                 mv ~/.symbiont/assembly-dev/dev-network/default/$nodeName/logs /tmp/regression-logs/$nodeName
+                for i in txe api-server apollo smartlog
+                do
+                    journalctl --no-pager -xu $i > /tmp/regression-logs/$nodeName/$i.systemd
+                done
             done
+            mkdir /tmp/regression-logs/system
+            journalctl -k --no-pager > /tmp/regression-logs/system/kernel.log
       - store_artifacts:
           path: /tmp/regression-logs
