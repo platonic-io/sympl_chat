@@ -50,7 +50,7 @@ jobs:
           at: /tmp/workspace
       - checkout
       - assembly-sdk/install_sdk:
-          sdk_version: next
+          sdk_version: v4.1.0-beta
           symenvrc: CI_SYMENVRC
       - run:
           name: pytest tests
