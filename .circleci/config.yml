@@ -60,6 +60,7 @@ jobs:
             DEFAULT_NETWORK_CONFIG="$HOME/.symbiont/assembly-dev/dev-network/default/network-config.json"
             pip3 install -r lang10/tests/requirements.txt
             pytest lang10/tests --connection-file "$DEFAULT_NETWORK_CONFIG" --contract-path lang10/contracts --baseline -p no:pytest-mp
+      - store_logs_on_fail
 workflows:
   version: 2
   validate_pr:
@@ -68,3 +69,22 @@ workflows:
           context: org-global
       - test-lang10:
           context: org-global
+          
+          
+commands:
+  store_logs_on_fail:
+    steps:
+      - run:
+          name: Store logs on failure
+          when: on_fail
+          command: |
+            sym --version
+            nodes=$(ls -d ~/.symbiont/assembly-dev/dev-network/default/default-*/)
+            for dir in $nodes
+            do
+                nodeName=$(basename $dir)
+                mkdir -p /tmp/regression-logs/$nodeName
+                mv ~/.symbiont/assembly-dev/dev-network/default/$nodeName/logs /tmp/regression-logs/$nodeName
+            done
+      - store_artifacts:
+          path: /tmp/regression-logs
