@@ -32,7 +32,9 @@ class TestRegTests:
 
     def test_null_byte_in_room_name(self, state):
         creator = state.key_alias()
-        state.create_room(creator=creator, room_name='\x00')
+        with pytest.raises(Exception) as e:
+            state.create_room(creator=creator, room_name='\x00')
+        assert 'create_room failed' in str(e.value)
 
     def test_restore_non_deleted_room(self, state):
         u1 = state.key_alias()
