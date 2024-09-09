@@ -1,7 +1,7 @@
 # Chat smart contract
 
-<a href="https://portal.symbiont.io/sdk_docs/docs/intro"><img src="https://img.shields.io/badge/Assembly-6.1.0-orange"/></a>
-<a href="https://portal.symbiont.io/sdk_docs/docs/intro"><img src="https://img.shields.io/badge/Assembly%20SDK-4.1.0-blue"/></a>
+<a href="https://docs.platonic.io/sdk/intro"><img src="https://img.shields.io/badge/Assembly-6.1.0-orange"/></a>
+<a href="https://docs.platonic.io/sdk/intro"><img src="https://img.shields.io/badge/Assembly%20SDK-4.1.0-blue"/></a>
 
 ## Introduction
 
@@ -87,7 +87,7 @@ and provide feedback/merge it.
 
 Requirements:
 
-- Install the [pytest plugin](https://iportal.symbiont.io/sdk_docs/docs/testing/index/index.html)
+- Install the [pytest plugin](https://docs.platonic.io/sdk/testing/index)
 - Have a local-network running (we recommend using `sym` to get a mock network up and running quickly)
 
 Steps:
